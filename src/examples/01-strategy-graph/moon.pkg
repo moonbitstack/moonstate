@@ -1,0 +1,7 @@
+
+import {
+  "moonbitstack/moonstate",
+  "moonbitlang/async",
+}
+
+pkgtype(kind: "executable")
