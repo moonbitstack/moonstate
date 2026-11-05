@@ -1,8 +1,7 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbitstack/CHANGE-ME"
+package "moonbitstack/moonstate"
 
 // Values
-pub fn greet(StringView) -> String
 
 // Errors
 

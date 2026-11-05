@@ -1,2 +1,1 @@
-// What this package implements, and a first-hand link to the specification it
-// implements. A package without that link is not finished.
+// The state graph engine and the contracts for what stores its checkpoints. Knows nothing of models.
