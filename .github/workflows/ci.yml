@@ -49,7 +49,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           for dir in src/examples/*/; do
-            if grep -q 'kind: "executable"' "$dir/moon.pkg" && ! grep -q 'supported_targets = "js"' "$dir/moon.pkg"; then
+            if grep -q 'kind: "executable"' "$dir/moon.pkg"; then
               moon run "$dir" --target native > /dev/null
             fi
           done
@@ -61,3 +61,46 @@ jobs:
       - name: interfaces are up to date
         run: |
           moon info --target all && git diff --exit-code
+
+  vectors:
+    name: differential vectors match the reference
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: install the reference
+        run: pip install "langgraph==1.2.20"
+
+      - name: regenerate and compare
+        run: python scripts/gen_vectors.py --check
+
+  crash:
+    name: a killed run continues from its checkpoint
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: kill the durable example mid-run and restart it
+        run: bash scripts/kill_test.sh
