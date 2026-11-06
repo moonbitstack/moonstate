@@ -1,0 +1,1380 @@
+[
+  {
+    "name": "line",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "bump",
+          "delta": 2,
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "a",
+        "b"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "fanout_two",
+    "nodes": [
+      {
+        "id": "start",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "left",
+        "op": {
+          "kind": "note",
+          "label": "left"
+        }
+      },
+      {
+        "id": "right",
+        "op": {
+          "kind": "note",
+          "label": "right"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "start"
+      ],
+      [
+        "start",
+        "left"
+      ],
+      [
+        "start",
+        "right"
+      ],
+      [
+        "left",
+        "END"
+      ],
+      [
+        "right",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "fanout_three",
+    "nodes": [
+      {
+        "id": "start",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "a",
+        "op": {
+          "kind": "note",
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "start"
+      ],
+      [
+        "start",
+        "a"
+      ],
+      [
+        "start",
+        "b"
+      ],
+      [
+        "start",
+        "c"
+      ],
+      [
+        "a",
+        "END"
+      ],
+      [
+        "b",
+        "END"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "diamond_join",
+    "nodes": [
+      {
+        "id": "start",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "a",
+        "op": {
+          "kind": "bump",
+          "delta": 3,
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "join",
+        "op": {
+          "kind": "note",
+          "label": "join"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "start"
+      ],
+      [
+        "start",
+        "a"
+      ],
+      [
+        "start",
+        "b"
+      ],
+      [
+        "a",
+        "join"
+      ],
+      [
+        "b",
+        "join"
+      ],
+      [
+        "join",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "join_three",
+    "nodes": [
+      {
+        "id": "start",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "a",
+        "op": {
+          "kind": "note",
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      },
+      {
+        "id": "gathered",
+        "op": {
+          "kind": "note",
+          "label": "gathered"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "start"
+      ],
+      [
+        "start",
+        "a"
+      ],
+      [
+        "start",
+        "b"
+      ],
+      [
+        "start",
+        "c"
+      ],
+      [
+        "a",
+        "gathered"
+      ],
+      [
+        "b",
+        "gathered"
+      ],
+      [
+        "c",
+        "gathered"
+      ],
+      [
+        "gathered",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "loop_branch",
+    "nodes": [
+      {
+        "id": "loop",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "tick"
+        }
+      },
+      {
+        "id": "exit",
+        "op": {
+          "kind": "note",
+          "label": "exit"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "from": "loop",
+        "cases": [
+          {
+            "n_at_least": 3,
+            "to": [
+              "exit"
+            ]
+          }
+        ],
+        "default": [
+          "loop"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "loop"
+      ],
+      [
+        "exit",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "cycle_exit",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "b"
+        }
+      },
+      {
+        "id": "exit",
+        "op": {
+          "kind": "note",
+          "label": "exit"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "from": "b",
+        "cases": [
+          {
+            "n_at_least": 2,
+            "to": [
+              "exit"
+            ]
+          }
+        ],
+        "default": [
+          "a"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "a",
+        "b"
+      ],
+      [
+        "exit",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "branch_default",
+    "nodes": [
+      {
+        "id": "router",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "big",
+        "op": {
+          "kind": "note",
+          "label": "big"
+        }
+      },
+      {
+        "id": "small",
+        "op": {
+          "kind": "note",
+          "label": "small"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "from": "router",
+        "cases": [
+          {
+            "n_at_least": 5,
+            "to": [
+              "big"
+            ]
+          }
+        ],
+        "default": [
+          "small"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "router"
+      ],
+      [
+        "big",
+        "END"
+      ],
+      [
+        "small",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 1,
+      "log": []
+    }
+  },
+  {
+    "name": "branch_cases",
+    "nodes": [
+      {
+        "id": "router",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "mid",
+        "op": {
+          "kind": "note",
+          "label": "mid"
+        }
+      },
+      {
+        "id": "low",
+        "op": {
+          "kind": "note",
+          "label": "low"
+        }
+      },
+      {
+        "id": "none",
+        "op": {
+          "kind": "note",
+          "label": "none"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "from": "router",
+        "cases": [
+          {
+            "n_at_least": 2,
+            "to": [
+              "mid"
+            ]
+          },
+          {
+            "n_at_least": 1,
+            "to": [
+              "low"
+            ]
+          }
+        ],
+        "default": [
+          "none"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "router"
+      ],
+      [
+        "mid",
+        "END"
+      ],
+      [
+        "low",
+        "END"
+      ],
+      [
+        "none",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 1,
+      "log": []
+    }
+  },
+  {
+    "name": "send_map",
+    "nodes": [
+      {
+        "id": "fan",
+        "op": {
+          "kind": "send",
+          "count": 3
+        }
+      }
+    ],
+    "worker": {
+      "kind": "label_n",
+      "prefix": "w"
+    },
+    "edges": [
+      [
+        "START",
+        "fan"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "send_to_join",
+    "nodes": [
+      {
+        "id": "fan",
+        "op": {
+          "kind": "send",
+          "count": 2
+        }
+      },
+      {
+        "id": "collect",
+        "op": {
+          "kind": "note",
+          "label": "collect"
+        }
+      }
+    ],
+    "worker": {
+      "kind": "note",
+      "label": "w"
+    },
+    "edges": [
+      [
+        "START",
+        "fan"
+      ],
+      [
+        "worker",
+        "collect"
+      ],
+      [
+        "collect",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "goto_command",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "goto",
+          "to": "c"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "goto_with_update",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "goto",
+          "to": "c",
+          "label": "jump"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "retry_once",
+    "nodes": [
+      {
+        "id": "flaky",
+        "op": {
+          "kind": "fail_once",
+          "label": "flaky"
+        }
+      },
+      {
+        "id": "out",
+        "op": {
+          "kind": "note",
+          "label": "out"
+        }
+      }
+    ],
+    "retry": {
+      "flaky": 3
+    },
+    "edges": [
+      [
+        "START",
+        "flaky"
+      ],
+      [
+        "flaky",
+        "out"
+      ],
+      [
+        "out",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 4,
+      "log": []
+    }
+  },
+  {
+    "name": "interrupt_gate",
+    "nodes": [
+      {
+        "id": "before",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "before"
+        }
+      },
+      {
+        "id": "gate",
+        "op": {
+          "kind": "gate",
+          "label": "gate"
+        }
+      },
+      {
+        "id": "after",
+        "op": {
+          "kind": "note",
+          "label": "after"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "before"
+      ],
+      [
+        "before",
+        "gate"
+      ],
+      [
+        "gate",
+        "after"
+      ],
+      [
+        "after",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    },
+    "resume": 42
+  },
+  {
+    "name": "interrupt_mid",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "bump",
+          "delta": 2,
+          "label": "a"
+        }
+      },
+      {
+        "id": "gate",
+        "op": {
+          "kind": "gate",
+          "label": "gate"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "a",
+        "gate"
+      ],
+      [
+        "gate",
+        "b"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    },
+    "resume": 7
+  },
+  {
+    "name": "subgraph_once",
+    "nodes": [
+      {
+        "id": "start",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "sub",
+        "op": {
+          "kind": "sub",
+          "delta": 5,
+          "label": "sub"
+        }
+      },
+      {
+        "id": "done",
+        "op": {
+          "kind": "note",
+          "label": "done"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "start"
+      ],
+      [
+        "start",
+        "sub"
+      ],
+      [
+        "sub",
+        "done"
+      ],
+      [
+        "done",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 1,
+      "log": []
+    }
+  },
+  {
+    "name": "subgraph_loop",
+    "nodes": [
+      {
+        "id": "loop",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "tick"
+        }
+      },
+      {
+        "id": "sub",
+        "op": {
+          "kind": "sub",
+          "delta": 2,
+          "label": "sub"
+        }
+      },
+      {
+        "id": "exit",
+        "op": {
+          "kind": "note",
+          "label": "exit"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "from": "sub",
+        "cases": [
+          {
+            "n_at_least": 6,
+            "to": [
+              "exit"
+            ]
+          }
+        ],
+        "default": [
+          "loop"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "loop"
+      ],
+      [
+        "loop",
+        "sub"
+      ],
+      [
+        "exit",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "deep_chain",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "note",
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      },
+      {
+        "id": "d",
+        "op": {
+          "kind": "note",
+          "label": "d"
+        }
+      },
+      {
+        "id": "e",
+        "op": {
+          "kind": "note",
+          "label": "e"
+        }
+      },
+      {
+        "id": "f",
+        "op": {
+          "kind": "note",
+          "label": "f"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "a",
+        "b"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "d"
+      ],
+      [
+        "d",
+        "e"
+      ],
+      [
+        "e",
+        "f"
+      ],
+      [
+        "f",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "time_travel_note",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "note",
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "bump",
+          "delta": 10,
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "a",
+        "b"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    },
+    "after": {
+      "write": {
+        "log": [
+          "rewound"
+        ]
+      },
+      "as_node": "b"
+    }
+  },
+  {
+    "name": "time_travel_value",
+    "nodes": [
+      {
+        "id": "a",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "b"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "a"
+      ],
+      [
+        "a",
+        "b"
+      ],
+      [
+        "b",
+        "c"
+      ],
+      [
+        "c",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    },
+    "after": {
+      "write": {
+        "n": 100
+      },
+      "as_node": "b"
+    }
+  },
+  {
+    "name": "double_diamond",
+    "nodes": [
+      {
+        "id": "start",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "a",
+        "op": {
+          "kind": "note",
+          "label": "a"
+        }
+      },
+      {
+        "id": "b",
+        "op": {
+          "kind": "note",
+          "label": "b"
+        }
+      },
+      {
+        "id": "mid",
+        "op": {
+          "kind": "bump",
+          "delta": 1,
+          "label": "mid"
+        }
+      },
+      {
+        "id": "c",
+        "op": {
+          "kind": "note",
+          "label": "c"
+        }
+      },
+      {
+        "id": "d",
+        "op": {
+          "kind": "note",
+          "label": "d"
+        }
+      },
+      {
+        "id": "last",
+        "op": {
+          "kind": "note",
+          "label": "last"
+        }
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "start"
+      ],
+      [
+        "start",
+        "a"
+      ],
+      [
+        "start",
+        "b"
+      ],
+      [
+        "a",
+        "mid"
+      ],
+      [
+        "b",
+        "mid"
+      ],
+      [
+        "mid",
+        "c"
+      ],
+      [
+        "mid",
+        "d"
+      ],
+      [
+        "c",
+        "last"
+      ],
+      [
+        "d",
+        "last"
+      ],
+      [
+        "last",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "send_then_step",
+    "nodes": [
+      {
+        "id": "fan",
+        "op": {
+          "kind": "send",
+          "count": 2
+        }
+      },
+      {
+        "id": "finish",
+        "op": {
+          "kind": "note",
+          "label": "finish"
+        }
+      }
+    ],
+    "worker": {
+      "kind": "label_n",
+      "prefix": "w"
+    },
+    "edges": [
+      [
+        "START",
+        "fan"
+      ],
+      [
+        "worker",
+        "finish"
+      ],
+      [
+        "finish",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 0,
+      "log": []
+    }
+  },
+  {
+    "name": "branch_fanout",
+    "nodes": [
+      {
+        "id": "router",
+        "op": {
+          "kind": "pass"
+        }
+      },
+      {
+        "id": "x",
+        "op": {
+          "kind": "note",
+          "label": "x"
+        }
+      },
+      {
+        "id": "y",
+        "op": {
+          "kind": "note",
+          "label": "y"
+        }
+      },
+      {
+        "id": "z",
+        "op": {
+          "kind": "note",
+          "label": "z"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "from": "router",
+        "cases": [
+          {
+            "n_at_least": 1,
+            "to": [
+              "x",
+              "y"
+            ]
+          }
+        ],
+        "default": [
+          "z"
+        ]
+      }
+    ],
+    "edges": [
+      [
+        "START",
+        "router"
+      ],
+      [
+        "x",
+        "END"
+      ],
+      [
+        "y",
+        "END"
+      ],
+      [
+        "z",
+        "END"
+      ]
+    ],
+    "input": {
+      "n": 1,
+      "log": []
+    }
+  }
+]

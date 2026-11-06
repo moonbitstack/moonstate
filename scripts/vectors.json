@@ -1,0 +1,3312 @@
+[
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "line",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "a"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "b"
+        ],
+        "values": {
+          "log": [
+            "a"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "c"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c"
+          ],
+          "n": 3
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "line",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "delta": 2,
+            "kind": "bump",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "start",
+        "update": {}
+      },
+      {
+        "node": "left",
+        "update": {
+          "log": [
+            "left"
+          ]
+        }
+      },
+      {
+        "node": "right",
+        "update": {
+          "log": [
+            "right"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "fanout_two",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "start"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "left",
+          "right"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "left",
+            "right"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "start"
+        ],
+        [
+          "start",
+          "left"
+        ],
+        [
+          "start",
+          "right"
+        ],
+        [
+          "left",
+          "END"
+        ],
+        [
+          "right",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "fanout_two",
+      "nodes": [
+        {
+          "id": "start",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "left",
+          "op": {
+            "kind": "note",
+            "label": "left"
+          }
+        },
+        {
+          "id": "right",
+          "op": {
+            "kind": "note",
+            "label": "right"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "start",
+        "update": {}
+      },
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ]
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ]
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "fanout_three",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "start"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "a",
+          "b",
+          "c"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "start"
+        ],
+        [
+          "start",
+          "a"
+        ],
+        [
+          "start",
+          "b"
+        ],
+        [
+          "start",
+          "c"
+        ],
+        [
+          "a",
+          "END"
+        ],
+        [
+          "b",
+          "END"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "fanout_three",
+      "nodes": [
+        {
+          "id": "start",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "a",
+          "op": {
+            "kind": "note",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "start",
+        "update": {}
+      },
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ]
+        }
+      },
+      {
+        "node": "join",
+        "update": {
+          "log": [
+            "join"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "diamond_join",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "start"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "a",
+          "b"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "join"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "join"
+          ],
+          "n": 3
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "start"
+        ],
+        [
+          "start",
+          "a"
+        ],
+        [
+          "start",
+          "b"
+        ],
+        [
+          "a",
+          "join"
+        ],
+        [
+          "b",
+          "join"
+        ],
+        [
+          "join",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "diamond_join",
+      "nodes": [
+        {
+          "id": "start",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "a",
+          "op": {
+            "delta": 3,
+            "kind": "bump",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "join",
+          "op": {
+            "kind": "note",
+            "label": "join"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "start",
+        "update": {}
+      },
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ]
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ]
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      },
+      {
+        "node": "gathered",
+        "update": {
+          "log": [
+            "gathered"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "join_three",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "start"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "a",
+          "b",
+          "c"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "gathered"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c",
+            "gathered"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "start"
+        ],
+        [
+          "start",
+          "a"
+        ],
+        [
+          "start",
+          "b"
+        ],
+        [
+          "start",
+          "c"
+        ],
+        [
+          "a",
+          "gathered"
+        ],
+        [
+          "b",
+          "gathered"
+        ],
+        [
+          "c",
+          "gathered"
+        ],
+        [
+          "gathered",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "join_three",
+      "nodes": [
+        {
+          "id": "start",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "a",
+          "op": {
+            "kind": "note",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        },
+        {
+          "id": "gathered",
+          "op": {
+            "kind": "note",
+            "label": "gathered"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "loop",
+        "update": {
+          "log": [
+            "tick"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "node": "loop",
+        "update": {
+          "log": [
+            "tick"
+          ],
+          "n": 2
+        }
+      },
+      {
+        "node": "loop",
+        "update": {
+          "log": [
+            "tick"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "node": "exit",
+        "update": {
+          "log": [
+            "exit"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "loop_branch",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "loop"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "loop"
+        ],
+        "values": {
+          "log": [
+            "tick"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "loop"
+        ],
+        "values": {
+          "log": [
+            "tick",
+            "tick"
+          ],
+          "n": 2
+        }
+      },
+      {
+        "next": [
+          "exit"
+        ],
+        "values": {
+          "log": [
+            "tick",
+            "tick",
+            "tick"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "tick",
+            "tick",
+            "tick",
+            "exit"
+          ],
+          "n": 3
+        }
+      }
+    ],
+    "spec": {
+      "branches": [
+        {
+          "cases": [
+            {
+              "n_at_least": 3,
+              "to": [
+                "exit"
+              ]
+            }
+          ],
+          "default": [
+            "loop"
+          ],
+          "from": "loop"
+        }
+      ],
+      "edges": [
+        [
+          "START",
+          "loop"
+        ],
+        [
+          "exit",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "loop_branch",
+      "nodes": [
+        {
+          "id": "loop",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "tick"
+          }
+        },
+        {
+          "id": "exit",
+          "op": {
+            "kind": "note",
+            "label": "exit"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ],
+          "n": 2
+        }
+      },
+      {
+        "node": "exit",
+        "update": {
+          "log": [
+            "exit"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "cycle_exit",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "a"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "b"
+        ],
+        "values": {
+          "log": [
+            "a"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "exit"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b"
+          ],
+          "n": 2
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "exit"
+          ],
+          "n": 2
+        }
+      }
+    ],
+    "spec": {
+      "branches": [
+        {
+          "cases": [
+            {
+              "n_at_least": 2,
+              "to": [
+                "exit"
+              ]
+            }
+          ],
+          "default": [
+            "a"
+          ],
+          "from": "b"
+        }
+      ],
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "exit",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "cycle_exit",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "b"
+          }
+        },
+        {
+          "id": "exit",
+          "op": {
+            "kind": "note",
+            "label": "exit"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "router",
+        "update": {}
+      },
+      {
+        "node": "small",
+        "update": {
+          "log": [
+            "small"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "branch_default",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "router"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "small"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "small"
+          ],
+          "n": 1
+        }
+      }
+    ],
+    "spec": {
+      "branches": [
+        {
+          "cases": [
+            {
+              "n_at_least": 5,
+              "to": [
+                "big"
+              ]
+            }
+          ],
+          "default": [
+            "small"
+          ],
+          "from": "router"
+        }
+      ],
+      "edges": [
+        [
+          "START",
+          "router"
+        ],
+        [
+          "big",
+          "END"
+        ],
+        [
+          "small",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 1
+      },
+      "name": "branch_default",
+      "nodes": [
+        {
+          "id": "router",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "big",
+          "op": {
+            "kind": "note",
+            "label": "big"
+          }
+        },
+        {
+          "id": "small",
+          "op": {
+            "kind": "note",
+            "label": "small"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "router",
+        "update": {}
+      },
+      {
+        "node": "low",
+        "update": {
+          "log": [
+            "low"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "branch_cases",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "router"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "low"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "low"
+          ],
+          "n": 1
+        }
+      }
+    ],
+    "spec": {
+      "branches": [
+        {
+          "cases": [
+            {
+              "n_at_least": 2,
+              "to": [
+                "mid"
+              ]
+            },
+            {
+              "n_at_least": 1,
+              "to": [
+                "low"
+              ]
+            }
+          ],
+          "default": [
+            "none"
+          ],
+          "from": "router"
+        }
+      ],
+      "edges": [
+        [
+          "START",
+          "router"
+        ],
+        [
+          "mid",
+          "END"
+        ],
+        [
+          "low",
+          "END"
+        ],
+        [
+          "none",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 1
+      },
+      "name": "branch_cases",
+      "nodes": [
+        {
+          "id": "router",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "mid",
+          "op": {
+            "kind": "note",
+            "label": "mid"
+          }
+        },
+        {
+          "id": "low",
+          "op": {
+            "kind": "note",
+            "label": "low"
+          }
+        },
+        {
+          "id": "none",
+          "op": {
+            "kind": "note",
+            "label": "none"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "fan",
+        "update": {}
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w0"
+          ]
+        }
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w1"
+          ]
+        }
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w2"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "send_map",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "fan"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "worker",
+          "worker",
+          "worker"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "w0",
+            "w1",
+            "w2"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "fan"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "send_map",
+      "nodes": [
+        {
+          "id": "fan",
+          "op": {
+            "count": 3,
+            "kind": "send"
+          }
+        }
+      ],
+      "worker": {
+        "kind": "label_n",
+        "prefix": "w"
+      }
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "fan",
+        "update": {}
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w"
+          ]
+        }
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w"
+          ]
+        }
+      },
+      {
+        "node": "collect",
+        "update": {
+          "log": [
+            "collect"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "send_to_join",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "fan"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "worker",
+          "worker"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "collect"
+        ],
+        "values": {
+          "log": [
+            "w",
+            "w"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "w",
+            "w",
+            "collect"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "fan"
+        ],
+        [
+          "worker",
+          "collect"
+        ],
+        [
+          "collect",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "send_to_join",
+      "nodes": [
+        {
+          "id": "fan",
+          "op": {
+            "count": 2,
+            "kind": "send"
+          }
+        },
+        {
+          "id": "collect",
+          "op": {
+            "kind": "note",
+            "label": "collect"
+          }
+        }
+      ],
+      "worker": {
+        "kind": "note",
+        "label": "w"
+      }
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {}
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "goto_command",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "a"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "c"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "c"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "goto_command",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "kind": "goto",
+            "to": "c"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "jump"
+          ]
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "goto_with_update",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "a"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "c"
+        ],
+        "values": {
+          "log": [
+            "jump"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "jump",
+            "c"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "goto_with_update",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "kind": "goto",
+            "label": "jump",
+            "to": "c"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {
+      "flaky": 2
+    },
+    "events": [
+      {
+        "node": "flaky",
+        "update": {
+          "log": [
+            "flaky"
+          ],
+          "n": 4
+        }
+      },
+      {
+        "node": "out",
+        "update": {
+          "log": [
+            "out"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "retry_once",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "flaky"
+        ],
+        "values": {
+          "log": [],
+          "n": 4
+        }
+      },
+      {
+        "next": [
+          "out"
+        ],
+        "values": {
+          "log": [
+            "flaky"
+          ],
+          "n": 4
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "flaky",
+            "out"
+          ],
+          "n": 4
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "flaky"
+        ],
+        [
+          "flaky",
+          "out"
+        ],
+        [
+          "out",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 4
+      },
+      "name": "retry_once",
+      "nodes": [
+        {
+          "id": "flaky",
+          "op": {
+            "kind": "fail_once",
+            "label": "flaky"
+          }
+        },
+        {
+          "id": "out",
+          "op": {
+            "kind": "note",
+            "label": "out"
+          }
+        }
+      ],
+      "retry": {
+        "flaky": 3
+      }
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "before",
+        "update": {
+          "log": [
+            "before"
+          ],
+          "n": 1
+        }
+      }
+    ],
+    "interrupt": {
+      "ask": "number"
+    },
+    "name": "interrupt_gate",
+    "resumed": {
+      "events": [
+        {
+          "node": "gate",
+          "update": {
+            "log": [
+              "gate"
+            ],
+            "n": 42
+          }
+        },
+        {
+          "node": "after",
+          "update": {
+            "log": [
+              "after"
+            ]
+          }
+        }
+      ],
+      "final": {
+        "log": [
+          "before",
+          "gate",
+          "after"
+        ],
+        "n": 42
+      }
+    },
+    "snapshots": [
+      {
+        "next": [
+          "before"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "gate"
+        ],
+        "values": {
+          "log": [
+            "before"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "after"
+        ],
+        "values": {
+          "log": [
+            "before",
+            "gate"
+          ],
+          "n": 42
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "before",
+            "gate",
+            "after"
+          ],
+          "n": 42
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "before"
+        ],
+        [
+          "before",
+          "gate"
+        ],
+        [
+          "gate",
+          "after"
+        ],
+        [
+          "after",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "interrupt_gate",
+      "nodes": [
+        {
+          "id": "before",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "before"
+          }
+        },
+        {
+          "id": "gate",
+          "op": {
+            "kind": "gate",
+            "label": "gate"
+          }
+        },
+        {
+          "id": "after",
+          "op": {
+            "kind": "note",
+            "label": "after"
+          }
+        }
+      ],
+      "resume": 42
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ],
+          "n": 2
+        }
+      }
+    ],
+    "interrupt": {
+      "ask": "number"
+    },
+    "name": "interrupt_mid",
+    "resumed": {
+      "events": [
+        {
+          "node": "gate",
+          "update": {
+            "log": [
+              "gate"
+            ],
+            "n": 7
+          }
+        },
+        {
+          "node": "b",
+          "update": {
+            "log": [
+              "b"
+            ],
+            "n": 8
+          }
+        },
+        {
+          "node": "c",
+          "update": {
+            "log": [
+              "c"
+            ]
+          }
+        }
+      ],
+      "final": {
+        "log": [
+          "a",
+          "gate",
+          "b",
+          "c"
+        ],
+        "n": 8
+      }
+    },
+    "snapshots": [
+      {
+        "next": [
+          "a"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "gate"
+        ],
+        "values": {
+          "log": [
+            "a"
+          ],
+          "n": 2
+        }
+      },
+      {
+        "next": [
+          "b"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "gate"
+          ],
+          "n": 7
+        }
+      },
+      {
+        "next": [
+          "c"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "gate",
+            "b"
+          ],
+          "n": 8
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "gate",
+            "b",
+            "c"
+          ],
+          "n": 8
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "a",
+          "gate"
+        ],
+        [
+          "gate",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "interrupt_mid",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "delta": 2,
+            "kind": "bump",
+            "label": "a"
+          }
+        },
+        {
+          "id": "gate",
+          "op": {
+            "kind": "gate",
+            "label": "gate"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        }
+      ],
+      "resume": 7
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "start",
+        "update": {}
+      },
+      {
+        "node": "sub",
+        "update": {
+          "log": [
+            "sub"
+          ],
+          "n": 6
+        }
+      },
+      {
+        "node": "done",
+        "update": {
+          "log": [
+            "done"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "subgraph_once",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "start"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "sub"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "done"
+        ],
+        "values": {
+          "log": [
+            "sub"
+          ],
+          "n": 6
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "sub",
+            "done"
+          ],
+          "n": 6
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "start"
+        ],
+        [
+          "start",
+          "sub"
+        ],
+        [
+          "sub",
+          "done"
+        ],
+        [
+          "done",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 1
+      },
+      "name": "subgraph_once",
+      "nodes": [
+        {
+          "id": "start",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "sub",
+          "op": {
+            "delta": 5,
+            "kind": "sub",
+            "label": "sub"
+          }
+        },
+        {
+          "id": "done",
+          "op": {
+            "kind": "note",
+            "label": "done"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "loop",
+        "update": {
+          "log": [
+            "tick"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "node": "sub",
+        "update": {
+          "log": [
+            "sub"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "node": "loop",
+        "update": {
+          "log": [
+            "tick"
+          ],
+          "n": 4
+        }
+      },
+      {
+        "node": "sub",
+        "update": {
+          "log": [
+            "sub"
+          ],
+          "n": 6
+        }
+      },
+      {
+        "node": "exit",
+        "update": {
+          "log": [
+            "exit"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "subgraph_loop",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "loop"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "sub"
+        ],
+        "values": {
+          "log": [
+            "tick"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "loop"
+        ],
+        "values": {
+          "log": [
+            "tick",
+            "sub"
+          ],
+          "n": 3
+        }
+      },
+      {
+        "next": [
+          "sub"
+        ],
+        "values": {
+          "log": [
+            "tick",
+            "sub",
+            "tick"
+          ],
+          "n": 4
+        }
+      },
+      {
+        "next": [
+          "exit"
+        ],
+        "values": {
+          "log": [
+            "tick",
+            "sub",
+            "tick",
+            "sub"
+          ],
+          "n": 6
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "tick",
+            "sub",
+            "tick",
+            "sub",
+            "exit"
+          ],
+          "n": 6
+        }
+      }
+    ],
+    "spec": {
+      "branches": [
+        {
+          "cases": [
+            {
+              "n_at_least": 6,
+              "to": [
+                "exit"
+              ]
+            }
+          ],
+          "default": [
+            "loop"
+          ],
+          "from": "sub"
+        }
+      ],
+      "edges": [
+        [
+          "START",
+          "loop"
+        ],
+        [
+          "loop",
+          "sub"
+        ],
+        [
+          "exit",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "subgraph_loop",
+      "nodes": [
+        {
+          "id": "loop",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "tick"
+          }
+        },
+        {
+          "id": "sub",
+          "op": {
+            "delta": 2,
+            "kind": "sub",
+            "label": "sub"
+          }
+        },
+        {
+          "id": "exit",
+          "op": {
+            "kind": "note",
+            "label": "exit"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ]
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ]
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      },
+      {
+        "node": "d",
+        "update": {
+          "log": [
+            "d"
+          ]
+        }
+      },
+      {
+        "node": "e",
+        "update": {
+          "log": [
+            "e"
+          ]
+        }
+      },
+      {
+        "node": "f",
+        "update": {
+          "log": [
+            "f"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "deep_chain",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "a"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "b"
+        ],
+        "values": {
+          "log": [
+            "a"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "c"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "d"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "e"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "f"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "d"
+        ],
+        [
+          "d",
+          "e"
+        ],
+        [
+          "e",
+          "f"
+        ],
+        [
+          "f",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "deep_chain",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "kind": "note",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        },
+        {
+          "id": "d",
+          "op": {
+            "kind": "note",
+            "label": "d"
+          }
+        },
+        {
+          "id": "e",
+          "op": {
+            "kind": "note",
+            "label": "e"
+          }
+        },
+        {
+          "id": "f",
+          "op": {
+            "kind": "note",
+            "label": "f"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": {
+      "events": [
+        {
+          "node": "c",
+          "update": {
+            "log": [
+              "c"
+            ],
+            "n": 20
+          }
+        }
+      ],
+      "final": {
+        "log": [
+          "a",
+          "b",
+          "c",
+          "rewound",
+          "c"
+        ],
+        "n": 20
+      }
+    },
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ]
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ]
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ],
+          "n": 10
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "time_travel_note",
+    "resumed": null,
+    "snapshots": null,
+    "spec": {
+      "after": {
+        "as_node": "b",
+        "write": {
+          "log": [
+            "rewound"
+          ]
+        }
+      },
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "time_travel_note",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "kind": "note",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "delta": 10,
+            "kind": "bump",
+            "label": "c"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": {
+      "events": [
+        {
+          "node": "c",
+          "update": {
+            "log": [
+              "c"
+            ]
+          }
+        }
+      ],
+      "final": {
+        "log": [
+          "a",
+          "b",
+          "c",
+          "c"
+        ],
+        "n": 100
+      }
+    },
+    "attempts": {},
+    "events": [
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ],
+          "n": 2
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "time_travel_value",
+    "resumed": null,
+    "snapshots": null,
+    "spec": {
+      "after": {
+        "as_node": "b",
+        "write": {
+          "n": 100
+        }
+      },
+      "edges": [
+        [
+          "START",
+          "a"
+        ],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "time_travel_value",
+      "nodes": [
+        {
+          "id": "a",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "b"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "start",
+        "update": {}
+      },
+      {
+        "node": "a",
+        "update": {
+          "log": [
+            "a"
+          ]
+        }
+      },
+      {
+        "node": "b",
+        "update": {
+          "log": [
+            "b"
+          ]
+        }
+      },
+      {
+        "node": "mid",
+        "update": {
+          "log": [
+            "mid"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "node": "c",
+        "update": {
+          "log": [
+            "c"
+          ]
+        }
+      },
+      {
+        "node": "d",
+        "update": {
+          "log": [
+            "d"
+          ]
+        }
+      },
+      {
+        "node": "last",
+        "update": {
+          "log": [
+            "last"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "double_diamond",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "start"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "a",
+          "b"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "mid"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "c",
+          "d"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "mid"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "last"
+        ],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "mid",
+            "c",
+            "d"
+          ],
+          "n": 1
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "a",
+            "b",
+            "mid",
+            "c",
+            "d",
+            "last"
+          ],
+          "n": 1
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "start"
+        ],
+        [
+          "start",
+          "a"
+        ],
+        [
+          "start",
+          "b"
+        ],
+        [
+          "a",
+          "mid"
+        ],
+        [
+          "b",
+          "mid"
+        ],
+        [
+          "mid",
+          "c"
+        ],
+        [
+          "mid",
+          "d"
+        ],
+        [
+          "c",
+          "last"
+        ],
+        [
+          "d",
+          "last"
+        ],
+        [
+          "last",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "double_diamond",
+      "nodes": [
+        {
+          "id": "start",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "a",
+          "op": {
+            "kind": "note",
+            "label": "a"
+          }
+        },
+        {
+          "id": "b",
+          "op": {
+            "kind": "note",
+            "label": "b"
+          }
+        },
+        {
+          "id": "mid",
+          "op": {
+            "delta": 1,
+            "kind": "bump",
+            "label": "mid"
+          }
+        },
+        {
+          "id": "c",
+          "op": {
+            "kind": "note",
+            "label": "c"
+          }
+        },
+        {
+          "id": "d",
+          "op": {
+            "kind": "note",
+            "label": "d"
+          }
+        },
+        {
+          "id": "last",
+          "op": {
+            "kind": "note",
+            "label": "last"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "fan",
+        "update": {}
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w0"
+          ]
+        }
+      },
+      {
+        "node": "worker",
+        "update": {
+          "log": [
+            "w1"
+          ]
+        }
+      },
+      {
+        "node": "finish",
+        "update": {
+          "log": [
+            "finish"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "send_then_step",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "fan"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "worker",
+          "worker"
+        ],
+        "values": {
+          "log": [],
+          "n": 0
+        }
+      },
+      {
+        "next": [
+          "finish"
+        ],
+        "values": {
+          "log": [
+            "w0",
+            "w1"
+          ],
+          "n": 0
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "w0",
+            "w1",
+            "finish"
+          ],
+          "n": 0
+        }
+      }
+    ],
+    "spec": {
+      "edges": [
+        [
+          "START",
+          "fan"
+        ],
+        [
+          "worker",
+          "finish"
+        ],
+        [
+          "finish",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 0
+      },
+      "name": "send_then_step",
+      "nodes": [
+        {
+          "id": "fan",
+          "op": {
+            "count": 2,
+            "kind": "send"
+          }
+        },
+        {
+          "id": "finish",
+          "op": {
+            "kind": "note",
+            "label": "finish"
+          }
+        }
+      ],
+      "worker": {
+        "kind": "label_n",
+        "prefix": "w"
+      }
+    }
+  },
+  {
+    "after": null,
+    "attempts": {},
+    "events": [
+      {
+        "node": "router",
+        "update": {}
+      },
+      {
+        "node": "x",
+        "update": {
+          "log": [
+            "x"
+          ]
+        }
+      },
+      {
+        "node": "y",
+        "update": {
+          "log": [
+            "y"
+          ]
+        }
+      }
+    ],
+    "interrupt": null,
+    "name": "branch_fanout",
+    "resumed": null,
+    "snapshots": [
+      {
+        "next": [
+          "router"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [
+          "x",
+          "y"
+        ],
+        "values": {
+          "log": [],
+          "n": 1
+        }
+      },
+      {
+        "next": [],
+        "values": {
+          "log": [
+            "x",
+            "y"
+          ],
+          "n": 1
+        }
+      }
+    ],
+    "spec": {
+      "branches": [
+        {
+          "cases": [
+            {
+              "n_at_least": 1,
+              "to": [
+                "x",
+                "y"
+              ]
+            }
+          ],
+          "default": [
+            "z"
+          ],
+          "from": "router"
+        }
+      ],
+      "edges": [
+        [
+          "START",
+          "router"
+        ],
+        [
+          "x",
+          "END"
+        ],
+        [
+          "y",
+          "END"
+        ],
+        [
+          "z",
+          "END"
+        ]
+      ],
+      "input": {
+        "log": [],
+        "n": 1
+      },
+      "name": "branch_fanout",
+      "nodes": [
+        {
+          "id": "router",
+          "op": {
+            "kind": "pass"
+          }
+        },
+        {
+          "id": "x",
+          "op": {
+            "kind": "note",
+            "label": "x"
+          }
+        },
+        {
+          "id": "y",
+          "op": {
+            "kind": "note",
+            "label": "y"
+          }
+        },
+        {
+          "id": "z",
+          "op": {
+            "kind": "note",
+            "label": "z"
+          }
+        }
+      ]
+    }
+  }
+]
