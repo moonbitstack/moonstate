@@ -1,178 +1,158 @@
 ///|
-/// A snapshot of an agent's run at a node boundary (Koog `AgentCheckpointData` with its
-/// `GraphCheckpointProperties`): the conversation so far, the LLM configuration that produced
-/// it, the serialized `AIAgentStorage`, and where the strategy graph had reached — the node
-/// about to run (`node_id`) and the value flowing into it (`last_input`). Restoring replays
-/// `message_history` and resumes the walk at `node_id`.
-///
-/// `created_at` is caller-supplied: MoonBit has no ambient clock, and a supplied one keeps a
-/// test's checkpoints deterministic.
-pub(all) struct AgentCheckpoint {
-  checkpoint_id : String
-  created_at : Int64
-  message_history : Array[@prompt.Message]
-  llm_params : @prompt.LLMParams?
-  llm_model : @llm.LLModel?
-  tools : Array[String]?
-  storage : Json
-  node_id : String
-  last_input : Json?
-  agent_iterations : Int32
-  version : Int64
-} derive(Eq, Debug)
-
-///|
-/// A checkpoint with only the fields a resume needs stated; the rest carry empty defaults, so
-/// a caller that keeps no LLM configuration or storage need not spell them out.
-pub fn AgentCheckpoint::new(
-  checkpoint_id~ : String,
-  created_at~ : Int64,
-  node_id~ : String,
-  message_history~ : Array[@prompt.Message] = [],
-  llm_params? : @prompt.LLMParams,
-  llm_model? : @llm.LLModel,
-  tools? : Array[String],
-  storage~ : Json = Json::object({}),
-  last_input? : Json,
-  agent_iterations~ : Int32 = 0,
-  version~ : Int64 = 1L,
-) -> AgentCheckpoint {
-  {
-    checkpoint_id,
-    created_at,
-    message_history,
-    llm_params,
-    llm_model,
-    tools,
-    storage,
-    node_id,
-    last_input,
-    agent_iterations,
-    version,
-  }
+/// Where a thread's checkpoints live. The engine writes one per superstep and
+/// reads the last one back to resume, so an implementation only has to store
+/// records and hand them back in order.
+pub(open) trait Saver {
+  ///|
+  /// The checkpoint with `id`, or the thread's latest when `id` is absent.
+  async fn get(Self, thread : String, id? : String) -> Checkpoint?
+  ///|
+  /// Store a checkpoint. Writing the same id twice replaces it.
+  async fn put(Self, Checkpoint) -> Unit
+  ///|
+  /// Record what one task of checkpoint `id` produced, before the superstep
+  /// finishes. A resumed run skips tasks that already have writes here.
+  async fn put_writes(
+    Self,
+    thread : String,
+    id : String,
+    task : String,
+    values : Array[Json],
+  ) -> Unit
+  ///|
+  /// A thread's checkpoints in the order they were written. `limit` keeps the
+  /// most recent ones, `before` keeps those written before that checkpoint id.
+  async fn list(Self, thread : String, limit? : Int32, before? : String) -> Array[
+    Checkpoint,
+  ]
+  ///|
+  /// Drop a thread entirely: checkpoints and writes.
+  async fn delete(Self, thread : String) -> Unit
 }
 
 ///|
-/// The checkpoint storage contract (Koog `PersistenceStorageProvider`): save a
-/// checkpoint under a session, list a session's checkpoints, or fetch its latest.
-pub(open) trait PersistenceStorageProvider {
-  fn save_checkpoint(Self, session_id : String, checkpoint : AgentCheckpoint) -> Unit
-  fn get_checkpoints(Self, session_id : String) -> Array[AgentCheckpoint]
-  fn get_latest_checkpoint(Self, session_id : String) -> AgentCheckpoint?
+/// A saver that keeps everything in memory: enough for a run that has to survive
+/// a failed node, not the process it runs in.
+pub struct MemorySaver {
+  threads : Map[String, Array[Checkpoint]]
+  writes : Map[String, Array[TaskWrite]]
 }
 
 ///|
-/// An in-memory `PersistenceStorageProvider` (Koog `InMemoryPersistencyStorageProvider`):
-/// checkpoints kept per session in save order.
-pub struct InMemoryPersistence {
-  by_session : Map[String, Array[AgentCheckpoint]]
+pub fn MemorySaver::new() -> MemorySaver {
+  { threads: Map([]), writes: Map([]), }
 }
 
 ///|
-/// An empty in-memory checkpoint store.
-pub fn InMemoryPersistence::new() -> InMemoryPersistence {
-  { by_session: Map([]), }
+fn bucket_key(thread : String, id : String) -> String {
+  thread + "\u{1f}" + id
 }
 
 ///|
-/// The store's behaviour lives in these three, so the inherent methods and the trait impls
-/// below are the same code seen through two names rather than one calling the other.
-fn InMemoryPersistence::put(
-  self : InMemoryPersistence,
-  session_id : String,
-  checkpoint : AgentCheckpoint,
-) -> Unit {
-  match self.by_session.get(session_id) {
-    Some(cps) => cps.push(checkpoint)
-    None => self.by_session[session_id] = [checkpoint]
-  }
-}
-
-///|
-fn InMemoryPersistence::list(
-  self : InMemoryPersistence,
-  session_id : String,
-) -> Array[AgentCheckpoint] {
-  match self.by_session.get(session_id) {
-    Some(cps) => [..cps]
-    None => []
-  }
-}
-
-///|
-fn InMemoryPersistence::latest(
-  self : InMemoryPersistence,
-  session_id : String,
-) -> AgentCheckpoint? {
-  guard self.by_session.get(session_id) is Some(cps) else { return None }
-  guard cps.length() > 0 else { return None }
-  let mut latest = cps[0]
-  for cp in cps {
-    // `>=` so that checkpoints sharing a timestamp resolve to the last saved, which is what
-    // a caller with no clock (every stamp 0) means by "latest".
-    if cp.created_at >= latest.created_at {
-      latest = cp
+fn MemorySaver::bucket(
+  self : MemorySaver,
+  thread : String,
+) -> Array[Checkpoint] {
+  match self.threads.get(thread) {
+    Some(all) => all
+    None => {
+      let all = []
+      self.threads[thread] = all
+      all
     }
   }
-  Some(latest)
 }
 
 ///|
-/// Save `checkpoint` under `session_id`.
-pub fn InMemoryPersistence::save_checkpoint(
-  self : InMemoryPersistence,
-  session_id : String,
-  checkpoint : AgentCheckpoint,
-) -> Unit {
-  self.put(session_id, checkpoint)
+pub impl Saver for MemorySaver with fn get(self, thread, id?) -> Checkpoint? raise {
+  let all = self.bucket(thread)
+  let found = match id {
+    Some(want) => all.iter().find_first(cp => cp.id == want)
+    None => all.last()
+  }
+  match found {
+    None => None
+    Some(cp) =>
+      Some({ ..cp, writes: self.writes.get(bucket_key(thread, cp.id)), })
+  }
 }
 
 ///|
-/// Every checkpoint saved for `session_id`, in save order.
-pub fn InMemoryPersistence::get_checkpoints(
-  self : InMemoryPersistence,
-  session_id : String,
-) -> Array[AgentCheckpoint] {
-  self.list(session_id)
+pub impl Saver for MemorySaver with fn put(self, checkpoint) -> Unit raise {
+  let all = self.bucket(checkpoint.thread)
+  let stored = { ..checkpoint, writes: None, }
+  let mut replaced = false
+  for i = 0; i < all.length(); i = i + 1 {
+    if all[i].id == checkpoint.id {
+      all[i] = stored
+      replaced = true
+    }
+  }
+  if !replaced {
+    all.push(stored)
+  }
 }
 
 ///|
-/// The most recent checkpoint for `session_id` — the highest `created_at`, ties going to the
-/// last saved — or `None` when the session has none.
-pub fn InMemoryPersistence::get_latest_checkpoint(
-  self : InMemoryPersistence,
-  session_id : String,
-) -> AgentCheckpoint? {
-  self.latest(session_id)
-}
-
-///|
-pub impl PersistenceStorageProvider for InMemoryPersistence with fn save_checkpoint(
+pub impl Saver for MemorySaver with fn put_writes(
   self,
-  session_id,
-  checkpoint,
-) {
-  self.put(session_id, checkpoint)
+  thread,
+  id,
+  task,
+  values,
+) -> Unit raise {
+  let key = bucket_key(thread, id)
+  let recorded = match self.writes.get(key) {
+    Some(recorded) => recorded
+    None => {
+      let recorded = []
+      self.writes[key] = recorded
+      recorded
+    }
+  }
+  for i = 0; i < recorded.length(); i = i + 1 {
+    if recorded[i].task == task {
+      recorded[i] = { task, values, }
+      return
+    }
+  }
+  recorded.push({ task, values, })
 }
 
 ///|
-pub impl PersistenceStorageProvider for InMemoryPersistence with fn get_checkpoints(
-  self,
-  session_id,
-) {
-  self.list(session_id)
+pub impl Saver for MemorySaver with fn list(self, thread, limit?, before?) -> Array[
+  Checkpoint,
+] raise {
+  let kept = []
+  for cp in self.bucket(thread) {
+    let is_before = match before {
+      Some(id) => cp.id < id
+      None => true
+    }
+    if is_before {
+      kept.push({ ..cp, writes: self.writes.get(bucket_key(thread, cp.id)), })
+    }
+  }
+  match limit {
+    Some(n) => kept.rev()[:n].rev()
+    None => kept
+  }
 }
 
 ///|
-pub impl PersistenceStorageProvider for InMemoryPersistence with fn get_latest_checkpoint(
-  self,
-  session_id,
-) {
-  self.latest(session_id)
+pub impl Saver for MemorySaver with fn delete(self, thread) -> Unit raise {
+  self.threads.remove(thread)
+  let prefix = thread + "\u{1f}"
+  let stale = []
+  for key, _ in self.writes {
+    if key.has_prefix(prefix) {
+      stale.push(key)
+    }
+  }
+  for key in stale {
+    self.writes.remove(key)
+  }
 }
 
 ///|
-pub extend AgentCheckpoint with Debug::{to_repr}
-
-///|
-pub extend AgentCheckpoint with Eq::{not_equal, equal}
+pub extend MemorySaver with Saver::{get, put, put_writes, list, delete}

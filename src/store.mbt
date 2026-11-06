@@ -1,194 +1,132 @@
-// This package tracks Koog **0.7.3**, not 1.1.1 like the rest of the repo. The
-// `Concept` / `Fact` / `MemorySubject` / `MemoryScope` / `AgentMemoryProvider` model
-// transcribed here was removed upstream by 0.8.0, where memory became `ChatMemory`
-// (chat-history providers) and `LongTermMemory` (`MemoryRecord` + ingestion and
-// retrieval). Re-anchoring means rewriting this package, not renaming it.
+///|
+/// One remembered value: a space, a key inside it, and the value itself.
+pub(all) struct Item {
+  space : Array[String]
+  key : String
+  value : Json
+}
 
 ///|
-/// Whether a concept holds one fact or many (Koog `FactType`).
-pub(all) enum FactType {
-  Single
-  Multiple
-} derive(Eq, Debug)
+/// Long-term memory that outlives a thread: spaced key-value pairs with a
+/// search over them. A node reaches the store through `Run::store`.
+pub(open) trait Store {
+  ///|
+  async fn get(Self, space : Array[String], key : String) -> Item?
+  ///|
+  async fn put(Self, space : Array[String], key : String, value : Json) -> Unit
+  ///|
+  async fn delete(Self, space : Array[String], key : String) -> Unit
+  ///|
+  /// Items under `space` (or below it), newest first. `query` is matched
+  /// against the item's text, `filter` against its top-level object fields.
+  async fn search(
+    Self,
+    space : Array[String],
+    query? : String,
+    filter? : Map[String, Json],
+    limit? : Int32,
+  ) -> Array[Item]
+}
 
 ///|
-/// A concept the agent remembers facts about: a short `keyword`, a `description`
-/// the model is shown, and whether it carries one fact or many. Transcribed from
-/// the koog `Concept` data class.
-pub(all) struct Concept {
-  keyword : String
-  description : String
-  fact_type : FactType
-} derive(Eq, Debug)
+/// A store that keeps everything in memory, for tests and for short-lived
+/// processes.
+pub struct MemoryStore {
+  items : Map[String, Item]
+}
 
 ///|
-/// A fact about a concept, timestamped when captured (Koog's sealed `Fact`:
-/// `SingleFact` carries one `value`, `MultipleFacts` a list of `values`). The
-/// timestamp is caller-supplied — MoonBit has no ambient clock — the explicit
-/// equivalent of Koog threading a `Clock` into fact retrieval.
-pub(all) enum Fact {
-  SingleFact(concept~ : Concept, value~ : String, timestamp~ : Int64)
-  MultipleFacts(concept~ : Concept, values~ : Array[String], timestamp~ : Int64)
-} derive(Eq, Debug)
+pub fn MemoryStore::new() -> MemoryStore {
+  { items: Map([]), }
+}
 
 ///|
-/// The concept a fact is about, whichever variant it is.
-pub fn Fact::concept(self : Fact) -> Concept {
-  match self {
-    SingleFact(concept~, ..) => concept
-    MultipleFacts(concept~, ..) => concept
+fn item_key(space : Array[String], key : String) -> String {
+  let path = StringBuilder()
+  for part in space {
+    path.write_string(part)
+    path.write_char('\u{1f}')
   }
+  path.write_char('\u{1e}')
+  path.write_string(key)
+  path.to_string()
 }
 
 ///|
-/// Who or what a fact is about (Koog `MemorySubject`): a `name`, and a `priority`
-/// for ordering when subjects overlap. The predefined subjects mirror Koog's.
-pub(all) struct MemorySubject {
-  name : String
-  priority : Int32
-} derive(Eq, Debug)
-
-///|
-pub let subject_everything : MemorySubject = {
-  name: "everything",
-  priority: 0,
-}
-
-///|
-pub let subject_user : MemorySubject = { name: "user", priority: 1, }
-
-///|
-pub let subject_machine : MemorySubject = { name: "machine", priority: 2, }
-
-///|
-pub let subject_organization : MemorySubject = {
-  name: "organization",
-  priority: 3,
-}
-
-///|
-/// How widely a fact is shared (Koog `MemoryScope`): to a single agent, a single
-/// feature, the whole product, or across products.
-pub(all) enum MemoryScope {
-  ScopeAgent(String)
-  ScopeFeature(String)
-  ScopeProduct
-  ScopeCrossProduct
-} derive(Eq, Debug)
-
-///|
-/// The storage key for a `(subject, scope)` bucket.
-fn bucket_key(subject : MemorySubject, scope : MemoryScope) -> String {
-  let s = match scope {
-    ScopeAgent(a) => "agent:" + a
-    ScopeFeature(f) => "feature:" + f
-    ScopeProduct => "product"
-    ScopeCrossProduct => "cross-product"
+fn under_space(item : Item, space : Array[String]) -> Bool {
+  guard item.space.length() >= space.length() else { return false }
+  for i = 0; i < space.length(); i = i + 1 {
+    if item.space[i] != space[i] {
+      return false
+    }
   }
-  s + "|" + subject.name
+  true
 }
 
 ///|
-/// The save/load contract for agent memory (Koog `AgentMemoryProvider`): store a
-/// fact under a subject and scope, load a concept's facts back, or load everything
-/// in a bucket.
-pub(open) trait MemoryProvider {
-  fn save(Self, fact : Fact, subject : MemorySubject, scope : MemoryScope) -> Unit
-  fn load(Self, concept : Concept, subject : MemorySubject, scope : MemoryScope) -> Array[
-    Fact,
-  ]
-  fn load_all(Self, subject : MemorySubject, scope : MemoryScope) -> Array[Fact]
+fn matches_filter(item : Item, filter : Map[String, Json]) -> Bool {
+  guard item.value is Object(fields) else { return filter.is_empty() }
+  for name, wanted in filter {
+    match fields.get(name) {
+      Some(actual) => if actual != wanted { return false }
+      None => return false
+    }
+  }
+  true
 }
 
 ///|
-/// An in-memory `MemoryProvider`: facts kept in a map keyed by `(scope, subject)`.
-/// The faithful equivalent of Koog's `LocalFileMemoryProvider` without the file
-/// backend — enough to run and test the memory contract in process.
-pub struct InMemoryProvider {
-  store : Map[String, Array[Fact]]
+pub impl Store for MemoryStore with fn get(self, space, key) -> Item? raise {
+  self.items.get(item_key(space, key))
 }
 
 ///|
-/// An empty in-memory provider.
-pub fn InMemoryProvider::new() -> InMemoryProvider {
-  { store: Map([]), }
+pub impl Store for MemoryStore with fn put(self, space, key, value) -> Unit raise {
+  self.items[item_key(space, key)] = { space, key, value, }
 }
 
 ///|
-pub impl MemoryProvider for InMemoryProvider with fn save(
+pub impl Store for MemoryStore with fn delete(self, space, key) -> Unit raise {
+  self.items.remove(item_key(space, key))
+}
+
+///|
+pub impl Store for MemoryStore with fn search(
   self,
-  fact,
-  subject,
-  scope,
-) {
-  let key = bucket_key(subject, scope)
-  match self.store.get(key) {
-    Some(facts) => facts.push(fact)
-    None => self.store[key] = [fact]
+  space,
+  query?,
+  filter?,
+  limit?,
+) -> Array[Item] raise {
+  let wanted = match limit {
+    Some(limit) => limit
+    None => 10
+  }
+  let found = []
+  for _, item in self.items {
+    if !under_space(item, space) {
+      continue
+    }
+    match query {
+      Some(text) => if !item.value.stringify().contains(text) { continue }
+      None => ()
+    }
+    match filter {
+      Some(filter) => if !matches_filter(item, filter) { continue }
+      None => ()
+    }
+    found.push(item)
+  }
+  if found.length() > wanted {
+    let cut = []
+    for index = 0; index < wanted; index = index + 1 {
+      cut.push(found[index])
+    }
+    cut
+  } else {
+    found
   }
 }
 
 ///|
-pub impl MemoryProvider for InMemoryProvider with fn load(
-  self,
-  concept,
-  subject,
-  scope,
-) {
-  let out : Array[Fact] = []
-  match self.store.get(bucket_key(subject, scope)) {
-    Some(facts) =>
-      for f in facts {
-        if f.concept().keyword == concept.keyword {
-          out.push(f)
-        }
-      }
-    None => ()
-  }
-  out
-}
-
-///|
-pub impl MemoryProvider for InMemoryProvider with fn load_all(
-  self,
-  subject,
-  scope,
-) {
-  match self.store.get(bucket_key(subject, scope)) {
-    Some(facts) => [..facts]
-    None => []
-  }
-}
-
-///|
-pub extend Concept with Debug::{to_repr}
-
-///|
-pub extend Concept with Eq::{not_equal, equal}
-
-///|
-pub extend Fact with Debug::{to_repr}
-
-///|
-pub extend Fact with Eq::{not_equal, equal}
-
-///|
-pub extend FactType with Debug::{to_repr}
-
-///|
-pub extend FactType with Eq::{not_equal, equal}
-
-///|
-pub extend InMemoryProvider with MemoryProvider::{save, load_all, load}
-
-///|
-pub extend MemoryScope with Debug::{to_repr}
-
-///|
-pub extend MemoryScope with Eq::{not_equal, equal}
-
-///|
-pub extend MemorySubject with Debug::{to_repr}
-
-///|
-pub extend MemorySubject with Eq::{not_equal, equal}
+pub extend MemoryStore with Store::{get, put, delete, search}

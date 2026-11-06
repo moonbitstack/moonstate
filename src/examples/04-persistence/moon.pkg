@@ -1,6 +1,0 @@
-
-import {
-  "moonbitstack/moonstate",
-}
-
-pkgtype(kind: "executable")

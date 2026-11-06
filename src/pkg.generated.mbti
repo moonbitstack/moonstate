@@ -1,12 +1,275 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbitstack/moonstate"
 
+import {
+  "moonbitlang/core/json",
+  "moonbitlang/core/ref",
+}
+
 // Values
+pub let default_limit : Int32
+
+pub fn[I : @json.ToJson + @json.FromJson, O : @json.ToJson + @json.FromJson] entrypoint(String, async (I, Context) -> O, saver? : &Saver, store? : &Store, executor? : &Executor, limit? : Int32) -> Entrypoint[I, O] raise Refused
+
+pub let inline : &Executor
+
+pub let retry : Retry
+
+pub fn[I, O] task(String, async (I) -> O, retry? : Retry) -> Task[I, O]
 
 // Errors
+pub(all) suberror GraphError {
+  StepLimit(limit~ : Int32)
+  NodeFailed(node~ : String, message~ : String)
+  Interrupted(thread~ : String, value~ : @json.Json)
+  NotInterrupted(thread~ : String)
+  MissingThread(thread~ : String)
+  MissingNode(node~ : String)
+  Unreadable(reason~ : String)
+  Cancelled(thread~ : String)
+  Backend(reason~ : String)
+}
+
+pub(all) suberror Refused {
+  NoNodes
+  NoEntry
+  UnknownEntry(node~ : String)
+  DuplicateNode(node~ : String)
+  DanglingEdge(from~ : String, to~ : String)
+  Unreachable(node~ : String)
+  NoExit
+}
 
 // Types and methods
+pub struct Builder[S, U] {
+  merge : (S, U) -> S
+  initial : S
+  mut entry : String?
+  nodes : Map[String, NodeSpec[S, U]]
+  edges : Array[(String, String)]
+  joins : Array[(Array[String], String)]
+  branches : Array[(String, async (S) -> Array[String])]
+  routed : Array[String]
+  duplicates : Array[String]
+}
+pub fn[S, U] Builder::branch(Self[S, U], String, async (S) -> Array[String]) -> Self[S, U]
+pub fn[S, U] Builder::compile(Self[S, U], String, saver? : &Saver, store? : &Store, executor? : &Executor, limit? : Int32) -> Graph[S, U] raise Refused
+pub fn[S, U] Builder::edge(Self[S, U], String, String) -> Self[S, U]
+pub fn[S, U] Builder::entry(Self[S, U], String) -> Self[S, U]
+pub fn[S, U] Builder::join(Self[S, U], Array[String], String) -> Self[S, U]
+pub fn[S, U] Builder::new(merge~ : (S, U) -> S, initial~ : S) -> Self[S, U]
+pub fn[S, U] Builder::node(Self[S, U], String, async (S, Run) -> Array[Step[S, U]], retry? : Retry) -> Self[S, U]
+pub fn[S, U] Builder::routed(Self[S, U], String) -> Self[S, U]
+pub fn[T : @json.ToJson + @json.FromJson, V : @json.ToJson + @json.FromJson, S, U] Builder::subgraph(Self[S, U], String, Graph[T, V], enter~ : (S) -> T, leave~ : (T) -> U) -> Self[S, U]
+
+#derive(@json.FromJson, @json.ToJson)
+pub(all) struct Checkpoint {
+  thread : String
+  id : String
+  parent : String?
+  seq : Int32
+  step : Int32
+  state : @json.Json
+  pending : Array[Pending]
+  interrupt : @json.Json?
+  created_at : Int64
+  writes : Array[TaskWrite]?
+}
+pub fn Checkpoint::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Checkpoint::to_json(Self) -> @json.Json
+
+pub struct Context {
+  run : Run
+  saver : &Saver?
+  executor : &Executor
+  graph : String
+  mut index : Int32
+  recorded : Map[String, @json.Json]
+}
+pub fn Context::index(Self) -> Int32
+pub fn Context::run(Self) -> Run
+
+pub(all) struct Done {
+  values : Array[@json.Json]?
+  error : String?
+}
+
+pub struct Entrypoint[I, O] {
+  graph : Graph[Frame, Frame]
+  encode : (I) -> @json.Json
+  decode : (@json.Json) -> O raise GraphError
+}
+pub async fn[I, O] Entrypoint::run(Self[I, O], I, thread? : String) -> O raise GraphError
+
+pub(all) enum Event[S, U] {
+  Values(S)
+  Updates(node~ : String, U)
+  Custom(node~ : String, @json.Json)
+  Started(node~ : String)
+  Finished(node~ : String)
+  Interrupted(@json.Json)
+}
+
+#derive(@json.FromJson, @json.ToJson)
+pub(all) struct Frame {
+  input : @json.Json
+  output : @json.Json?
+}
+pub fn Frame::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Frame::to_json(Self) -> @json.Json
+
+pub struct Graph[S, U] {
+  name : String
+  merge : (S, U) -> S
+  initial : S
+  entry : String
+  nodes : Map[String, NodeSpec[S, U]]
+  edges : Map[String, Array[String]]
+  joins : Array[(Array[String], String)]
+  branches : Map[String, Array[async (S) -> Array[String]]]
+  saver : &Saver?
+  store : &Store?
+  executor : &Executor
+  limit : Int32
+}
+pub async fn[S : @json.FromJson, U] Graph::history(Self[S, U], String) -> Array[Snapshot[S]] raise GraphError
+pub fn[S, U] Graph::limit(Self[S, U]) -> Int32
+pub fn[S, U] Graph::name(Self[S, U]) -> String
+pub async fn[S : @json.ToJson + @json.FromJson, U : @json.ToJson + @json.FromJson] Graph::resume_stream(Self[S, U], String, @json.Json, async (Event[S, U]) -> Unit) -> S raise GraphError
+pub async fn[S : @json.ToJson + @json.FromJson, U : @json.ToJson + @json.FromJson] Graph::resume_with(Self[S, U], String, @json.Json) -> S raise GraphError
+pub async fn[S : @json.ToJson + @json.FromJson, U : @json.ToJson + @json.FromJson] Graph::run(Self[S, U], U, thread? : String) -> S raise GraphError
+pub async fn[S : @json.FromJson, U] Graph::state(Self[S, U], String) -> Snapshot[S]? raise GraphError
+pub async fn[S : @json.ToJson + @json.FromJson, U : @json.ToJson + @json.FromJson] Graph::stream(Self[S, U], U, async (Event[S, U]) -> Unit, thread? : String) -> S raise GraphError
+pub async fn[S : @json.ToJson + @json.FromJson, U] Graph::update(Self[S, U], String, U, as_node? : String) -> Unit raise GraphError
+
+pub(all) struct Item {
+  space : Array[String]
+  key : String
+  value : @json.Json
+}
+
+pub struct MemorySaver {
+  threads : Map[String, Array[Checkpoint]]
+  writes : Map[String, Array[TaskWrite]]
+}
+pub async fn MemorySaver::delete(Self, String) -> Unit
+pub async fn MemorySaver::get(Self, String, id? : String) -> Checkpoint?
+pub async fn MemorySaver::list(Self, String, limit? : Int32, before? : String) -> Array[Checkpoint]
+pub fn MemorySaver::new() -> Self
+pub async fn MemorySaver::put(Self, Checkpoint) -> Unit
+pub async fn MemorySaver::put_writes(Self, String, String, String, Array[@json.Json]) -> Unit
+pub impl Saver for MemorySaver
+
+pub struct MemoryStore {
+  items : Map[String, Item]
+}
+pub async fn MemoryStore::delete(Self, Array[String], String) -> Unit
+pub async fn MemoryStore::get(Self, Array[String], String) -> Item?
+pub fn MemoryStore::new() -> Self
+pub async fn MemoryStore::put(Self, Array[String], String, @json.Json) -> Unit
+pub async fn MemoryStore::search(Self, Array[String], query? : String, filter? : Map[String, @json.Json], limit? : Int32) -> Array[Item]
+pub impl Store for MemoryStore
+
+type NodeSpec[S, U]
+
+#derive(@json.FromJson, @json.ToJson)
+pub(all) struct Pending {
+  node : String
+  input : @json.Json?
+}
+pub fn Pending::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Pending::to_json(Self) -> @json.Json
+
+pub(all) struct Retry {
+  attempts : Int32
+  delay : Int32
+}
+
+pub struct Run {
+  thread : String
+  step : Int32
+  checkpoint : String
+  answer : @json.Json?
+  store : &Store?
+  saver : &Saver?
+  cancelled : @ref.Ref[Bool]
+  emit : (@json.Json) -> Unit
+  writes : Array[TaskWrite]
+}
+pub fn Run::answer(Self) -> @json.Json?
+pub fn Run::cancel(Self) -> Unit
+pub fn Run::checkpoint(Self) -> String
+pub fn Run::emit(Self, @json.Json) -> Unit
+pub fn Run::is_cancelled(Self) -> Bool
+pub fn Run::saver(Self) -> &Saver?
+pub fn Run::step(Self) -> Int32
+pub fn Run::store(Self) -> &Store?
+pub fn Run::thread(Self) -> String
+pub fn Run::writes(Self) -> Array[TaskWrite]
+
+pub(all) struct Snapshot[S] {
+  thread : String
+  id : String
+  parent : String?
+  step : Int32
+  state : S
+  next : Array[String]
+  interrupt : @json.Json?
+  created_at : Int64
+}
+
+pub(all) enum Step[S, U] {
+  Write(U)
+  Goto(String)
+  Send(String, S)
+  Interrupt(@json.Json)
+}
+pub fn[S : @json.FromJson, U : @json.FromJson] Step::decode(@json.Json) -> Self[S, U] raise GraphError
+pub fn[S : @json.ToJson, U : @json.ToJson] Step::encode(Self[S, U]) -> @json.Json
+
+pub struct Task[I, O] {
+  name : String
+  run : async (I) -> O
+  retry : Retry?
+}
+pub async fn[I : @json.ToJson, O : @json.ToJson + @json.FromJson] Task::call(Self[I, O], Context, I) -> O raise GraphError
+
+#derive(@json.FromJson, @json.ToJson)
+pub(all) struct TaskWrite {
+  task : String
+  values : Array[@json.Json]
+}
+pub fn TaskWrite::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn TaskWrite::to_json(Self) -> @json.Json
+
+pub(all) struct Work {
+  graph : String
+  node : String
+  thread : String
+  step : Int32
+  attempt : Int32
+  input : () -> @json.Json
+  run : async () -> Array[@json.Json]
+}
 
 // Type aliases
 
 // Traits
+pub(open) trait Executor {
+  async fn each(Self, Array[Work]) -> Array[Done]
+}
+
+pub(open) trait Saver {
+  async fn get(Self, String, id? : String) -> Checkpoint?
+  async fn put(Self, Checkpoint) -> Unit
+  async fn put_writes(Self, String, String, String, Array[@json.Json]) -> Unit
+  async fn list(Self, String, limit? : Int32, before? : String) -> Array[Checkpoint]
+  async fn delete(Self, String) -> Unit
+}
+
+pub(open) trait Store {
+  async fn get(Self, Array[String], String) -> Item?
+  async fn put(Self, Array[String], String, @json.Json) -> Unit
+  async fn delete(Self, Array[String], String) -> Unit
+  async fn search(Self, Array[String], query? : String, filter? : Map[String, @json.Json], limit? : Int32) -> Array[Item]
+}
