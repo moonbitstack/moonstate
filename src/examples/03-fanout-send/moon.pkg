@@ -1,0 +1,11 @@
+import {
+  "moonbitstack/moonstate",
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  supported_targets: "native",
+)
