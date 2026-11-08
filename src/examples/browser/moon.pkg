@@ -1,0 +1,15 @@
+import {
+  "moonbitstack/moonstate",
+  "moonbitlang/async/js_async",
+  "moonbitlang/core/json",
+}
+
+options(
+  supported_targets: "js",
+  link: {
+    "js": {
+      "exports": [ "reset", "run", "answer", "rewrite", "dump", "restore" ],
+      "format": "esm",
+    },
+  },
+)

@@ -5,3 +5,4 @@ _*
 target/
 src/examples/*/pkg.generated.mbti
 src/snippet_check/
+docs/engine/
