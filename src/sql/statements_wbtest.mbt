@@ -183,6 +183,27 @@ async test "list keeps the newest checkpoints and hands them back oldest first" 
 }
 
 ///|
+async test "a page with no limit is the whole thread, oldest first" {
+  let driver = Recorder::new(@moondb.Dialect::Postgres)
+  let saver = saver(driver)
+  driver.answer([
+    checkpoint_row("job", "cp-000002", None, 2, 2, "{}", "[]", None, 0L),
+    checkpoint_row("job", "cp-000001", None, 1, 1, "{}", "[]", None, 0L),
+    checkpoint_row("job", "cp-000000", None, 0, 0, "{}", "[]", None, 0L),
+  ])
+  driver.answer([])
+  driver.answer([])
+  driver.answer([])
+  let all = saver.list("job")
+  let (sql, _) = driver.query_at(0)
+  assert_true(sql.contains("ORDER BY seq DESC"))
+  assert_false(sql.contains("LIMIT"))
+  assert_eq(all.map(checkpoint => checkpoint.id), [
+    "cp-000000", "cp-000001", "cp-000002",
+  ])
+}
+
+///|
 async test "a task's writes come back attached to its checkpoint" {
   let driver = Recorder::new(@moondb.Dialect::Mysql)
   let saver = saver(driver)
