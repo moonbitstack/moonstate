@@ -1,0 +1,16 @@
+import {
+  "moonbitstack/moonstate",
+  "moonbitstack/moonstate/otel",
+  "moonbitstack/moontel/otlp",
+  "moonbitstack/moontel/otlp/grpc",
+  "moonbitstack/moontel/trace",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  supported_targets: "native",
+)
