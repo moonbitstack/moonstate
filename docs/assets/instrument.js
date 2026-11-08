@@ -47,6 +47,15 @@ const STAGES = [
     caption:
       "a rewrite — update starts a new branch from double, so the dial counts it from 0; the six checkpoints of both branches stay.",
   },
+  {
+    name: "the plug",
+    scenario: "line",
+    actions: ["run", "plug"],
+    caption:
+      "the plug — the tab reloads under the run. It comes back where it was, because a checkpoint is a record.",
+    after:
+      "the plug — the tab reloaded, and the run is still here: three supersteps, four checkpoints, none of them re-run.",
+  },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -258,8 +267,10 @@ function renderStages() {
   }
 
   if ($("stage-note")) {
-    $("stage-note").textContent = stageNow !== null
-      ? `${stageNow + 1} · ${STAGES[stageNow].caption}`
+    const stage = stageNow !== null ? STAGES[stageNow] : null;
+    const after = payload && payload.outcome === "restored" && stage && stage.after;
+    $("stage-note").textContent = stage
+      ? `${stageNow + 1} · ${after || stage.caption}`
       : "press play, or pick a stage: each one runs the engine to that point.";
   }
 
@@ -279,7 +290,12 @@ async function gotoStage(index) {
     for (const action of stage.actions) {
       if (action === "run") await apply(run(), true);
       else if (action === "rewrite") await apply(rewrite("double"), true);
-      else if (action.startsWith("answer:")) {
+      else if (action === "plug") {
+        stageNow = i;
+        await persist(true);
+        location.reload();
+        return;
+      } else if (action.startsWith("answer:")) {
         await apply(answer(action.slice("answer:".length)), true);
       }
     }
@@ -409,7 +425,7 @@ async function persist(pending = false) {
     const records = await dump();
     localStorage.setItem(
       STORE,
-      JSON.stringify({ scenario: payload.scenario, records, plug: pending }),
+      JSON.stringify({ scenario: payload.scenario, records, plug: pending, stage: stageNow }),
     );
   } catch {
     localStorage.removeItem(STORE);
@@ -432,10 +448,15 @@ async function boot() {
   try {
     const saved = localStorage.getItem(STORE);
     if (saved) {
-      const { scenario, records } = JSON.parse(saved);
+      const { scenario, records, plug, stage } = JSON.parse(saved);
       const list = JSON.parse(records);
       if (Array.isArray(list) && list.length > 0) {
         await apply(restore(scenario, records));
+        if (plug && typeof stage === "number") {
+          stageNow = stage;
+          seen.add(stage);
+          saveSeen();
+        }
         renderStages();
         return;
       }

@@ -395,8 +395,8 @@ node wrote before asking to stop is kept.
 ## Documentation
 
 The site is <https://moonbitstack.github.io/moonstate/>: an instrument that runs this library in
-the browser (a ring of the twenty-five supersteps a run may take, the checkpoints as notches, and
-a lever that reloads the tab mid-run), a guide that walks the same path the code does, and the
+the browser (a ring of the twenty-five supersteps a run may take, the checkpoints as notches, a demo
+that plays itself in six stages, and a last stage that reloads the tab mid-run), a guide that walks the same path the code does, and the
 reference generated from the interface files. Every block on the guide is the README's block,
 compiled by CI; every page follows the reader's light or dark setting, and the setting follows the
 system until the reader chooses one.
