@@ -4,55 +4,83 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Guide — moonstate</title>
-    <meta name="description" content="A first run, then checkpoints, interrupts, supersteps, the executor, a database and traces: the whole library in the order you meet it.">
+    <meta name="description" content="A first run, then checkpoints, questions, supersteps, the executor, a database and traces: the whole library in the order you meet it, every block compiled by CI.">
+    <meta name="theme-color" content="#f3f0e7">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/instrument.css">
     <link rel="stylesheet" href="assets/pages.css">
+    <script src="assets/theme.js"></script>
+    <script type="module" src="assets/pages.js"></script>
   </head>
   <body class="doc">
     <a class="skip" href="#start">Skip to the guide</a>
     <header class="top">
       <a class="mark" href="index.html">moonstate</a>
       <nav class="nav" aria-label="The library">
-        <a href="index.html">the instrument</a>
+        <a href="index.html">instrument</a>
         <a href="guide.html" aria-current="page">guide</a>
         <a href="api.html">api</a>
         <a href="playground.html">playground</a>
         <a href="https://github.com/moonbitstack/moonstate">github</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg data-icon="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3Z"></path>
+          </svg>
+          <svg data-icon="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>
+          </svg>
+          <span>theme</span>
+        </button>
       </nav>
     </header>
 
     <main class="guide" id="start">
-      <h1>A run, step by step</h1>
-      <p class="lede">
-        The library is a graph, a state, and a fold. Everything else — checkpoints, interrupts,
-        resume, fan-out, time travel — is one of those three being careful about something. This
-        page walks the same path the code does, and every block on it is compiled by CI.
-      </p>
+      <aside class="rail" aria-label="The sections of the guide">
+        <a href="#install"><span>01</span>install</a>
+        <a href="#state"><span>02</span>state and fold</a>
+        <a href="#checkpoints"><span>03</span>checkpoints</a>
+        <a href="#questions"><span>04</span>questions</a>
+        <a href="#supersteps"><span>05</span>supersteps</a>
+        <a href="#executor"><span>06</span>the executor</a>
+        <a href="#database"><span>07</span>a database</a>
+        <a href="#traces"><span>08</span>traces</a>
+      </aside>
 
-      <h2>Install</h2>
-      <p>
-        The engine depends on <code>moonbitlang/async</code> and nothing else. The two
-        subpackages are separate imports, so a reader who only wants the graph never downloads a
-        database driver or a tracing stack.
-      </p>
-      <pre class="cmd"><code>[dependencies]
-&quot;moonbitstack/moonstate&quot; = &quot;0.1.0&quot;
-&quot;moonbitlang/async&quot; = &quot;0.22.5&quot;</code></pre>
-      <pre class="sig"><code>import { &quot;moonbitstack/moonstate&quot; }</code></pre>
+      <article class="prose">
+        <h1>A run, step by step</h1>
+        <p class="lede">
+          The library is a graph, a state, and a fold. Everything else — checkpoints, questions,
+          resume, fan-out, time travel — is one of those three being careful about something. This
+          page walks the same path the code does, and every block on it is compiled and run by CI
+          against the source you are reading.
+        </p>
 
-      <h2>What the library needs from you</h2>
-      <p>
-        Two types: the state <code>S</code>, and the update <code>U</code> a node writes. One
-        function, <code>merge : (S, U) -> S</code>. Both types go through JSON, because a
-        checkpoint stores the state and an executor that ships a task elsewhere sends it as JSON.
-      </p>
-      <p>
-        A node returns steps, not a new state: <code>Write</code> folds an update,
-        <code>Goto</code> leaves the declared edges behind, <code>Send</code> queues a node with
-        its own input, <code>Interrupt</code> stops the run and waits.
-      </p>
-      <pre class="sig"><code>#derive(@json.ToJson, @json.FromJson)
+        <section id="install">
+          <h2><span class="num">01</span>Install</h2>
+          <p>
+            The engine depends on <code>moonbitlang/async</code> and nothing else. The two
+            subpackages are separate imports, so a reader who wants the graph never downloads a
+            database driver or a tracing stack.
+          </p>
+          <pre class="cmd"><code>moon add moonbitstack/moonstate</code></pre>
+          <pre class="sig"><code>import { "moonbitstack/moonstate" }</code></pre>
+        </section>
+
+        <section id="state">
+          <h2><span class="num">02</span>State and fold</h2>
+          <p>
+            Two types: the state <code>S</code>, and the update <code>U</code> a node writes. One
+            function, <code>merge : (S, U) -&gt; S</code>. Both go through JSON, because a
+            checkpoint stores the state, and an executor that ships a task elsewhere sends it as
+            JSON.
+          </p>
+          <p>
+            A node returns steps, not a new state. <code>Write</code> folds an update,
+            <code>Goto</code> leaves the declared edges behind, <code>Send</code> queues a node
+            with its own input, <code>Interrupt</code> stops the run and waits.
+          </p>
+          <pre class="sig"><code>#derive(@json.ToJson, @json.FromJson)
 struct Counter {
   n : Int32
   log : Array[String]
@@ -70,104 +98,121 @@ fn merge(state : Counter, patch : Patch) -&gt; Counter {
 
 async fn hello() -&gt; Counter raise {
   let graph = @moonstate.Builder::new(merge~, initial={ n: 0, log: [] })
-    .entry(&quot;seed&quot;)
-    .node(&quot;seed&quot;, (_state, _run) =&gt; {
-      [@moonstate.Write({ n: Some(1), log: Some([&quot;seed&quot;]) })]
+    .entry("seed")
+    .node("seed", (_state, _run) =&gt; {
+      [@moonstate.Write({ n: Some(1), log: Some(["seed"]) })]
     })
-    .node(&quot;double&quot;, (state, _run) =&gt; {
+    .node("double", (state, _run) =&gt; {
       [@moonstate.Write({ n: Some(state.n * 2), log: None })]
     })
-    .edge(&quot;seed&quot;, &quot;double&quot;)
-    .compile(&quot;hello&quot;)
+    .edge("seed", "double")
+    .compile("hello")
   graph.run({ n: None, log: None })
 }
 
-async test &quot;the first graph&quot; {
+async test "the first graph" {
   let out = hello() catch { error =&gt; abort((error : Error).to_string()) }
   assert_eq(out.n, 2)
-  assert_eq(out.log, [&quot;seed&quot;])
+  assert_eq(out.log, ["seed"])
 }</code></pre>
-      <p class="caption">The test is part of the page: it runs, and it asserts what the graph came out as.</p>
+          <p class="out"><span>out</span> <code>n = 2 · log = ["seed"]</code></p>
+          <p>
+            <code>compile</code> checks the structure before a run can happen: an edge to nowhere,
+            a node nothing reaches, a graph with no end, a node entered at run time that nobody
+            declared with <code>routed</code>. Those arrive as <code>Refused</code>, not as a
+            failure halfway through a run.
+          </p>
+        </section>
 
-      <h2>Checkpoints</h2>
-      <p>
-        Compile with a <code>Saver</code> and every superstep is written down before it runs. The
-        next run on the same thread opens the last checkpoint instead of starting over, which is
-        what makes a crash survivable and what makes a finished thread restartable.
-      </p>
-      <pre class="sig"><code>async fn durable() -&gt; Array[String] raise {
+        <section id="checkpoints">
+          <h2><span class="num">03</span>Checkpoints</h2>
+          <p>
+            Compile with a <code>Saver</code> and every superstep is written down before it runs.
+            The next run on the same thread opens the last checkpoint instead of starting over,
+            which is what makes a crash survivable and a finished thread restartable.
+          </p>
+          <pre class="sig"><code>async fn durable() -&gt; Array[String] raise {
   let saver = @moonstate.MemorySaver::new()
   let graph = @moonstate.Builder::new(merge~, initial={ n: 0, log: [] })
-    .entry(&quot;seed&quot;)
-    .node(&quot;seed&quot;, (_state, _run) =&gt; {
-      [@moonstate.Write({ n: Some(1), log: Some([&quot;seed&quot;]) })]
+    .entry("seed")
+    .node("seed", (_state, _run) =&gt; {
+      [@moonstate.Write({ n: Some(1), log: Some(["seed"]) })]
     })
-    .node(&quot;double&quot;, (state, _run) =&gt; {
+    .node("double", (state, _run) =&gt; {
       [@moonstate.Write({ n: Some(state.n * 2), log: None })]
     })
-    .edge(&quot;seed&quot;, &quot;double&quot;)
-    .compile(&quot;durable&quot;, saver=saver)
-  let _ = graph.run({ n: None, log: None }, thread=&quot;job&quot;)
-  let second = graph.run({ n: None, log: None }, thread=&quot;job&quot;)
-  let history = graph.history(&quot;job&quot;)
+    .edge("seed", "double")
+    .compile("durable", saver=saver)
+  let _ = graph.run({ n: None, log: None }, thread="job")
+  let second = graph.run({ n: None, log: None }, thread="job")
+  let history = graph.history("job")
   [second.n.to_string(), history.length().to_string(), history[2].id]
 }
 
-async test &quot;a finished thread starts a new turn&quot; {
+async test "a finished thread starts a new turn" {
   let out = durable() catch { error =&gt; abort((error : Error).to_string()) }
-  assert_eq(out, [&quot;2&quot;, &quot;6&quot;, &quot;cp-000002&quot;])
+  assert_eq(out, ["2", "6", "cp-000002"])
 }</code></pre>
-      <p>
-        <code>put_writes</code> records a task's result the moment it finishes, so a task that
-        completed is not run twice after a crash even when the rest of its superstep did not
-        survive. <code>state</code> is the thread now, <code>history</code> is every checkpoint it
-        went through, each naming the one it was written on top of.
-      </p>
+          <p class="out"><span>out</span> <code>["2", "6", "cp-000002"]</code> — the value, six checkpoints, the third one by id</p>
+          <p>
+            <code>put_writes</code> records a task's result the moment it finishes, so a task that
+            completed is not run twice after a crash even when the rest of its superstep did not
+            survive. <code>state</code> is the thread now; <code>history</code> is every checkpoint
+            it went through, each naming the one it was written on top of.
+          </p>
+          <p class="note">
+            A saver is an interface, not a table: <code>MemorySaver</code> is for tests,
+            <code>moonstate/sql</code> is for a database, and <code>src/sql/saver.mbt</code> is a
+            hundred lines to read if you want your own.
+          </p>
+        </section>
 
-      <h2>Interrupts</h2>
-      <p>
-        A question is not a callback and not a thread that blocks: the node returns
-        <code>Interrupt(payload)</code>, the run ends with <code>GraphError::Interrupted</code>,
-        and the payload is in the checkpoint. The answer arrives later, from anywhere, and the
-        node that asked runs again and reads it.
-      </p>
-      <pre class="sig"><code>async fn approve() -&gt; Int32 raise {
+        <section id="questions">
+          <h2><span class="num">04</span>Questions</h2>
+          <p>
+            A question is not a callback and not a thread that blocks. The node returns
+            <code>Interrupt(payload)</code>, the run ends with
+            <code>GraphError::Interrupted</code>, and the payload is in the checkpoint. The answer
+            arrives later, from anywhere, and the node that asked runs again and reads it.
+          </p>
+          <pre class="sig"><code>async fn approve() -&gt; Int32 raise {
   let graph = @moonstate.Builder::new(merge~, initial={ n: 0, log: [] })
-    .entry(&quot;approve&quot;)
-    .node(&quot;approve&quot;, (_state, run) =&gt; match run.answer() {
+    .entry("approve")
+    .node("approve", (_state, run) =&gt; match run.answer() {
       Some(answer) =&gt; {
         let decided : Int32 = @json.from_json(answer)
         [@moonstate.Write({ n: Some(decided), log: None })]
       }
-      None =&gt; [@moonstate.Interrupt({ &quot;ask&quot;: &quot;approve?&quot; })]
+      None =&gt; [@moonstate.Interrupt({ "ask": "approve?" })]
     })
-    .compile(&quot;approval&quot;, saver=@moonstate.MemorySaver::new())
+    .compile("approval", saver=@moonstate.MemorySaver::new())
   let stopped = try {
-    let _ = graph.run({ n: None, log: None }, thread=&quot;review&quot;)
-    &quot;finished&quot;
+    let _ = graph.run({ n: None, log: None }, thread="review")
+    "finished"
   } catch {
     @moonstate.GraphError::Interrupted(value~, ..) =&gt; value.stringify()
-    _ =&gt; abort(&quot;the run failed for another reason&quot;)
+    _ =&gt; abort("the run failed for another reason")
   }
-  assert_eq(stopped, &quot;{\&quot;ask\&quot;:\&quot;approve?\&quot;}&quot;)
-  let out = graph.resume_with(&quot;review&quot;, Json(7))
+  assert_eq(stopped, "{\"ask\":\"approve?\"}")
+  let out = graph.resume_with("review", Json(7))
   out.n
 }
 
-async test &quot;a question stops the run and the answer continues it&quot; {
+async test "a question stops the run and the answer continues it" {
   let out = approve() catch { error =&gt; abort((error : Error).to_string()) }
   assert_eq(out, 7)
 }</code></pre>
+          <p class="out"><span>stopped with</span> <code>{"ask":"approve?"}</code> <span>then answered</span> <code>n = 7</code></p>
+        </section>
 
-      <h2>Supersteps and the fan-out</h2>
-      <p>
-        A superstep runs the nodes that are queued, merges what they wrote in task order, then
-        decides what runs next. <code>Send</code> queues one node once per input; a
-        <code>join</code> holds a node until every upstream node ran in the same superstep. A
-        node entered at run time is declared with <code>routed</code>, or <code>compile</code>
-        refuses the graph as unreachable.
-      </p>
-      <pre class="sig"><code>#derive(@json.ToJson, @json.FromJson)
+        <section id="supersteps">
+          <h2><span class="num">05</span>Supersteps and the fan-out</h2>
+          <p>
+            A superstep runs the nodes that are queued, merges what they wrote in task order, then
+            decides what runs next. <code>Send</code> queues one node once per input; a
+            <code>join</code> holds a node until every upstream node has run in the same superstep.
+          </p>
+          <pre class="sig"><code>#derive(@json.ToJson, @json.FromJson)
 struct Report {
   parts : Array[Array[Int32]]
   total : Int32
@@ -184,41 +229,45 @@ fn report_merge(state : Report, part : Part) -&gt; Report {
 
 async fn fan_out() -&gt; Report raise {
   let graph = @moonstate.Builder::new(merge=report_merge, initial={ parts: [], total: 0 })
-    .entry(&quot;fan&quot;)
-    .node(&quot;fan&quot;, (state, _run) =&gt; {
+    .entry("fan")
+    .node("fan", (state, _run) =&gt; {
       let steps : Array[@moonstate.Step[Report, Part]] = []
       for index = 0; index &lt; 3; index = index + 1 {
-        steps.push(@moonstate.Send(&quot;shard&quot;, { parts: state.parts, total: index }))
+        steps.push(@moonstate.Send("shard", { parts: state.parts, total: index }))
       }
       steps
     })
-    .node(&quot;shard&quot;, (state, _run) =&gt; {
+    .node("shard", (state, _run) =&gt; {
       let steps : Array[@moonstate.Step[Report, Part]] = []
       steps.push(@moonstate.Write({ value: state.total * 10 }))
       steps
     })
-    .routed(&quot;shard&quot;)
-    .compile(&quot;fan&quot;)
+    .routed("shard")
+    .compile("fan")
   graph.run({ value: 0 })
 }
 
-async test &quot;one node, three inputs&quot; {
+async test "one node, three inputs" {
   let out = fan_out() catch { error =&gt; abort((error : Error).to_string()) }
   assert_eq(out.total, 30)
 }</code></pre>
-      <p>
-        The result does not depend on which task finished first: the engine folds the writes in
-        the order the tasks were queued. That is the whole reason merging is a function rather
-        than a set of field annotations.
-      </p>
+          <p class="out"><span>out</span> <code>total = 30</code>, four shards folded in the order they were queued</p>
+          <p>
+            The result does not depend on which task finished first: the engine folds the writes in
+            the order the tasks were queued. That is the whole reason merging is a function rather
+            than a set of field annotations.
+          </p>
+        </section>
 
-      <h2>Where the tasks run</h2>
-      <p>
-        An <code>Executor</code> decides where a superstep's tasks run. The default puts them all
-        in this process at the same time; an executor that ships them elsewhere finds the node by
-        name on the far side and returns the steps as JSON. A policy of your own is one method.
-      </p>
-      <pre class="sig"><code>struct OneAtATime {}
+        <section id="executor">
+          <h2><span class="num">06</span>The executor</h2>
+          <p>
+            An <code>Executor</code> decides where a superstep's tasks run. The default puts them
+            all in this process at the same time; an executor that ships them elsewhere finds the
+            node by name on the far side and returns the steps as JSON. A policy of your own is one
+            method.
+          </p>
+          <pre class="sig"><code>struct OneAtATime {}
 
 pub impl @moonstate.Executor for OneAtATime with fn each(_self, works) {
   let done : Array[@moonstate.Done] = []
@@ -237,32 +286,35 @@ pub impl @moonstate.Executor for OneAtATime with fn each(_self, works) {
   done
 }
 
-// The trait&#x27;s method is not promoted to a plain method of the type: call it
+// The trait's method is not promoted to a plain method of the type: call it
 // through the trait, which is what the engine does.
 pub extend OneAtATime with @moonstate.Executor::{each}
 
 async fn one_at_a_time() -&gt; Int32 raise {
   let graph = @moonstate.Builder::new(merge~, initial={ n: 0, log: [] })
-    .entry(&quot;seed&quot;)
-    .node(&quot;seed&quot;, (_state, _run) =&gt; [@moonstate.Write({ n: Some(5), log: None })])
-    .compile(&quot;serial&quot;, executor=OneAtATime::{})
+    .entry("seed")
+    .node("seed", (_state, _run) =&gt; [@moonstate.Write({ n: Some(5), log: None })])
+    .compile("serial", executor=OneAtATime::{})
   let out = graph.run({ n: None, log: None })
   out.n
 }
 
-async test &quot;an executor of one&#x27;s own&quot; {
+async test "an executor of one's own" {
   let out = one_at_a_time() catch { error =&gt; abort((error : Error).to_string()) }
   assert_eq(out, 5)
 }</code></pre>
+          <p class="out"><span>out</span> <code>n = 5</code>, one task at a time</p>
+        </section>
 
-      <h2>In a database</h2>
-      <p>
-        <code>moonbitstack/moonstate/sql</code> puts the saver and the store on any backend the
-        database seam speaks. SQLite, PostgreSQL and MySQL run the same code: the placeholders,
-        the upsert spelling and the indexes are written once against the dialect the driver
-        reports.
-      </p>
-      <pre class="sig"><code>async fn [T : @moondb.AsyncDriver] on_a_database(
+        <section id="database">
+          <h2><span class="num">07</span>A database</h2>
+          <p>
+            <code>moonbitstack/moonstate/sql</code> puts the saver and the store on any backend the
+            database seam speaks. SQLite, PostgreSQL and MySQL run the same code: the placeholders,
+            the upsert spelling and the indexes are written once against the dialect the driver
+            reports.
+          </p>
+          <pre class="sig"><code>async fn [T : @moondb.AsyncDriver] on_a_database(
   connection : T,
 ) -&gt; @moonstate.Graph[Counter, Patch] raise {
   let saver = @sql.saver(connection)
@@ -270,33 +322,39 @@ async test &quot;an executor of one&#x27;s own&quot; {
   // every start.
   saver.setup()
   @moonstate.Builder::new(merge~, initial={ n: 0, log: [] })
-    .entry(&quot;seed&quot;)
-    .node(&quot;seed&quot;, (_state, _run) =&gt; {
-      [@moonstate.Write({ n: Some(1), log: Some([&quot;seed&quot;]) })]
+    .entry("seed")
+    .node("seed", (_state, _run) =&gt; {
+      [@moonstate.Write({ n: Some(1), log: Some(["seed"]) })]
     })
-    .compile(&quot;on-a-database&quot;, saver=saver)
+    .compile("on-a-database", saver=saver)
 }</code></pre>
-      <p class="note">
-        One connection carries one saver and one store: a driver's connection carries one
-        exchange at a time. A blocking driver — SQLite's calls into C — goes in through
-        <code>@sql.blocking</code>.
-      </p>
+          <pre class="cmd"><code>// once, at startup
+@sql.saver(connection).setup()
+@sql.store(connection).setup()</code></pre>
+          <p class="note">
+            One connection carries one saver and one store: a driver's connection carries one
+            exchange at a time. A blocking driver — SQLite's calls into C — goes in through
+            <code>@sql.blocking</code>. A driver that does not report its dialect is told which one
+            to use: <code>@sql.saver(connection, dialect=@moondb.Dialect::Postgres)</code>.
+          </p>
+        </section>
 
-      <h2>Traces</h2>
-      <p>
-        <code>moonbitstack/moonstate/otel</code> wraps an executor so every superstep is a span
-        and every node a child of it, named with the GenAI semantic conventions. A trace follows
-        a thread from superstep to superstep, so a run is one trace however long it takes, and a
-        node span sits under the superstep that ran it.
-      </p>
-      <pre class="sig"><code>fn clock() -&gt; Int64 {
+        <section id="traces">
+          <h2><span class="num">08</span>Traces</h2>
+          <p>
+            <code>moonbitstack/moonstate/otel</code> wraps an executor so every superstep is a span
+            and every node a child of it, named with the GenAI semantic conventions. A trace
+            follows a thread from superstep to superstep, so a run is one trace however long it
+            takes, and a node span sits under the superstep that ran it.
+          </p>
+          <pre class="sig"><code>fn clock() -&gt; Int64 {
   @env.now().reinterpret_as_int64() * 1_000_000L
 }
 
 fn random_bytes(width : Int32) -&gt; Bytes {
   match @env.rand(width) {
     Some(bytes) =&gt; bytes
-    None =&gt; abort(&quot;the platform has no entropy source&quot;)
+    None =&gt; abort("the platform has no entropy source")
   }
 }
 
@@ -309,35 +367,46 @@ async fn traced_run() -&gt; Array[String] raise {
   )
   let executor = @otel.traced(@moonstate.inline, tracer~, now=clock)
   let graph = @moonstate.Builder::new(merge~, initial={ n: 0, log: [] })
-    .entry(&quot;seed&quot;)
-    .node(&quot;seed&quot;, (_state, _run) =&gt; [@moonstate.Write({ n: Some(2), log: None })])
-    .compile(&quot;traced&quot;, executor=executor)
+    .entry("seed")
+    .node("seed", (_state, _run) =&gt; [@moonstate.Write({ n: Some(2), log: None })])
+    .compile("traced", executor=executor)
   let _ = graph.run({ n: None, log: None })
   spans.spans().map(span =&gt; span.name)
 }
 
-async test &quot;a run is a tree of spans&quot; {
+async test "a run is a tree of spans" {
   let names = traced_run() catch { error =&gt; abort((error : Error).to_string()) }
-  assert_eq(names, [&quot;seed&quot;, &quot;superstep 0&quot;])
+  assert_eq(names, ["seed", "superstep 0"])
 }</code></pre>
+          <p class="out"><span>span names</span> <code>["seed", "superstep 0"]</code></p>
+          <p class="note">
+            <code>now</code> is required, the way moontel's own layer requires it: a library that
+            reads a clock cannot be replayed. The live check in CI sends these spans to
+            <code>weaver registry live-check</code>, and a name this library invented would fail
+            the job.
+          </p>
+        </section>
 
-      <h2>What is not on this page</h2>
-      <p>
-        <code>join</code>, <code>branch</code>, <code>subgraph</code>, retries, cancellation and
-        the functional form are in the README, with the same guarantee: its blocks compile and
-        its asserted values were produced by running them. The reference lists every public item
-        of the three packages.
-      </p>
-      <ul>
-        <li><a href="https://github.com/moonbitstack/moonstate#readme">the README</a></li>
-        <li><a href="api.html">the reference</a></li>
-        <li><a href="playground.html">the playground</a></li>
-      </ul>
-
-      <footer class="foot">
-        <span>moonbitstack/moonstate</span>
-        <a href="https://github.com/moonbitstack/moonstate">the repository</a>
-      </footer>
+        <section class="next-up">
+          <h2><span class="num">→</span>What is not on this page</h2>
+          <p>
+            <code>join</code>, <code>branch</code>, subgraphs, retries, cancellation and the
+            functional form are in the README, with the same promise: its blocks compile and its
+            asserted values were produced by running them. The reference lists every public item of
+            the three packages.
+          </p>
+          <ul class="links">
+            <li><a href="api.html"><span>the reference</span></a></li>
+            <li><a href="playground.html"><span>the playground</span></a></li>
+            <li><a href="https://github.com/moonbitstack/moonstate#readme"><span>the README</span></a></li>
+          </ul>
+        </section>
+      </article>
     </main>
+
+    <footer class="foot">
+      <span>moonbitstack/moonstate</span>
+      <a href="https://github.com/moonbitstack/moonstate">the repository</a>
+    </footer>
   </body>
 </html>

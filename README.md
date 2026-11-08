@@ -392,6 +392,15 @@ run stops to ask. `run` is `stream` without a listener.
 Cancelling stops the thread at the next superstep boundary, never inside a node, so what a
 node wrote before asking to stop is kept.
 
+## Documentation
+
+The site is <https://moonbitstack.github.io/moonstate/>: an instrument that runs this library in
+the browser (a ring of the twenty-five supersteps a run may take, the checkpoints as notches, and
+a lever that reloads the tab mid-run), a guide that walks the same path the code does, and the
+reference generated from the interface files. Every block on the guide is the README's block,
+compiled by CI; every page follows the reader's light or dark setting, and the setting follows the
+system until the reader chooses one.
+
 ## API
 
 | Item | Purpose |

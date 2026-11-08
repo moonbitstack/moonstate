@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guide — moonstate</title>
+    <meta name="description" content="A first run, then checkpoints, questions, supersteps, the executor, a database and traces: the whole library in the order you meet it, every block compiled by CI.">
+    <meta name="theme-color" content="#f3f0e7">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/instrument.css">
+    <link rel="stylesheet" href="assets/pages.css">
+    <script src="assets/theme.js"></script>
+    <script type="module" src="assets/pages.js"></script>
+  </head>
+  <body class="doc">
+    <a class="skip" href="#start">Skip to the guide</a>
+    <header class="top">
+      <a class="mark" href="index.html">moonstate</a>
+      <nav class="nav" aria-label="The library">
+        <a href="index.html">instrument</a>
+        <a href="guide.html" aria-current="page">guide</a>
+        <a href="api.html">api</a>
+        <a href="playground.html">playground</a>
+        <a href="https://github.com/moonbitstack/moonstate">github</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg data-icon="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3Z"></path>
+          </svg>
+          <svg data-icon="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>
+          </svg>
+          <span>theme</span>
+        </button>
+      </nav>
+    </header>
+
+    <main class="guide" id="start">
+      <aside class="rail" aria-label="The sections of the guide">
+        <a href="#install"><span>01</span>install</a>
+        <a href="#state"><span>02</span>state and fold</a>
+        <a href="#checkpoints"><span>03</span>checkpoints</a>
+        <a href="#questions"><span>04</span>questions</a>
+        <a href="#supersteps"><span>05</span>supersteps</a>
+        <a href="#executor"><span>06</span>the executor</a>
+        <a href="#database"><span>07</span>a database</a>
+        <a href="#traces"><span>08</span>traces</a>
+      </aside>
+
+      <article class="prose">
+        <h1>A run, step by step</h1>
+        <p class="lede">
+          The library is a graph, a state, and a fold. Everything else — checkpoints, questions,
+          resume, fan-out, time travel — is one of those three being careful about something. This
+          page walks the same path the code does, and every block on it is compiled and run by CI
+          against the source you are reading.
+        </p>
+
+        <section id="install">
+          <h2><span class="num">01</span>Install</h2>
+          <p>
+            The engine depends on <code>moonbitlang/async</code> and nothing else. The two
+            subpackages are separate imports, so a reader who wants the graph never downloads a
+            database driver or a tracing stack.
+          </p>
+          <pre class="cmd"><code>moon add moonbitstack/moonstate</code></pre>
+          <!-- code:1 -->
+        </section>
+
+        <section id="state">
+          <h2><span class="num">02</span>State and fold</h2>
+          <p>
+            Two types: the state <code>S</code>, and the update <code>U</code> a node writes. One
+            function, <code>merge : (S, U) -&gt; S</code>. Both go through JSON, because a
+            checkpoint stores the state, and an executor that ships a task elsewhere sends it as
+            JSON.
+          </p>
+          <p>
+            A node returns steps, not a new state. <code>Write</code> folds an update,
+            <code>Goto</code> leaves the declared edges behind, <code>Send</code> queues a node
+            with its own input, <code>Interrupt</code> stops the run and waits.
+          </p>
+          <!-- code:0 -->
+          <p class="out"><span>out</span> <code>n = 2 · log = ["seed"]</code></p>
+          <p>
+            <code>compile</code> checks the structure before a run can happen: an edge to nowhere,
+            a node nothing reaches, a graph with no end, a node entered at run time that nobody
+            declared with <code>routed</code>. Those arrive as <code>Refused</code>, not as a
+            failure halfway through a run.
+          </p>
+        </section>
+
+        <section id="checkpoints">
+          <h2><span class="num">03</span>Checkpoints</h2>
+          <p>
+            Compile with a <code>Saver</code> and every superstep is written down before it runs.
+            The next run on the same thread opens the last checkpoint instead of starting over,
+            which is what makes a crash survivable and a finished thread restartable.
+          </p>
+          <!-- code:3 -->
+          <p class="out"><span>out</span> <code>["2", "6", "cp-000002"]</code> — the value, six checkpoints, the third one by id</p>
+          <p>
+            <code>put_writes</code> records a task's result the moment it finishes, so a task that
+            completed is not run twice after a crash even when the rest of its superstep did not
+            survive. <code>state</code> is the thread now; <code>history</code> is every checkpoint
+            it went through, each naming the one it was written on top of.
+          </p>
+          <p class="note">
+            A saver is an interface, not a table: <code>MemorySaver</code> is for tests,
+            <code>moonstate/sql</code> is for a database, and <code>src/sql/saver.mbt</code> is a
+            hundred lines to read if you want your own.
+          </p>
+        </section>
+
+        <section id="questions">
+          <h2><span class="num">04</span>Questions</h2>
+          <p>
+            A question is not a callback and not a thread that blocks. The node returns
+            <code>Interrupt(payload)</code>, the run ends with
+            <code>GraphError::Interrupted</code>, and the payload is in the checkpoint. The answer
+            arrives later, from anywhere, and the node that asked runs again and reads it.
+          </p>
+          <!-- code:5 -->
+          <p class="out"><span>stopped with</span> <code>{"ask":"approve?"}</code> <span>then answered</span> <code>n = 7</code></p>
+        </section>
+
+        <section id="supersteps">
+          <h2><span class="num">05</span>Supersteps and the fan-out</h2>
+          <p>
+            A superstep runs the nodes that are queued, merges what they wrote in task order, then
+            decides what runs next. <code>Send</code> queues one node once per input; a
+            <code>join</code> holds a node until every upstream node has run in the same superstep.
+          </p>
+          <!-- code:2 -->
+          <p class="out"><span>out</span> <code>total = 30</code>, four shards folded in the order they were queued</p>
+          <p>
+            The result does not depend on which task finished first: the engine folds the writes in
+            the order the tasks were queued. That is the whole reason merging is a function rather
+            than a set of field annotations.
+          </p>
+        </section>
+
+        <section id="executor">
+          <h2><span class="num">06</span>The executor</h2>
+          <p>
+            An <code>Executor</code> decides where a superstep's tasks run. The default puts them
+            all in this process at the same time; an executor that ships them elsewhere finds the
+            node by name on the far side and returns the steps as JSON. A policy of your own is one
+            method.
+          </p>
+          <!-- code:6 -->
+          <p class="out"><span>out</span> <code>n = 5</code>, one task at a time</p>
+        </section>
+
+        <section id="database">
+          <h2><span class="num">07</span>A database</h2>
+          <p>
+            <code>moonbitstack/moonstate/sql</code> puts the saver and the store on any backend the
+            database seam speaks. SQLite, PostgreSQL and MySQL run the same code: the placeholders,
+            the upsert spelling and the indexes are written once against the dialect the driver
+            reports.
+          </p>
+          <!-- code:4 -->
+          <pre class="cmd"><code>// once, at startup
+@sql.saver(connection).setup()
+@sql.store(connection).setup()</code></pre>
+          <p class="note">
+            One connection carries one saver and one store: a driver's connection carries one
+            exchange at a time. A blocking driver — SQLite's calls into C — goes in through
+            <code>@sql.blocking</code>. A driver that does not report its dialect is told which one
+            to use: <code>@sql.saver(connection, dialect=@moondb.Dialect::Postgres)</code>.
+          </p>
+        </section>
+
+        <section id="traces">
+          <h2><span class="num">08</span>Traces</h2>
+          <p>
+            <code>moonbitstack/moonstate/otel</code> wraps an executor so every superstep is a span
+            and every node a child of it, named with the GenAI semantic conventions. A trace
+            follows a thread from superstep to superstep, so a run is one trace however long it
+            takes, and a node span sits under the superstep that ran it.
+          </p>
+          <!-- code:7 -->
+          <p class="out"><span>span names</span> <code>["seed", "superstep 0"]</code></p>
+          <p class="note">
+            <code>now</code> is required, the way moontel's own layer requires it: a library that
+            reads a clock cannot be replayed. The live check in CI sends these spans to
+            <code>weaver registry live-check</code>, and a name this library invented would fail
+            the job.
+          </p>
+        </section>
+
+        <section class="next-up">
+          <h2><span class="num">→</span>What is not on this page</h2>
+          <p>
+            <code>join</code>, <code>branch</code>, subgraphs, retries, cancellation and the
+            functional form are in the README, with the same promise: its blocks compile and its
+            asserted values were produced by running them. The reference lists every public item of
+            the three packages.
+          </p>
+          <ul class="links">
+            <li><a href="api.html"><span>the reference</span></a></li>
+            <li><a href="playground.html"><span>the playground</span></a></li>
+            <li><a href="https://github.com/moonbitstack/moonstate#readme"><span>the README</span></a></li>
+          </ul>
+        </section>
+      </article>
+    </main>
+
+    <footer class="foot">
+      <span>moonbitstack/moonstate</span>
+      <a href="https://github.com/moonbitstack/moonstate">the repository</a>
+    </footer>
+  </body>
+</html>

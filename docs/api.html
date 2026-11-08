@@ -8,22 +8,38 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/instrument.css">
     <link rel="stylesheet" href="assets/pages.css">
+    <script src="assets/theme.js"></script>
+    <script type="module" src="assets/pages.js"></script>
   </head>
   <body class="doc">
     <a class="skip" href="#entries">Skip to the reference</a>
     <header class="top">
       <a class="mark" href="index.html">moonstate</a>
       <nav class="nav" aria-label="The library">
-        <a href="index.html">the instrument</a>
+        <a href="index.html">instrument</a>
         <a href="guide.html">guide</a>
         <a href="api.html" aria-current="page">api</a>
         <a href="playground.html">playground</a>
         <a href="https://github.com/moonbitstack/moonstate">github</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg data-icon="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3Z"></path>
+          </svg>
+          <svg data-icon="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>
+          </svg>
+          <span>theme</span>
+        </button>
       </nav>
     </header>
 
     <main class="reference">
       <aside class="rail" aria-label="Packages and items">
+        <div class="filter-box">
+          <input id="filter" class="filter" type="search" placeholder="filter" aria-label="Filter the reference" spellcheck="false">
+          <span class="filter-count" id="filter-count"></span>
+        </div>
         <div class="group"><b>moonstate</b>
 <a href="#moonstate-grapherror">GraphError</a>
 <a href="#moonstate-refused">Refused</a>
@@ -70,8 +86,8 @@
         <h1>The reference</h1>
         <p class="note">
           Every public item of the three packages, read from each package's interface file and
-          from the doc comments beside the code. Nothing here is written by hand, and a stale
-          page fails the build.
+          from the doc comments beside the code. Nothing here is written by hand, and a stale page
+          fails the build. Press <kbd>/</kbd> to filter.
         </p>
         <section id="moonstate-top"><h2><span class="pkg">moonstate</span></h2><p>The graph, its builder, the steps a node returns, the two contracts a store or a saver implements, and the in-memory implementations that ship with them.</p>
 <article id="moonstate-grapherror"><h3><span class="kind">suberror</span> GraphError</h3>

@@ -42,8 +42,13 @@ jobs:
           mkdir -p docs/engine
           cp _build/js/release/build/examples/browser/browser.js docs/engine/moonstate.js
 
-      - name: the reference matches the sources
-        run: python3 scripts/gen_api.py --check
+      # Every page is generated or checked here, so a page cannot disagree with
+      # the code that it describes.
+      - name: the pages match the sources
+        run: |
+          python3 scripts/gen_api.py --check
+          python3 scripts/gen_guide.py --check
+          python3 scripts/gen_numbers.py --check
 
       - name: the code on the pages compiles
         run: python3 scripts/check_snippets.py docs/guide.html

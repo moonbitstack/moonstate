@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>moonstate — durable state graphs for MoonBit</title>
-    <meta name="description" content="A run is a sequence of supersteps. Every superstep is a checkpoint. This page runs the library in your browser: run it, stop it at a question, reload the tab, and it carries on.">
+    <meta name="description" content="A run is a sequence of supersteps, and every superstep is a checkpoint. This page runs the library in your browser: run it, stop it at a question, reload the tab, and it carries on.">
+    <meta name="theme-color" content="#f3f0e7">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/instrument.css">
+    <script src="assets/theme.js"></script>
     <script type="module" src="assets/instrument.js"></script>
   </head>
   <body>
@@ -15,34 +17,54 @@
     <header class="top">
       <a class="mark" href="index.html">moonstate</a>
       <nav class="nav" aria-label="The library">
-        <a href="index.html" aria-current="page">the instrument</a>
+        <a href="index.html" aria-current="page">instrument</a>
         <a href="guide.html">guide</a>
         <a href="api.html">api</a>
         <a href="playground.html">playground</a>
         <a href="https://github.com/moonbitstack/moonstate">github</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg data-icon="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3Z"></path>
+          </svg>
+          <svg data-icon="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>
+          </svg>
+          <span>theme</span>
+        </button>
       </nav>
     </header>
 
     <main class="page">
       <section class="stage" aria-label="The instrument">
         <div class="instrument">
-          <svg id="ring" viewBox="0 0 520 520" role="img" aria-labelledby="ring-title ring-desc">
+          <svg id="ring" viewBox="10 10 500 500" role="img" aria-labelledby="ring-title ring-desc">
             <title id="ring-title">The phase ring of a run</title>
-            <desc id="ring-desc">A ring of twenty-five phases. The arc shows how many supersteps have run and marks where the checkpoints are.</desc>
+            <desc id="ring-desc">A ring of twenty-five phases. The arc is the supersteps that ran, the notches are the checkpoints they left, and the faint ticks are the supersteps the run did not need.</desc>
             <circle class="rim" cx="260" cy="260" r="200"></circle>
             <circle class="rim-inner" cx="260" cy="260" r="150"></circle>
             <g id="ticks"></g>
             <path id="arc" class="arc" d=""></path>
             <g id="notches"></g>
+            <g id="cap"></g>
           </svg>
 
           <div class="readout" aria-live="polite">
-            <p class="phase"><span id="phase">0</span><span class="of">/<span id="limit">25</span></span></p>
-            <p class="verdict" id="verdict">a fresh run</p>
+            <p class="count"><span id="phase">0</span><span class="unit">supersteps</span></p>
+            <p class="verdict" id="verdict">loading the engine</p>
             <p class="state" id="state" data-empty="true">{ }</p>
-            <p class="meta"><span id="next-nodes">—</span> <span class="dot">·</span> <span id="checkpoint">no checkpoint</span></p>
+            <p class="meta">
+              <span id="next-nodes">—</span><span class="dot">·</span><span id="checkpoint">no checkpoint</span>
+            </p>
+            <p class="budget">limit <span id="limit">25</span></p>
           </div>
         </div>
+
+        <p class="legend" aria-hidden="true">
+          <span><i></i> a superstep that ran</span>
+          <span><i class="k-notch"></i> a checkpoint</span>
+          <span><i class="k-tick"></i> a phase the run may take</span>
+        </p>
 
         <form class="controls" id="controls" autocomplete="off">
           <div class="chips" role="group" aria-label="The graph">
@@ -50,6 +72,8 @@
             <button type="button" class="chip" data-scenario="review">a question</button>
             <button type="button" class="chip" data-scenario="fanout">a fan-out</button>
           </div>
+
+          <p class="hint" id="hint">three nodes in a row: seed → double → stamp.</p>
 
           <div class="acts">
             <button type="button" class="act act-run" id="run">Run</button>
@@ -63,61 +87,86 @@
             <button type="submit" class="act" id="reply">Answer</button>
           </div>
 
-          <p class="lever-line">
-            <button type="button" class="lever" id="pull">Pull the plug</button>
-            <span>the tab reloads; the run does not start over.</span>
-          </p>
+          <ol class="moves" aria-label="Three things to try">
+            <li data-move="run">
+              <span class="n">1</span>
+              <button type="button" data-do="run">run it</button>
+            </li>
+            <li data-move="ask">
+              <span class="n">2</span>
+              <button type="button" data-do="ask">stop it at a question</button>
+            </li>
+            <li data-move="plug">
+              <span class="n">3</span>
+              <button type="button" data-do="plug">pull the plug</button>
+            </li>
+          </ol>
         </form>
       </section>
 
       <div class="plates" id="plates">
         <section class="plate" id="what">
+          <span class="index">01 · the shape of a run</span>
           <h1>Durable state graphs, and nothing else</h1>
           <p class="lede">
             A run is a sequence of supersteps. In each one a set of nodes runs, each returns the
             updates it wants applied, and the updates fold into the state in task order. Before
             every superstep is written a checkpoint. When a process dies, the next run opens the
-            last checkpoint and continues; when a node asks a question, the run stops and waits.
+            last checkpoint and carries on; when a node asks a question, the run stops and waits.
           </p>
           <p>
-            The ring is that run. Its phases are the supersteps the graph may take — twenty-five
-            of them by default. The arc is the supersteps that ran; the notches are the
-            checkpoints they left. Everything on this page is the library, compiled to
-            JavaScript and running in your tab: the state, the checkpoint ids and the numbers are
-            read from it, not drawn by the page.
+            The ring is that run. A run may take twenty-five supersteps — that number is the
+            engine's default limit, and a run that reaches it stops with its place kept. The arc
+            is the supersteps this one used; the notches are the checkpoints they left. Every
+            number on this page is read back from the engine, which is this library compiled to
+            JavaScript and running in your tab.
           </p>
+
+          <!-- numbers:start -->
+          <div class="numbers">
+            <div><b>0.1.0</b><span>the version</span></div>
+            <div><b>25</b><span>supersteps a run may take</span></div>
+            <div><b>24</b><span>graphs compared with LangGraph</span></div>
+            <div><b>88</b><span>checkpoints compared, one by one</span></div>
+          </div>
+          <!-- numbers:end -->
+
           <p class="aside">
-            Nothing here is a recording. Press <em>Run</em>, then press <em>Pull the plug</em> at
-            any stop: the tab reloads, and the run is where you left it, because the checkpoint
-            is a record and this page keeps the records.
+            Nothing here is a recording. Pick <em>a question</em>, answer it, then press
+            <em>pull the plug</em>: the tab reloads, and the run is where you left it, because the
+            checkpoint is a record and this page keeps the records.
           </p>
         </section>
 
         <section class="plate" id="ledger-plate">
-          <h2>Every stop is a checkpoint</h2>
+          <span class="index">02 · every stop is a checkpoint</span>
+          <h2>The history is the run</h2>
           <p>
-            A checkpoint is the state as merged, the tasks the next superstep will run, and
+            A checkpoint holds the state as merged, the tasks the next superstep will run, and
             whether the run is waiting on an answer. Pick one below to read it — that is the
-            history the saver hands back, newest last.
+            history the saver hands back, oldest first, and the ring's notches are the same
+            records.
           </p>
           <ol class="ledger" id="ledger" tabindex="0" aria-label="The checkpoints of this run"></ol>
         </section>
 
         <section class="plate" id="question">
+          <span class="index">03 · a question is a stop</span>
           <h2>A question is a stop, not a callback</h2>
           <p>
             A node returns <code>Interrupt(payload)</code> and the run ends there, with the
-            payload in the checkpoint. Nothing is held in memory: the answer arrives later, from
-            anywhere, and the node that asked runs again and reads it.
+            payload written into the checkpoint. Nothing is held in memory: the answer arrives
+            later, from anywhere, and the node that asked runs again and reads it.
           </p>
           <p>
-            Switch to <em>a question</em> and press <em>Run</em>. The ring stops one phase in,
-            the arc goes dark, and a number is wanted. Answer it — then answer it after a reload,
-            which is the same path a server takes after a restart.
+            Move 2 switches to <em>a question</em> and runs it. The ring stops partway, the arc
+            goes dark, and a number is wanted. Answer it — then answer it after a reload, which is
+            the same path a server takes after a restart.
           </p>
         </section>
 
         <section class="plate" id="fold">
+          <span class="index">04 · one superstep, three writes</span>
           <h2>Three writes, one fold</h2>
           <p>
             <code>Send</code> queues a node once per input, and the three of them run in one
@@ -128,11 +177,12 @@
         </section>
 
         <section class="plate" id="rewrite-plate">
-          <h2>Time travel is a write</h2>
+          <span class="index">05 · time travel is a write</span>
+          <h2>A finished thread can be taken back</h2>
           <p>
-            A finished thread can be taken back: <code>update</code> writes a state as if a node
-            had produced it, then the run continues from what follows that node. The checkpoints
-            of the abandoned attempt stay in the history — the ring keeps both arcs.
+            <code>update</code> writes a state as if a node had produced it, then the run
+            continues from what follows that node. The checkpoints of the abandoned attempt stay
+            in the history, so the ring keeps both arcs and the ledger keeps both records.
           </p>
           <p>
             On <em>a line</em>, run it to the end and press <em>Rewrite the tail</em>.
@@ -140,25 +190,20 @@
         </section>
 
         <section class="plate" id="reading">
-          <h2>What to read next</h2>
-          <p>
-            The README carries the whole surface: the builder, the four steps a node returns, the
-            two contracts a store or a saver implements, the SQL subpackage that keeps
-            checkpoints in SQLite, PostgreSQL or MySQL, and the traced executor that turns each
-            superstep into a span.
-          </p>
+          <span class="index">06 · read next</span>
+          <h2>Where the rest of it is</h2>
           <ul class="links">
-            <li><a href="guide.html">the guide, in the order you meet it</a></li>
-            <li><a href="api.html">the reference, every public item</a></li>
-            <li><a href="playground.html">the playground, for the scrub</a></li>
-            <li><a href="https://github.com/moonbitstack/moonstate#readme">The README</a></li>
-            <li><a href="https://github.com/moonbitstack/moonstate/tree/master/src/sql">the sql subpackage</a></li>
-            <li><a href="https://github.com/moonbitstack/moonstate/tree/master/src/otel">the otel subpackage</a></li>
-            <li><a href="https://github.com/moonbitstack/moonstate/tree/master/integration">four backends, one transcript</a></li>
-            <li><a href="https://mooncakes.io/docs/moonbitstack/moonstate">the package</a></li>
+            <li><a href="guide.html"><span>the guide, in the order you meet it</span></a></li>
+            <li><a href="api.html"><span>the reference, every public item</span></a></li>
+            <li><a href="playground.html"><span>the playground, for the record itself</span></a></li>
+            <li><a href="https://github.com/moonbitstack/moonstate#readme"><span>the README</span></a></li>
+            <li><a href="https://github.com/moonbitstack/moonstate/tree/master/src/sql"><span>the sql subpackage</span></a></li>
+            <li><a href="https://github.com/moonbitstack/moonstate/tree/master/src/otel"><span>the otel subpackage</span></a></li>
+            <li><a href="https://mooncakes.io/docs/moonbitstack/moonstate"><span>the package</span></a></li>
           </ul>
           <p class="colophon">
-            Set in the system serif and mono faces. One accent, taken from the moon.
+            Set in the system serif and mono faces, drawn in SVG, run by the library it describes.
+            <br>moonbitstack/moonstate · Apache-2.0 · one accent, taken from the moon.
           </p>
         </section>
       </div>

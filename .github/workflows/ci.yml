@@ -77,9 +77,12 @@ jobs:
         if: runner.os == 'Linux'
         run: python3 scripts/check_snippets.py
 
-      - name: the reference matches the sources
+      - name: the pages match the sources
         if: runner.os == 'Linux'
-        run: python3 scripts/gen_api.py --check
+        run: |
+          python3 scripts/gen_api.py --check
+          python3 scripts/gen_guide.py --check
+          python3 scripts/gen_numbers.py --check
 
   vectors:
     name: differential vectors match the reference
