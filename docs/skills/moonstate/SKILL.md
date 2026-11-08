@@ -28,7 +28,7 @@ checkpoint stores the state and an executor that ships a task elsewhere sends it
 ```moonbit
 #derive(@json.ToJson, @json.FromJson)
 struct Counter {
-  n : Int
+  n : Int32
   log : Array[String]
 }
 
@@ -38,7 +38,7 @@ pub extend Counter with @json.FromJson::{from_json}
 
 #derive(@json.ToJson, @json.FromJson)
 struct Patch {
-  n : Int?
+  n : Int32?
   log : Array[String]?
 }
 
@@ -55,12 +55,20 @@ A node returns steps, not a new state: `Write(U)`, `Goto(node)`, `Send(node, S)`
 `Interrupt(Json)`.
 
 ```moonbit
-let graph = @moonstate.Builder::new(merge=merge, initial={ n: 0, log: [] })
-  .entry("seed")
-  .node("seed", (_state, _run) => [@moonstate.Write({ n: Some(1), log: Some(["seed"]) })])
-  .node("double", (state, _run) => [@moonstate.Write({ n: Some(state.n * 2), log: None })])
-  .edge("seed", "double")
-  .compile("hello")
+async test "the graph runs" {
+  let hello = @moonstate.Builder::new(merge=merge, initial={ n: 0, log: [] })
+    .entry("seed")
+    .node("seed", (_state, _run) => {
+      [@moonstate.Write({ n: Some(1), log: Some(["seed"]) })]
+    })
+    .node("double", (state, _run) => {
+      [@moonstate.Write({ n: Some(state.n * 2), log: None })]
+    })
+    .edge("seed", "double")
+    .compile("hello") catch { error => abort((error : Error).to_string()) }
+  let out = hello.run({ n: None, log: None }) catch { error => abort((error : Error).to_string()) }
+  assert_eq(out.n, 2)
+}
 ```
 
 ## Durable runs
@@ -69,34 +77,70 @@ Compile with a `Saver`, pass a `thread` to `run`, and a second `run` on the same
 continues from the last checkpoint instead of starting over.
 
 ```moonbit
-let saver = @moonstate.MemorySaver::new()
-let graph = build(saver)
-let _ = graph.run(input, thread="job")      // dies halfway
-let out = graph.run(input, thread="job")    // continues where it stopped
+async test "a thread outlives the call that started it" {
+  let saver = @moonstate.MemorySaver::new()
+  let durable = @moonstate.Builder::new(merge=merge, initial={ n: 0, log: [] })
+    .entry("seed")
+    .node("seed", (_state, _run) => [@moonstate.Write({ n: Some(1), log: None })])
+    .compile("durable", saver=saver) catch { error => abort((error : Error).to_string()) }
+  let _ = durable.run({ n: None, log: None }, thread="job") catch {
+    error => abort((error : Error).to_string())
+  }
+  let again = durable.run({ n: None, log: None }, thread="job") catch {
+    error => abort((error : Error).to_string())
+  }
+  assert_eq(again.n, 1)
+  let history = durable.history("job") catch { error => abort((error : Error).to_string()) }
+  assert_eq(history.length(), 4)
+}
 ```
 
 The same handles also cover the rest of a durable workflow:
 
 - `graph.state("job")` — the thread as it stands, and `graph.history("job")` — every
-  checkpoint it took.
+  checkpoint it took, oldest first, each naming the one it was written on top of.
 - `graph.update("job", patch, as_node="double")` — rewrite the latest state as if that node
   had written it, then run what follows it.
 - `graph.resume_with("job", answer)` — continue a thread whose node returned `Interrupt`.
 
-`MemorySaver` keeps checkpoints in the process. For anything that has to outlive the
-process, implement `Saver`: five methods over records of JSON.
+`MemorySaver` keeps checkpoints in the process. `moonbitstack/moonstate/sql` puts them in
+SQLite, PostgreSQL or MySQL: `@sql.saver(connection)` and `@sql.store(connection)`, with
+`setup()` to create the tables. One connection carries one saver and one store; a blocking
+driver goes in through `@sql.blocking(connection)`.
 
 ## Interrupts
 
-```moonbit
-.node("approve", (_state, run) => match run.answer() {
-  Some(answer) => [@moonstate.Write({ approved: Some(@json.from_json(answer)), text: None })],
-  None => [@moonstate.Interrupt({ "ask": "approve?" })],
-})
-```
+The node that asks returns `Interrupt`; the run raises `GraphError::Interrupted`; the answer
+arrives through `run.answer()` when the thread is resumed, and the node runs again.
 
-`run` ends with `GraphError::Interrupted`; `resume_with` runs the node again, and the answer
-comes back through `run.answer()`.
+```moonbit
+async test "the answer continues the thread" {
+  let approval = @moonstate.Builder::new(merge=merge, initial={ n: 0, log: [] })
+    .entry("approve")
+    .node("approve", (_state, run) => match run.answer() {
+      Some(answer) => {
+        let decided : Int32 = @json.from_json(answer)
+        [@moonstate.Write({ n: Some(decided), log: None })]
+      }
+      None => [@moonstate.Interrupt({ "ask": "approve?" })]
+    })
+    .compile("approval", saver=@moonstate.MemorySaver::new()) catch {
+      error => abort((error : Error).to_string())
+    }
+  let asked = try {
+    let _ = approval.run({ n: None, log: None }, thread="review")
+    false
+  } catch {
+    @moonstate.GraphError::Interrupted(..) => true
+    _ => abort("the run failed for another reason")
+  }
+  assert_true(asked)
+  let out = approval.resume_with("review", Json(7)) catch {
+    error => abort((error : Error).to_string())
+  }
+  assert_eq(out.n, 7)
+}
+```
 
 ## Fan-out
 
@@ -105,15 +149,81 @@ they were queued. A node entered only by `Send` has to be declared with `routed`
 `compile` refuses the graph as unreachable.
 
 ```moonbit
-.node("fan", (_state, _run) => {
-  let steps : Array[@moonstate.Step[Report, Part]] = []
-  for shard = 0; shard < 4; shard = shard + 1 {
-    steps.push(@moonstate.Send("score", { shard, hits: None }))
+#derive(@json.ToJson, @json.FromJson)
+struct Score {
+  hits : Int32
+}
+
+pub extend Score with @json.ToJson::{to_json}
+
+pub extend Score with @json.FromJson::{from_json}
+
+#derive(@json.ToJson, @json.FromJson)
+struct Hit {
+  hits : Int32
+}
+
+pub extend Hit with @json.ToJson::{to_json}
+
+pub extend Hit with @json.FromJson::{from_json}
+
+fn score_merge(state : Score, hit : Hit) -> Score {
+  { hits: state.hits + hit.hits }
+}
+
+async test "four sends are one superstep" {
+  let fan = @moonstate.Builder::new(merge=score_merge, initial={ hits: 0 })
+    .entry("fan")
+    .node("fan", (_state, _run) => {
+      let steps : Array[@moonstate.Step[Score, Hit]] = []
+      for shard = 0; shard < 4; shard = shard + 1 {
+        steps.push(@moonstate.Send("score", { hits: shard }))
+      }
+      steps
+    })
+    .node("score", (state, _run) => [@moonstate.Write({ hits: state.hits + 1 })])
+    .routed("score")
+    .compile("fan") catch { error => abort((error : Error).to_string()) }
+  let out = fan.run({ hits: 0 }) catch { error => abort((error : Error).to_string()) }
+  assert_eq(out.hits, 10)
+}
+```
+
+## Traces
+
+`moonbitstack/moonstate/otel` hands the engine an executor that opens a span per superstep
+and a child span per node, named with the OpenTelemetry GenAI semantic conventions:
+`gen_ai.operation.name` is `invoke_agent` on a superstep and `execute_tool` on a node,
+`gen_ai.agent.name` is the graph, `gen_ai.tool.name` is the node, and
+`gen_ai.conversation.id` is the thread.
+
+```moonbit
+fn clock() -> Int64 {
+  @env.now().reinterpret_as_int64() * 1_000_000L
+}
+
+fn random_bytes(width : Int32) -> Bytes {
+  match @env.rand(width) {
+    Some(bytes) => bytes
+    None => abort("the platform has no entropy source")
   }
-  steps
-})
-.node("score", (state, _run) => [@moonstate.Write({ shard: None, hits: Some(1) })])
-.routed("score")
+}
+
+async test "a traced run has a span per node" {
+  let spans = @trace.Recorder::new()
+  let tracer = @trace.Tracer::new(
+    rand=random_bytes,
+    sink=spans,
+    sampler=@trace.parent_based(root=@trace.always),
+  )
+  let executor = @otel.traced(@moonstate.inline, tracer~, now=clock)
+  let graph = @moonstate.Builder::new(merge=merge, initial={ n: 0, log: [] })
+    .entry("seed")
+    .node("seed", (_state, _run) => [@moonstate.Write({ n: Some(1), log: None })])
+    .compile("traced", executor=executor)
+  let _ = graph.run({ n: None, log: None }) catch { error => abort((error : Error).to_string()) }
+  assert_eq(spans.spans().map(span => span.name), ["seed", "superstep 0"])
+}
 ```
 
 ## Things that catch people out
@@ -128,3 +238,5 @@ they were queued. A node entered only by `Send` has to be declared with `routed`
   to write whatever the state should keep.
 - A run stops after 25 supersteps unless `compile` is given another `limit`; a cycle needs a
   branch that leaves it.
+- `run` on a finished thread starts a new turn rather than returning the old result: the
+  checkpoints of the earlier turn stay in the thread's history.
