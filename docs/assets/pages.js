@@ -95,11 +95,13 @@ function wireRail() {
   addEventListener("scroll", paint, { passive: true });
   paint();
 
-  // A heading is a link to itself, which is what a reader wants to copy.
-  for (const heading of document.querySelectorAll(".prose h2[id]")) {
+  // The section is the anchor, so the heading points at it.
+  for (const heading of document.querySelectorAll(".prose h2")) {
+    const section = heading.closest("section[id]");
+    if (!section) continue;
     heading.insertAdjacentHTML(
       "beforeend",
-      `<a class="anchor" href="#${heading.id}" aria-label="Link to this section">#</a>`,
+      `<a class="anchor" href="#${section.id}" aria-label="Link to this section">#</a>`,
     );
   }
 }

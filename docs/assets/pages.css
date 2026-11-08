@@ -93,8 +93,8 @@
 }
 
 .entries section {
-  margin: 0 0 48px;
-  padding-top: 8px;
+  margin: 0 0 56px;
+  padding-top: 10px;
   border-top: 1px solid var(--rule);
 }
 
@@ -104,14 +104,14 @@
   letter-spacing: 0.1em;
   font-weight: 400;
   color: var(--accent);
-  margin: 18px 0 10px;
+  margin: 20px 0 12px;
 }
 
 .entries h3 {
   font-family: var(--serif);
   font-size: 21px;
   font-weight: 400;
-  margin: 30px 0 8px;
+  margin: 28px 0 10px;
 }
 
 .entries .kind {
@@ -124,7 +124,7 @@
 }
 
 .entries article {
-  padding-bottom: 10px;
+  padding-bottom: 14px;
 }
 
 .entries p {
@@ -133,8 +133,8 @@
 }
 
 .entries .sig {
-  margin: 0 0 10px;
-  padding: 10px 12px;
+  margin: 0 0 12px;
+  padding: 11px 13px;
   background: var(--panel);
   border: 1px solid var(--rule);
   overflow-x: auto;
@@ -145,7 +145,7 @@
 }
 
 .entries .member {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   padding-left: 10px;
   border-left: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
 }
@@ -158,7 +158,7 @@
   display: grid;
   grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
   gap: 4px 16px;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   padding: 10px 12px;
   border: 1px solid var(--rule);
   font-size: 13px;
@@ -184,7 +184,7 @@
   max-width: 1180px;
   width: 100%;
   margin: 0 auto;
-  padding: 18px 28px 28px;
+  padding: 22px 30px 32px;
   border-top: 1px solid var(--rule);
   font-family: var(--mono);
   font-size: 11px;
@@ -205,7 +205,7 @@
   gap: 56px;
   max-width: 1060px;
   margin: 0 auto;
-  padding: 12px 30px 96px;
+  padding: 16px 30px 104px;
   align-items: start;
 }
 
@@ -290,7 +290,7 @@
   flex-wrap: wrap;
   gap: 4px 10px;
   align-items: baseline;
-  margin: -2px 0 20px;
+  margin: 0 0 24px;
   padding: 2px 0 2px 12px;
   border-left: 2px solid var(--accent);
   font-family: var(--mono);
@@ -315,7 +315,7 @@
 .prose .note {
   font-size: 14.5px;
   line-height: 1.62;
-  margin-top: 22px;
+  margin-top: 26px;
 }
 
 .prose section.next-up h2 {
@@ -338,8 +338,8 @@
   font-family: var(--serif);
   font-size: 23px;
   font-weight: 400;
-  margin: 46px 0 10px;
-  padding-top: 14px;
+  margin: 38px 0 16px;
+  padding-top: 18px;
   border-top: 1px solid var(--rule);
 }
 
@@ -356,6 +356,10 @@
   max-width: 64ch;
 }
 
+.guide p {
+  margin: 0 0 18px;
+}
+
 .guide ul {
   padding-left: 20px;
 }
@@ -366,7 +370,7 @@
 
 .guide .sig {
   margin: 0 0 16px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: var(--panel);
   border: 1px solid var(--rule);
   overflow-x: auto;
@@ -448,11 +452,11 @@
 
 .pg {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  gap: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+  gap: 48px;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 8px 28px 72px;
+  padding: 16px 30px 96px;
   align-items: start;
 }
 
@@ -469,9 +473,9 @@
 
 .pg .side {
   display: grid;
-  gap: 14px;
+  gap: 22px;
   position: sticky;
-  top: 16px;
+  top: 20px;
 }
 
 @media (width <= 900px) {
@@ -486,18 +490,20 @@
 }
 
 .pg .instrument #ring {
-  max-width: 560px;
+  max-width: 470px;
 }
 
 .pg .plate h2 {
   font-family: var(--serif);
   font-size: 20px;
   font-weight: 400;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
 }
 
 .pg .plate p {
   font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 12px;
   color: var(--muted);
 }
 
