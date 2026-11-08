@@ -1,0 +1,68 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build the site
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install moon
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      # The instrument on the page is this library compiled to JavaScript; the
+      # build product is not committed, so the workflow makes it.
+      - name: the engine behind the instrument
+        run: |
+          moon build --target js --release src/examples/browser
+          mkdir -p docs/engine
+          cp _build/js/release/build/examples/browser/browser.js docs/engine/moonstate.js
+
+      - name: the reference matches the sources
+        run: python3 scripts/gen_api.py --check
+
+      - name: the code on the pages compiles
+        run: python3 scripts/check_snippets.py docs/guide.html
+
+      - uses: actions/configure-pages@v6
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+  deploy:
+    name: deploy
+    needs: build
+    runs-on: ubuntu-26.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
