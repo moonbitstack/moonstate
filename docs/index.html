@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>moonstate — durable state graphs for MoonBit</title>
     <meta name="description" content="A run is a sequence of supersteps, and every superstep is a checkpoint. This page runs the library in your browser: run it, stop it at a question, reload the tab, and it carries on.">
-    <meta name="theme-color" content="#f2efe6">
+    <meta name="theme-color" content="#f1f0e7">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/instrument.css">
     <script src="assets/theme.js"></script>
@@ -64,7 +64,8 @@
         <p class="legend" aria-hidden="true">
           <span><i></i> a superstep that ran</span>
           <span><i class="k-notch"></i> a checkpoint</span>
-          <span><i class="k-tick"></i> a phase the run may take</span>
+          <span><i class="k-now"></i> the phase it is on</span>
+          <span><i class="k-tick"></i> a phase left</span>
         </p>
 
         <form class="controls" id="controls" autocomplete="off">
@@ -209,7 +210,7 @@
           </ul>
           <p class="colophon">
             Set in the system serif and mono faces, drawn in SVG, run by the library it describes.
-            <br>moonbitstack/moonstate · Apache-2.0 · one accent, the colour bronze turns.
+            <br>moonbitstack/moonstate · Apache-2.0 · emerald for what is recorded, turquoise for where it is now.
           </p>
         </section>
       </div>

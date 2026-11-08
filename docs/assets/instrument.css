@@ -1,20 +1,23 @@
-/* The site has one palette and two settings of it. Everything is drawn from
-   these variables, so the theme toggle is a change of eight values.
+/* Two stones, two jobs. Emerald is what the run has already done — the arc, the
+   notches, the labels, the links. Turquoise is where the run is now — the phase
+   that is lit, the stage you are on, the mark the arc stops at. Everything else
+   is ink on paper.
 
-   The accent is verdigris, the colour a bronze instrument turns: a green-blue
-   that sits beside ink without competing with it, and is not the gold every
-   dial on every landing page is given. Light is bone paper; dark is a night
-   that keeps a little green in it rather than going blue. */
+   Light is unglazed porcelain with a green cast; dark is obsidian with a little
+   pine in it, so the stone colours have somewhere to sit. The accent colours are
+   not decoration: a thing that moves is turquoise, a thing that is recorded is
+   emerald, and nothing else is allowed to be either. */
 
 :root {
-  --paper: #f2efe6;
-  --panel: #faf8f1;
-  --ink: #151a17;
-  --muted: #63695f;
-  --rule: #cbc9bd;
-  --rule-soft: #e0ded2;
-  --accent: #2c6659;
-  --accent-soft: #a9c9be;
+  --paper: #f1f0e7;
+  --panel: #faf9f2;
+  --ink: #12201b;
+  --muted: #5d6a63;
+  --rule: #c8cec1;
+  --rule-soft: #dee2d5;
+  --accent: #14604e;
+  --accent-soft: #a7c9bc;
+  --jade: #2c8a7d;
 
   --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
   --sans: ui-sans-serif, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -28,14 +31,15 @@
 }
 
 :root[data-theme="dark"] {
-  --paper: #0c100e;
-  --panel: #131815;
-  --ink: #e9ece7;
-  --muted: #96a099;
-  --rule: #2c3531;
-  --rule-soft: #1f2622;
-  --accent: #79c0ac;
-  --accent-soft: #2f4a41;
+  --paper: #0a1211;
+  --panel: #101b18;
+  --ink: #e6ece7;
+  --muted: #8da09a;
+  --rule: #26362f;
+  --rule-soft: #1a2622;
+  --accent: #6ccbb0;
+  --accent-soft: #1f4237;
+  --jade: #58d0c4;
 
   color-scheme: dark;
 }
@@ -43,14 +47,15 @@
 /* No script and no stored choice: the system still decides. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --paper: #0c100e;
-    --panel: #131815;
-    --ink: #e9ece7;
-    --muted: #96a099;
-    --rule: #2c3531;
-    --rule-soft: #1f2622;
-    --accent: #79c0ac;
-    --accent-soft: #2f4a41;
+    --paper: #0a1211;
+    --panel: #101b18;
+    --ink: #e6ece7;
+    --muted: #8da09a;
+    --rule: #26362f;
+    --rule-soft: #1a2622;
+    --accent: #6ccbb0;
+    --accent-soft: #1f4237;
+    --jade: #58d0c4;
 
     color-scheme: dark;
   }
@@ -217,8 +222,8 @@ pre code {
   border-radius: 50%;
   background:
     radial-gradient(circle at 50% 50%, var(--paper) 0 26%, transparent 27%),
-    linear-gradient(90deg, var(--accent) 0 50%, transparent 50%);
-  opacity: 0.9;
+    linear-gradient(90deg, var(--jade) 0 50%, transparent 50%);
+  opacity: 0.95;
 }
 
 .nav {
@@ -352,8 +357,8 @@ pre code {
 }
 
 .tick.is-now {
-  stroke: var(--ink);
-  stroke-width: 2.6;
+  stroke: var(--jade);
+  stroke-width: 3.2;
 }
 
 .numeral {
@@ -396,8 +401,8 @@ pre code {
 /* the end of a run, marked where the arc stops */
 .cap {
   fill: none;
-  stroke: var(--ink);
-  stroke-width: 1.6;
+  stroke: var(--jade);
+  stroke-width: 1.8;
 }
 
 /* the line that says what pressing Run will do, right above the button */
@@ -447,6 +452,12 @@ pre code {
   width: 1px;
   height: 9px;
   background: color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.legend .k-now {
+  width: 2px;
+  height: 11px;
+  background: var(--jade);
 }
 
 /* the reading sits at the centre of the dial, where a dial's reading belongs */
@@ -759,8 +770,8 @@ pre code {
 }
 
 .stages li.is-now button {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--jade);
+  border-color: var(--jade);
   color: var(--paper);
 }
 
