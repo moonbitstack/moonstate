@@ -1,0 +1,18 @@
+import {
+  "moonbitstack/moonstate",
+  "moonbitstack/moonstate/sql",
+  "moonbitstack/moondb",
+  "moonbitstack/moonsqlite",
+  "moonbitstack/moonpostgres",
+  "moonbitstack/moonmysql/client",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  supported_targets: "native",
+)
