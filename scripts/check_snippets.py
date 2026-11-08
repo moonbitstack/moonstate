@@ -15,6 +15,7 @@ Usage: python scripts/check_snippets.py [--moon moon] [file ...]
 """
 
 import argparse
+import html
 import re
 import shutil
 import subprocess
@@ -23,6 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FENCE = re.compile(r"(<!--\s*nocheck\s*-->[ \t]*\n)?```(mbt|moonbit)([^\n]*)\n(.*?)^```", re.S | re.M)
+PAGE = re.compile(r"<pre class=\"sig\"><code>(.*?)</code></pre>", re.S)
 TOP = re.compile(r"^(pub(\([a-z]+\))? |priv |fn |async fn |test |async test |struct |enum |suberror |impl |trait |typealias |type |extern |#[a-z])", re.M)
 CORE = {"array", "bench", "bigint", "buffer", "builtin", "bytes", "char", "cmp", "coverage", "deque", "double", "encoding", "env", "error", "float", "hashmap", "hashset", "immut", "int", "int16", "int64", "json", "list", "math", "option", "queue", "quickcheck", "random", "rational", "ref", "result", "set", "sorted_map", "sorted_set", "strconv", "string", "test", "tuple", "uint", "uint16", "uint64", "unit"}
 NESTED = {"utf8": "encoding/utf8", "utf16": "encoding/utf16"}
@@ -59,8 +61,23 @@ def packages(module, src, deps):
     return found
 
 
+def page_blocks(path):
+    """The code a site page shows, unescaped, in the order it appears."""
+    text = path.read_text(encoding="utf-8")
+    for match in PAGE.finditer(text):
+        body = html.unescape(match.group(1))
+        # A page also shows configuration, which is not code.
+        if re.match(r"(?:\s*//[^\n]*\n)*\s*(import \{|options\(|name\s*=|pkgtype\()", body):
+            continue
+        line = text[: match.start(1)].count("\n") + 1
+        yield line, False, False, body
+
+
 def blocks(path):
     text = path.read_text(encoding="utf-8")
+    if path.suffix == ".html":
+        yield from page_blocks(path)
+        return
     for m in FENCE.finditer(text):
         if m.group(1) or "nocheck" in m.group(3):
             continue
@@ -107,7 +124,11 @@ def main():
         return 0
     subprocess.run([args.moon, "update"], cwd=ROOT, capture_output=True)
     aliases = packages(module, src, deps)
-    files = [Path(f) for f in args.files] or [ROOT / "README.md", *sorted((ROOT / "docs" / "skills").glob("*/SKILL.md"))]
+    files = [Path(f) for f in args.files] or [
+        ROOT / "README.md",
+        *sorted((ROOT / "docs" / "skills").glob("*/SKILL.md")),
+        ROOT / "docs" / "guide.html",
+    ]
     failed = 0
     for file in files:
         file = file if file.is_absolute() else ROOT / file

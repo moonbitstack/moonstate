@@ -256,6 +256,15 @@ $("pull").addEventListener("click", async () => {
   location.reload();
 });
 
+window.moonstate = {
+  count: () => (payload ? payload.checkpoints.length : 0),
+  selected: () => picked,
+  select: (index) => {
+    picked = index;
+    render();
+  },
+};
+
 boot().catch((error) => {
   const verdict = document.getElementById("verdict");
   if (verdict) verdict.textContent = `the engine did not load: ${error.message}`;

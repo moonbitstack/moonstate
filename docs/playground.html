@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Playground — moonstate</title>
+    <meta name="description" content="The instrument at full size: run three graphs, scrub their checkpoints, answer a question, rewrite the tail, and pull the plug to see the run survive a reload.">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/instrument.css">
+    <link rel="stylesheet" href="assets/pages.css">
+    <script type="module" src="assets/instrument.js"></script>
+    <script type="module" src="assets/playground.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#notes">Skip to the notes</a>
+    <header class="top">
+      <a class="mark" href="index.html">moonstate</a>
+      <nav class="nav" aria-label="The library">
+        <a href="index.html">the instrument</a>
+        <a href="guide.html">guide</a>
+        <a href="api.html">api</a>
+        <a href="playground.html" aria-current="page">playground</a>
+        <a href="https://github.com/moonbitstack/moonstate">github</a>
+      </nav>
+    </header>
+
+    <main class="pg">
+      <section class="stage" aria-label="The instrument, at full size">
+        <div class="instrument">
+          <svg id="ring" viewBox="0 0 520 520" role="img" aria-labelledby="ring-title ring-desc">
+            <title id="ring-title">The phase ring of a run</title>
+            <desc id="ring-desc">Twenty-five phases. The arc counts the supersteps that ran; the notches are the checkpoints.</desc>
+            <circle class="rim" cx="260" cy="260" r="200"></circle>
+            <circle class="rim-inner" cx="260" cy="260" r="150"></circle>
+            <g id="ticks"></g>
+            <path id="arc" class="arc" d=""></path>
+            <g id="notches"></g>
+          </svg>
+
+          <div class="readout" aria-live="polite">
+            <p class="phase"><span id="phase">0</span><span class="of">/<span id="limit">25</span></span></p>
+            <p class="verdict" id="verdict">a fresh run</p>
+            <p class="state" id="state" data-empty="true">{ }</p>
+            <p class="meta"><span id="next-nodes">—</span> <span class="dot">·</span> <span id="checkpoint">no checkpoint</span></p>
+          </div>
+        </div>
+
+        <form class="controls" id="controls" autocomplete="off">
+          <div class="chips" role="group" aria-label="The graph">
+            <button type="button" class="chip is-on" data-scenario="line">a line</button>
+            <button type="button" class="chip" data-scenario="review">a question</button>
+            <button type="button" class="chip" data-scenario="fanout">a fan-out</button>
+          </div>
+
+          <div class="acts">
+            <button type="button" class="act act-run" id="run">Run</button>
+            <button type="button" class="act" id="rewrite" hidden>Rewrite the tail</button>
+            <button type="button" class="act act-quiet" id="reset">Start over</button>
+          </div>
+
+          <div class="chips" role="group" aria-label="Scrub the checkpoints">
+            <button type="button" class="act" id="prev" aria-label="the checkpoint before">◀</button>
+            <button type="button" class="act" id="next" aria-label="the checkpoint after">▶</button>
+            <span class="hint">scrub the records; nothing runs</span>
+          </div>
+
+          <div class="answer" id="answer-row" hidden>
+            <label for="answer">the question wants a number</label>
+            <input id="answer" name="answer" inputmode="numeric" value="7" size="3">
+            <button type="submit" class="act" id="reply">Answer</button>
+          </div>
+
+          <p class="lever-line">
+            <button type="button" class="lever" id="pull">Pull the plug</button>
+            <span>the tab reloads; the run does not start over.</span>
+          </p>
+        </form>
+      </section>
+
+      <aside class="side" id="notes">
+        <div class="plate">
+          <h2>The records</h2>
+          <p>
+            Every row below is a checkpoint the saver holds: the state as merged, the tasks the
+            next superstep would run, and whether the run is waiting. Picking one reads it; the
+            ring marks it. This is the whole of what a <code>Saver</code> returns.
+          </p>
+          <ol class="ledger" id="ledger" aria-label="The checkpoints of this run"></ol>
+        </div>
+
+        <div class="plate">
+          <h2>What to try</h2>
+          <ul class="tries">
+            <li><b>a question</b> — run it: the ring stops one phase in and wants a number.</li>
+            <li><b>pull the plug</b> — at that stop, reload: the question is still there.</li>
+            <li><b>a fan-out</b> — three shards add one each; the log keeps their order.</li>
+            <li><b>rewrite the tail</b> — on <em>a line</em>, run to the end, then rewrite.</li>
+            <li><b>◀ ▶</b> — walk the checkpoints of a finished run without running anything.</li>
+          </ul>
+        </div>
+
+        <div class="plate">
+          <p class="colophon">
+            The engine on this page is the library itself, compiled to JavaScript. The records
+            live in this browser, which is why a reload can continue a run.
+          </p>
+          <p class="links-row">
+            <a href="guide.html">the guide</a>
+            <a href="api.html">the reference</a>
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="foot">
+      <span>moonbitstack/moonstate</span>
+      <a href="https://github.com/moonbitstack/moonstate">the repository</a>
+    </footer>
+  </body>
+</html>

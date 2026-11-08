@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>API — moonstate</title>
+    <meta name="description" content="Every public item of moonstate, the sql subpackage and the otel subpackage, generated from the interface files and the doc comments.">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/instrument.css">
+    <link rel="stylesheet" href="assets/pages.css">
+  </head>
+  <body class="doc">
+    <a class="skip" href="#entries">Skip to the reference</a>
+    <header class="top">
+      <a class="mark" href="index.html">moonstate</a>
+      <nav class="nav" aria-label="The library">
+        <a href="index.html">the instrument</a>
+        <a href="guide.html">guide</a>
+        <a href="api.html" aria-current="page">api</a>
+        <a href="playground.html">playground</a>
+        <a href="https://github.com/moonbitstack/moonstate">github</a>
+      </nav>
+    </header>
+
+    <main class="reference">
+      <aside class="rail" aria-label="Packages and items">
+        <div class="group"><b>moonstate</b>
+<a href="#moonstate-grapherror">GraphError</a>
+<a href="#moonstate-refused">Refused</a>
+<a href="#moonstate-builder">Builder</a>
+<a href="#moonstate-checkpoint">Checkpoint</a>
+<a href="#moonstate-context">Context</a>
+<a href="#moonstate-done">Done</a>
+<a href="#moonstate-entrypoint">Entrypoint</a>
+<a href="#moonstate-event">Event</a>
+<a href="#moonstate-frame">Frame</a>
+<a href="#moonstate-graph">Graph</a>
+<a href="#moonstate-item">Item</a>
+<a href="#moonstate-memorysaver">MemorySaver</a>
+<a href="#moonstate-memorystore">MemoryStore</a>
+<a href="#moonstate-pending">Pending</a>
+<a href="#moonstate-retry">Retry</a>
+<a href="#moonstate-run">Run</a>
+<a href="#moonstate-snapshot">Snapshot</a>
+<a href="#moonstate-step">Step</a>
+<a href="#moonstate-task">Task</a>
+<a href="#moonstate-taskwrite">TaskWrite</a>
+<a href="#moonstate-work">Work</a>
+<a href="#moonstate-executor">Executor</a>
+<a href="#moonstate-saver">Saver</a>
+<a href="#moonstate-store">Store</a>
+<a href="#moonstate-functions">Functions</a>
+<a href="#moonstate-values">Values</a>
+</div>
+<div class="group"><b>moonstate/sql</b>
+<a href="#sql-failed">Failed</a>
+<a href="#sql-blocking">Blocking</a>
+<a href="#sql-names">Names</a>
+<a href="#sql-sqlsaver">SqlSaver</a>
+<a href="#sql-sqlstore">SqlStore</a>
+<a href="#sql-functions">Functions</a>
+<a href="#sql-values">Values</a>
+</div>
+<div class="group"><b>moonstate/otel</b>
+<a href="#otel-traced">Traced</a>
+<a href="#otel-functions">Functions</a>
+</div>
+      </aside>
+      <div class="entries" id="entries">
+        <h1>The reference</h1>
+        <p class="note">
+          Every public item of the three packages, read from each package's interface file and
+          from the doc comments beside the code. Nothing here is written by hand, and a stale
+          page fails the build.
+        </p>
+        <section id="moonstate-top"><h2><span class="pkg">moonstate</span></h2><p>The graph, its builder, the steps a node returns, the two contracts a store or a saver implements, and the in-memory implementations that ship with them.</p>
+<article id="moonstate-grapherror"><h3><span class="kind">suberror</span> GraphError</h3>
+<p>Why a run could not finish.</p>
+<pre class="sig"><code>pub(all) suberror GraphError {
+  StepLimit(limit~ : Int32)
+  NodeFailed(node~ : String, message~ : String)
+  Interrupted(thread~ : String, value~ : @json.Json)
+  NotInterrupted(thread~ : String)
+  MissingThread(thread~ : String)
+  MissingNode(node~ : String)
+  Unreadable(reason~ : String)
+  Cancelled(thread~ : String)
+  Backend(reason~ : String)
+}</code></pre>
+<dl class="fields"><dt><code>StepLimit</code></dt><dd><p> The run took <code>limit</code> supersteps without reaching an end.</p></dd><dt><code>NodeFailed</code></dt><dd><p> A node raised, after its retries if it had any; <code>message</code> is the error text.</p></dd><dt><code>Interrupted</code></dt><dd><p> A node asked to stop and wait for an answer. <code>resume</code> continues the thread.</p></dd><dt><code>NotInterrupted</code></dt><dd><p> <code>resume</code> was called on a thread with nothing to continue.</p></dd><dt><code>MissingThread</code></dt><dd><p> The thread has no checkpoint the saver knows about.</p></dd><dt><code>MissingNode</code></dt><dd><p> A node routed the run to a name the graph does not define. The compile-time check cannot see the names a <code>Goto</code>, a <code>Send</code> or a branch picks, so the run reports them the first time one is taken.</p></dd><dt><code>Unreadable</code></dt><dd><p> A checkpoint could not be decoded back into the graph&#x27;s state type.</p></dd><dt><code>Cancelled</code></dt><dd><p> A node cancelled the run, or the caller did before the next superstep.</p></dd><dt><code>Backend</code></dt><dd><p> A saver, a store, an executor or a stream callback raised. The engine keeps going only where it can tell what went wrong, so this is where an outside failure ends up.</p></dd></dl>
+</article>
+<article id="moonstate-refused"><h3><span class="kind">suberror</span> Refused</h3>
+<p>Why a graph definition was refused when it was compiled. Every check here is structural: the nodes and edges are known then, the runs are not.</p>
+<pre class="sig"><code>pub(all) suberror Refused {
+  NoNodes
+  NoEntry
+  UnknownEntry(node~ : String)
+  DuplicateNode(node~ : String)
+  DanglingEdge(from~ : String, to~ : String)
+  Unreachable(node~ : String)
+  NoExit
+}</code></pre>
+</article>
+<article id="moonstate-builder"><h3><span class="kind">struct</span> Builder</h3>
+<p>Accumulates nodes and edges, then checks them once in <code>compile</code>. Every method returns the builder, so a graph reads as one chain.</p>
+<pre class="sig"><code>pub struct Builder[S, U] {
+  merge : (S, U) -&gt; S
+  initial : S
+  mut entry : String?
+  nodes : Map[String, NodeSpec[S, U]]
+  edges : Array[(String, String)]
+  joins : Array[(Array[String], String)]
+  branches : Array[(String, async (S) -&gt; Array[String])]
+  routed : Array[String]
+  duplicates : Array[String]
+}</code></pre>
+<div class="member" id="moonstate-builder-branch"><pre class="sig"><code>pub fn[S, U] Builder::branch(Self[S, U], String, async (S) -&gt; Array[String]) -&gt; Self[S, U]</code></pre><p>Let <code>route</code> decide where to go after <code>from</code>. It is called with the state as merged at the end of the superstep, so it sees what the nodes wrote.</p></div>
+<div class="member" id="moonstate-builder-compile"><pre class="sig"><code>pub fn[S, U] Builder::compile(Self[S, U], String, saver? : &amp;Saver, store? : &amp;Store, executor? : &amp;Executor, limit? : Int32) -&gt; Graph[S, U] raise Refused</code></pre><p>Fold the collected structure into a graph, refusing a definition that cannot run: an edge to nowhere, a node nothing reaches, a graph with no end.</p></div>
+<div class="member" id="moonstate-builder-edge"><pre class="sig"><code>pub fn[S, U] Builder::edge(Self[S, U], String, String) -&gt; Self[S, U]</code></pre><p>Run <code>to</code> after <code>from</code>, unconditionally.</p></div>
+<div class="member" id="moonstate-builder-entry"><pre class="sig"><code>pub fn[S, U] Builder::entry(Self[S, U], String) -&gt; Self[S, U]</code></pre><p>Make <code>name</code> the node a run starts at. Without it a graph of exactly one node starts there, and anything larger is refused.</p></div>
+<div class="member" id="moonstate-builder-join"><pre class="sig"><code>pub fn[S, U] Builder::join(Self[S, U], Array[String], String) -&gt; Self[S, U]</code></pre><p>Run <code>to</code> once every node in <code>from</code> has run in the same superstep, and not before: a join is a gate, not just an edge.</p></div>
+<div class="member" id="moonstate-builder-new"><pre class="sig"><code>pub fn[S, U] Builder::new(merge~ : (S, U) -&gt; S, initial~ : S) -&gt; Self[S, U]</code></pre><p>A builder whose state starts at <code>initial</code> and whose every merged write goes through <code>merge</code>. <code>initial</code> is what a run starts from before the input is merged in, so it is the empty state: zeroed counters, empty lists.</p></div>
+<div class="member" id="moonstate-builder-node"><pre class="sig"><code>pub fn[S, U] Builder::node(Self[S, U], String, async (S, Run) -&gt; Array[Step[S, U]], retry? : Retry) -&gt; Self[S, U]</code></pre><p>Add node <code>name</code>. <code>run</code> gets the state and a <code>Run</code> handle and returns the steps it wants applied; <code>retry</code> gives it more than one try.</p></div>
+<div class="member" id="moonstate-builder-routed"><pre class="sig"><code>pub fn[S, U] Builder::routed(Self[S, U], String) -&gt; Self[S, U]</code></pre><p>Declare that <code>name</code> is entered at run time — by a <code>Goto</code>, a <code>Send</code> or a route — rather than by an edge. Without this the compile-time reachability check has no way to tell such a node from dead code, and refuses the graph.</p></div>
+<div class="member" id="moonstate-builder-subgraph"><pre class="sig"><code>pub fn[T : @json.ToJson + @json.FromJson, V : @json.ToJson + @json.FromJson, S, U] Builder::subgraph(Self[S, U], String, Graph[T, V], enter~ : (S) -&gt; T, leave~ : (T) -&gt; U) -&gt; Self[S, U]</code></pre></div>
+</article>
+<article id="moonstate-checkpoint"><h3><span class="kind">struct</span> Checkpoint</h3>
+<p>One durable point in a thread&#x27;s run: the state after <code>step</code> supersteps, the tasks the next superstep will run, and the writes already collected for them. A <code>Saver</code> stores these verbatim; the engine is the only thing that reads the state back into its own type.</p>
+<pre class="sig"><code>pub(all) struct Checkpoint {
+  thread : String
+  id : String
+  parent : String?
+  seq : Int32
+  step : Int32
+  state : @json.Json
+  pending : Array[Pending]
+  interrupt : @json.Json?
+  created_at : Int64
+  writes : Array[TaskWrite]?
+}</code></pre>
+<dl class="fields"><dt><code>id</code></dt><dd><p> Unique within the thread, and ordered by the saver.</p></dd><dt><code>parent</code></dt><dd><p> The checkpoint this one was written on top of, or <code>None</code> for the first.</p></dd><dt><code>seq</code></dt><dd><p> How many checkpoints the thread had written before this one. <code>id</code> is derived from it, so an <code>update</code> that forks the thread does not collide with the checkpoints it forked away from.</p></dd><dt><code>step</code></dt><dd><p> The superstep this checkpoint is about to run.</p></dd><dt><code>state</code></dt><dd><p> The whole state, encoded.</p></dd><dt><code>pending</code></dt><dd><p> The tasks of the next superstep, in the order their writes will be merged.</p></dd><dt><code>interrupt</code></dt><dd><p> Set when the superstep was cut short by <code>Step::Interrupt</code>.</p></dd><dt><code>writes</code></dt><dd><p> The writes recorded for this checkpoint&#x27;s tasks. A saver fills this in when it reads the checkpoint back; it is never part of what <code>put</code> stores.</p></dd></dl>
+<div class="member" id="moonstate-checkpoint-from_json"><pre class="sig"><code>pub fn Checkpoint::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-checkpoint-to_json"><pre class="sig"><code>pub fn Checkpoint::to_json(Self) -&gt; @json.Json</code></pre></div>
+</article>
+<article id="moonstate-context"><h3><span class="kind">struct</span> Context</h3>
+<p>What an entrypoint hands its body: the run it belongs to, and the machinery a task call needs. One context per attempt; <code>call</code> advances it, which is how a replayed run lines its calls up with the recorded ones.</p>
+<pre class="sig"><code>pub struct Context {
+  run : Run
+  saver : &amp;Saver?
+  executor : &amp;Executor
+  graph : String
+  mut index : Int32
+  recorded : Map[String, @json.Json]
+}</code></pre>
+<div class="member" id="moonstate-context-index"><pre class="sig"><code>pub fn Context::index(Self) -&gt; Int32</code></pre><p>How many task calls this attempt has made so far.</p></div>
+<div class="member" id="moonstate-context-run"><pre class="sig"><code>pub fn Context::run(Self) -&gt; Run</code></pre><p>The run this entrypoint belongs to.</p></div>
+</article>
+<article id="moonstate-done"><h3><span class="kind">struct</span> Done</h3>
+<p>What an executor reports back for one work item. Exactly one of <code>values</code> and <code>error</code> is set: a failed node&#x27;s error travels as text, because the executor may not share a process with the graph that would have to match on it.</p>
+<pre class="sig"><code>pub(all) struct Done {
+  values : Array[@json.Json]?
+  error : String?
+}</code></pre>
+</article>
+<article id="moonstate-entrypoint"><h3><span class="kind">struct</span> Entrypoint</h3>
+<p>A graph built from one function: the function is the only node, and every <code>Task::call</code> inside it is a durable step of that node.</p>
+<pre class="sig"><code>pub struct Entrypoint[I, O] {
+  graph : Graph[Frame, Frame]
+  encode : (I) -&gt; @json.Json
+  decode : (@json.Json) -&gt; O raise GraphError
+}</code></pre>
+</article>
+<article id="moonstate-event"><h3><span class="kind">enum</span> Event</h3>
+<p>What a run reports while it happens. The stream modes of a graph engine are one type here: the caller takes the variants it needs and ignores the rest.</p>
+<pre class="sig"><code>pub(all) enum Event[S, U] {
+  Values(S)
+  Updates(node~ : String, U)
+  Custom(node~ : String, @json.Json)
+  Started(node~ : String)
+  Finished(node~ : String)
+  Interrupted(@json.Json)
+}</code></pre>
+<dl class="fields"><dt><code>Values</code></dt><dd><p> The whole state after a superstep.</p></dd><dt><code>Updates</code></dt><dd><p> One node&#x27;s write, as it is folded in. Several arrive per superstep.</p></dd><dt><code>Custom</code></dt><dd><p> Whatever a node passed to <code>Run::emit</code>.</p></dd><dt><code>Started</code></dt><dd><p> A node has been handed to the executor.</p></dd><dt><code>Finished</code></dt><dd><p> A node finished and its steps are about to be applied.</p></dd><dt><code>Interrupted</code></dt><dd><p> The run stopped and is waiting for <code>resume</code> with this value.</p></dd></dl>
+</article>
+<article id="moonstate-frame"><h3><span class="kind">struct</span> Frame</h3>
+<p>The state a functional graph runs on: the input the entrypoint was called with, and the value it returned. Keeping both as JSON is what makes a half-finished entrypoint resumable — the input is still there to replay from.</p>
+<pre class="sig"><code>pub(all) struct Frame {
+  input : @json.Json
+  output : @json.Json?
+}</code></pre>
+<div class="member" id="moonstate-frame-from_json"><pre class="sig"><code>pub fn Frame::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-frame-to_json"><pre class="sig"><code>pub fn Frame::to_json(Self) -&gt; @json.Json</code></pre></div>
+</article>
+<article id="moonstate-graph"><h3><span class="kind">struct</span> Graph</h3>
+<p>A compiled graph: the nodes, the edges between them, and the three services a run leans on — a saver for checkpoints, a store for long-term memory, and an executor for where the nodes run. Everything structural was checked in <code>compile</code>, so a run only fails for reasons the run itself discovers.</p>
+<pre class="sig"><code>pub struct Graph[S, U] {
+  name : String
+  merge : (S, U) -&gt; S
+  initial : S
+  entry : String
+  nodes : Map[String, NodeSpec[S, U]]
+  edges : Map[String, Array[String]]
+  joins : Array[(Array[String], String)]
+  branches : Map[String, Array[async (S) -&gt; Array[String]]]
+  saver : &amp;Saver?
+  store : &amp;Store?
+  executor : &amp;Executor
+  limit : Int32
+}</code></pre>
+<div class="member" id="moonstate-graph-limit"><pre class="sig"><code>pub fn[S, U] Graph::limit(Self[S, U]) -&gt; Int32</code></pre><p>The superstep bound this graph was compiled with.</p></div>
+<div class="member" id="moonstate-graph-name"><pre class="sig"><code>pub fn[S, U] Graph::name(Self[S, U]) -&gt; String</code></pre></div>
+</article>
+<article id="moonstate-item"><h3><span class="kind">struct</span> Item</h3>
+<p>One remembered value: a space, a key inside it, and the value itself.</p>
+<pre class="sig"><code>pub(all) struct Item {
+  space : Array[String]
+  key : String
+  value : @json.Json
+}</code></pre>
+</article>
+<article id="moonstate-memorysaver"><h3><span class="kind">struct</span> MemorySaver</h3>
+<p>A saver that keeps everything in memory: enough for a run that has to survive a failed node, not the process it runs in.</p>
+<pre class="sig"><code>pub struct MemorySaver {
+  threads : Map[String, Array[Checkpoint]]
+  writes : Map[String, Array[TaskWrite]]
+}</code></pre>
+<div class="member" id="moonstate-memorysaver-new"><pre class="sig"><code>pub fn MemorySaver::new() -&gt; Self</code></pre></div>
+</article>
+<article id="moonstate-memorystore"><h3><span class="kind">struct</span> MemoryStore</h3>
+<p>A store that keeps everything in memory, for tests and for short-lived processes.</p>
+<pre class="sig"><code>pub struct MemoryStore {
+  items : Map[String, Item]
+}</code></pre>
+<div class="member" id="moonstate-memorystore-new"><pre class="sig"><code>pub fn MemoryStore::new() -&gt; Self</code></pre></div>
+</article>
+<article id="moonstate-pending"><h3><span class="kind">struct</span> Pending</h3>
+<p>A node queued for a superstep, as a checkpoint records it. <code>input</code> is the state the node is handed: absent means the state as merged at that point, present means a <code>Send</code> gave it its own.</p>
+<pre class="sig"><code>pub(all) struct Pending {
+  node : String
+  input : @json.Json?
+}</code></pre>
+<div class="member" id="moonstate-pending-from_json"><pre class="sig"><code>pub fn Pending::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-pending-to_json"><pre class="sig"><code>pub fn Pending::to_json(Self) -&gt; @json.Json</code></pre></div>
+</article>
+<article id="moonstate-retry"><h3><span class="kind">struct</span> Retry</h3>
+<p>How often a node is tried before its failure ends the run, and how long to wait between tries. <code>attempts</code> counts the first try: <code>attempts</code> of 1 means no retry at all.</p>
+<pre class="sig"><code>pub(all) struct Retry {
+  attempts : Int32
+  delay : Int32
+}</code></pre>
+</article>
+<article id="moonstate-run"><h3><span class="kind">struct</span> Run</h3>
+<p>What a node is handed besides the state: which thread it belongs to, which superstep it is running in, where to put long-term memory, how to report progress, and how to stop.  A run handle belongs to one task. Calling <code>cancel</code> on it stops the thread at the next superstep boundary — never in the middle of a node, so what a node wrote before asking to stop is kept.</p>
+<pre class="sig"><code>pub struct Run {
+  thread : String
+  step : Int32
+  checkpoint : String
+  answer : @json.Json?
+  store : &amp;Store?
+  saver : &amp;Saver?
+  cancelled : @ref.Ref[Bool]
+  emit : (@json.Json) -&gt; Unit
+  writes : Array[TaskWrite]
+}</code></pre>
+<div class="member" id="moonstate-run-answer"><pre class="sig"><code>pub fn Run::answer(Self) -&gt; @json.Json?</code></pre><p>The answer <code>resume</code> was called with, for the node that asked for it.</p></div>
+<div class="member" id="moonstate-run-cancel"><pre class="sig"><code>pub fn Run::cancel(Self) -&gt; Unit</code></pre><p>Ask the thread to stop at the next superstep boundary.</p></div>
+<div class="member" id="moonstate-run-checkpoint"><pre class="sig"><code>pub fn Run::checkpoint(Self) -&gt; String</code></pre><p>The checkpoint this superstep&#x27;s writes are filed under. A node that keeps its own progress in <code>Saver::put_writes</code> needs it.</p></div>
+<div class="member" id="moonstate-run-emit"><pre class="sig"><code>pub fn Run::emit(Self, @json.Json) -&gt; Unit</code></pre><p>Report progress to whoever is streaming this run. Does nothing when nobody is.</p></div>
+<div class="member" id="moonstate-run-is_cancelled"><pre class="sig"><code>pub fn Run::is_cancelled(Self) -&gt; Bool</code></pre></div>
+<div class="member" id="moonstate-run-saver"><pre class="sig"><code>pub fn Run::saver(Self) -&gt; &amp;Saver?</code></pre><p>The saver the graph was compiled with, if any. A node that runs another graph hands it on, so the child&#x27;s checkpoints land next to the parent&#x27;s.</p></div>
+<div class="member" id="moonstate-run-step"><pre class="sig"><code>pub fn Run::step(Self) -&gt; Int32</code></pre><p>The superstep this task belongs to, counting from zero.</p></div>
+<div class="member" id="moonstate-run-store"><pre class="sig"><code>pub fn Run::store(Self) -&gt; &amp;Store?</code></pre><p>The long-term store the graph was compiled with, if any.</p></div>
+<div class="member" id="moonstate-run-thread"><pre class="sig"><code>pub fn Run::thread(Self) -&gt; String</code></pre></div>
+<div class="member" id="moonstate-run-writes"><pre class="sig"><code>pub fn Run::writes(Self) -&gt; Array[TaskWrite]</code></pre><p>The writes already recorded for this checkpoint&#x27;s tasks. A node that runs other durable steps itself — the functional form does — reads them back here to skip work a crashed run had already finished.</p></div>
+</article>
+<article id="moonstate-snapshot"><h3><span class="kind">struct</span> Snapshot</h3>
+<p>A checkpoint seen through the graph&#x27;s own state type: what a caller asks for when it wants to look at a thread, not to resume it.</p>
+<pre class="sig"><code>pub(all) struct Snapshot[S] {
+  thread : String
+  id : String
+  parent : String?
+  step : Int32
+  state : S
+  next : Array[String]
+  interrupt : @json.Json?
+  created_at : Int64
+}</code></pre>
+<dl class="fields"><dt><code>next</code></dt><dd><p> The nodes the next superstep would run. Empty when the run finished.</p></dd></dl>
+</article>
+<article id="moonstate-step"><h3><span class="kind">enum</span> Step</h3>
+<p>What one node contributes to the superstep it took part in. A node returns a list of these, applied in the order it wrote them: writes fold into the state, <code>Goto</code> and <code>Send</code> decide who runs next, and <code>Interrupt</code> stops the run there.</p>
+<pre class="sig"><code>pub(all) enum Step[S, U] {
+  Write(U)
+  Goto(String)
+  Send(String, S)
+  Interrupt(@json.Json)
+}</code></pre>
+<dl class="fields"><dt><code>Write</code></dt><dd><p> Fold <code>U</code> into the state with the graph&#x27;s merge function.</p></dd><dt><code>Goto</code></dt><dd><p> Leave the node&#x27;s declared successors behind and run this node next.</p></dd><dt><code>Send</code></dt><dd><p> Queue this node for the next superstep with its own input state, which is how a fan-out hands each branch a different slice of the work.</p></dd><dt><code>Interrupt</code></dt><dd><p> Stop before the next superstep and wait for <code>resume</code>. The node that returned this runs again from the same input when the thread resumes, and reads the answer through <code>Run::answer</code>.</p></dd></dl>
+<div class="member" id="moonstate-step-decode"><pre class="sig"><code>pub fn[S : @json.FromJson, U : @json.FromJson] Step::decode(@json.Json) -&gt; Self[S, U] raise GraphError</code></pre><p>Read back a step written by <code>encode</code>. A step that cannot be decoded cannot be applied, and guessing at it would corrupt the state silently.</p></div>
+<div class="member" id="moonstate-step-encode"><pre class="sig"><code>pub fn[S : @json.ToJson, U : @json.ToJson] Step::encode(Self[S, U]) -&gt; @json.Json</code></pre><p>The wire form of a step: what a <code>Work</code> carries back from wherever the node ran. Executors only ever see this, which is what lets a node run in another process without the graph itself crossing the boundary.</p></div>
+</article>
+<article id="moonstate-task"><h3><span class="kind">struct</span> Task</h3>
+<p>A step that is recorded when it finishes. Calling one through <code>Task::call</code> writes its result to the checkpoint before the entrypoint moves on, so a run that replays after a crash reuses the result instead of doing the work twice.</p>
+<pre class="sig"><code>pub struct Task[I, O] {
+  name : String
+  run : async (I) -&gt; O
+  retry : Retry?
+}</code></pre>
+</article>
+<article id="moonstate-taskwrite"><h3><span class="kind">struct</span> TaskWrite</h3>
+<p>The steps one task produced, kept apart from the checkpoint record so that a finished task is never run twice after a crash.</p>
+<pre class="sig"><code>pub(all) struct TaskWrite {
+  task : String
+  values : Array[@json.Json]
+}</code></pre>
+<div class="member" id="moonstate-taskwrite-from_json"><pre class="sig"><code>pub fn TaskWrite::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-taskwrite-to_json"><pre class="sig"><code>pub fn TaskWrite::to_json(Self) -&gt; @json.Json</code></pre></div>
+</article>
+<article id="moonstate-work"><h3><span class="kind">struct</span> Work</h3>
+<p>One node&#x27;s turn to run, as the executor sees it. <code>input</code> is a function so the state is encoded only when it actually crosses a process boundary; <code>run</code> is what an in-process executor calls, and what an executor that ships the task elsewhere ignores — it finds the node by <code>graph</code> and <code>node</code> on the far side.</p>
+<pre class="sig"><code>pub(all) struct Work {
+  graph : String
+  node : String
+  thread : String
+  step : Int32
+  attempt : Int32
+  input : () -&gt; @json.Json
+  run : async () -&gt; Array[@json.Json]
+}</code></pre>
+</article>
+<article id="moonstate-executor"><h3><span class="kind">trait</span> Executor</h3>
+<p>Where a superstep&#x27;s tasks run. The engine hands over the whole superstep at once, which is what makes a fan-out parallel; the results come back in the order the work was given, so merging stays deterministic.</p>
+<pre class="sig"><code>pub(open) trait Executor {
+  async fn each(Self, Array[Work]) -&gt; Array[Done]
+}</code></pre>
+</article>
+<article id="moonstate-saver"><h3><span class="kind">trait</span> Saver</h3>
+<p>Where a thread&#x27;s checkpoints live. The engine writes one per superstep and reads the last one back to resume, so an implementation only has to store records and hand them back in order.</p>
+<pre class="sig"><code>pub(open) trait Saver {
+  async fn get(Self, String, id? : String) -&gt; Checkpoint?
+  async fn put(Self, Checkpoint) -&gt; Unit
+  async fn put_writes(Self, String, String, String, Array[@json.Json]) -&gt; Unit
+  async fn list(Self, String, limit? : Int32, before? : String) -&gt; Array[Checkpoint]
+  async fn delete(Self, String) -&gt; Unit
+}</code></pre>
+<dl class="fields"><dt><code>async</code></dt><dd><p>Drop a thread entirely: checkpoints and writes.</p></dd></dl>
+</article>
+<article id="moonstate-store"><h3><span class="kind">trait</span> Store</h3>
+<p>Long-term memory that outlives a thread: spaced key-value pairs with a search over them. A node reaches the store through <code>Run::store</code>.</p>
+<pre class="sig"><code>pub(open) trait Store {
+  async fn get(Self, Array[String], String) -&gt; Item?
+  async fn put(Self, Array[String], String, @json.Json) -&gt; Unit
+  async fn delete(Self, Array[String], String) -&gt; Unit
+  async fn search(Self, Array[String], query? : String, filter? : Map[String, @json.Json], limit? : Int32) -&gt; Array[Item]
+}</code></pre>
+<dl class="fields"><dt><code>async</code></dt><dd><p>Items under <code>space</code> (or below it), newest first. <code>query</code> is matched against the item&#x27;s text, <code>filter</code> against its top-level object fields.</p></dd></dl>
+</article>
+<h3 id="moonstate-functions">Functions</h3>
+<div class="member" id="moonstate-entrypoint"><pre class="sig"><code>pub fn[I : @json.ToJson + @json.FromJson, O : @json.ToJson + @json.FromJson] entrypoint(String, async (I, Context) -&gt; O, saver? : &amp;Saver, store? : &amp;Store, executor? : &amp;Executor, limit? : Int32) -&gt; Entrypoint[I, O] raise Refused</code></pre><p>Wrap <code>body</code> as a graph with one node. The body may call tasks; each call is recorded, and a resumed run replays the body from the start and reuses the results. The body itself has to be deterministic apart from those calls — replaying it is how the run gets back to where it stopped.</p></div>
+<div class="member" id="moonstate-task"><pre class="sig"><code>pub fn[I, O] task(String, async (I) -&gt; O, retry? : Retry) -&gt; Task[I, O]</code></pre></div>
+<h3 id="moonstate-values">Values</h3>
+<div class="member" id="moonstate-default_limit"><pre class="sig"><code>pub let default_limit : Int32</code></pre><p>How many supersteps a run may take before it is stopped. This is the bound a graph made of cycles relies on; it is LangGraph 1.2&#x27;s default recursion limit of 25 (<code>libs/langgraph/langgraph/constants.py</code>), kept the same so a graph ported from there needs no new number.</p></div>
+<div class="member" id="moonstate-inline"><pre class="sig"><code>pub let inline : &amp;Executor</code></pre><p>The default executor: every task in this process, at the same time.</p></div>
+<div class="member" id="moonstate-retry"><pre class="sig"><code>pub let retry : Retry</code></pre><p>Three tries with no pause, the default a durable workflow wants for a step that talks to something outside the process.</p></div>
+</section>
+<section id="sql-top"><h2><span class="pkg">moonstate/sql</span></h2><p>Checkpoints and long-term memory on a SQL backend: one implementation, written against the dialect the driver reports.</p>
+<article id="sql-failed"><h3><span class="kind">suberror</span> Failed</h3>
+<p>A row that could not be read back into the record it was written from: a checkpoint&#x27;s state, a task&#x27;s steps, a store item, or a column that is null when the record needs it.</p>
+<pre class="sig"><code>pub(all) suberror Failed {
+  Unreadable(column~ : String, reason~ : String)
+}</code></pre>
+<div class="member" id="sql-failed-report"><pre class="sig"><code>pub fn Failed::report(Self) -&gt; String</code></pre><p>The text an error carries, for the <code>Backend</code> a caller ends up matching on.</p></div>
+</article>
+<article id="sql-blocking"><h3><span class="kind">struct</span> Blocking</h3>
+<p>A blocking driver seen as an asynchronous one.  The seam this package writes against is <code>AsyncDriver</code>, because a checkpointer awaits its database and a wire backend can only be awaited. A driver whose work happens in a C call — SQLite is the one that ships — implements the synchronous <code>Driver</code> instead, and reaches this package through here: the call blocks the task it is made in, which is what a synchronous driver does anyway.</p>
+<pre class="sig"><code>pub struct Blocking[T] {
+  driver : T
+}</code></pre>
+<div class="member" id="sql-blocking-capabilities"><pre class="sig"><code>pub fn[T : @moondb.Driver] Blocking::capabilities(Self[T]) -&gt; @moondb.Capabilities</code></pre></div>
+<div class="member" id="sql-blocking-dialect"><pre class="sig"><code>pub fn[T : @moondb.Driver] Blocking::dialect(Self[T]) -&gt; @moondb.Dialect</code></pre></div>
+</article>
+<article id="sql-names"><h3><span class="kind">struct</span> Names</h3>
+<p>The three tables this package keeps, so that two savers can share one database without sharing one set of names.</p>
+<pre class="sig"><code>pub(all) struct Names {
+  checkpoint : String
+  write : String
+  item : String
+}</code></pre>
+<dl class="fields"><dt><code>checkpoint</code></dt><dd><p> One row per checkpoint.</p></dd><dt><code>write</code></dt><dd><p> One row per task that finished inside a superstep.</p></dd><dt><code>item</code></dt><dd><p> One row per key of the long-term store.</p></dd></dl>
+</article>
+<article id="sql-sqlsaver"><h3><span class="kind">struct</span> SqlSaver</h3>
+<p>Checkpoints in a SQL table.  One connection, one mutex: the driver&#x27;s connection carries one exchange at a time, and two runs sharing a saver would otherwise interleave their statements on it. Compile a graph with one saver per connection.</p>
+<pre class="sig"><code>pub struct SqlSaver[T] {
+  driver : T
+  names : Names
+  statements : Statements
+  lock : @async.Mutex
+  dialect : @moondb.Dialect
+}</code></pre>
+<div class="member" id="sql-sqlsaver-dialect"><pre class="sig"><code>pub fn[T] SqlSaver::dialect(Self[T]) -&gt; @moondb.Dialect</code></pre><p>The dialect the driver reported, which is the one the statements were written for.</p></div>
+</article>
+<article id="sql-sqlstore"><h3><span class="kind">struct</span> SqlStore</h3>
+<p>Long-term memory in a SQL table: spaced keys, each holding one JSON value.  The store is meant to outlive a thread, so it shares the connection discipline with the saver: one connection, one mutex, one saver and one store per connection.</p>
+<pre class="sig"><code>pub struct SqlStore[T] {
+  driver : T
+  names : Names
+  statements : Statements
+  lock : @async.Mutex
+  dialect : @moondb.Dialect
+}</code></pre>
+</article>
+<h3 id="sql-functions">Functions</h3>
+<div class="member" id="sql-blocking"><pre class="sig"><code>pub fn[T] blocking(T) -&gt; Blocking[T]</code></pre><p>Wrap <code>driver</code> so it can be handed to <code>saver</code> or <code>store</code>.  ``<code>moonbit nocheck let connection = @moonsqlite.SqliteDriver::open(&quot;state.db&quot;)  let saver = @sql.saver(@sql.blocking(connection)) </code>``</p></div>
+<div class="member" id="sql-saver"><pre class="sig"><code>pub fn[T : @moondb.AsyncDriver] saver(T, names? : Names, dialect? : @moondb.Dialect) -&gt; SqlSaver[T]</code></pre><p>A saver over <code>driver</code>, using the tables in <code>names</code>. Nothing is written until <code>setup</code> has run: a saver does not create tables behind the caller&#x27;s back, because a service account is often not allowed to.  ``<code>moonbit nocheck let saver = @sql.saver(connection) saver.setup() let graph = builder.compile(&quot;job&quot;, saver=saver) </code>`<code>  </code>dialect` overrides what the driver reports. A driver that numbers its parameters has to report its own dialect for this to be unnecessary; until it does, naming it here is the difference between one statement working and the first one being rejected by the server.</p></div>
+<div class="member" id="sql-store"><pre class="sig"><code>pub fn[T : @moondb.AsyncDriver] store(T, names? : Names, dialect? : @moondb.Dialect) -&gt; SqlStore[T]</code></pre><p>A store over <code>driver</code>, using the tables in <code>names</code>. <code>setup</code> on a saver of the same tables creates what this needs.  <code>dialect</code> overrides what the driver reports, the way <code>saver</code>&#x27;s does.</p></div>
+<h3 id="sql-values">Values</h3>
+<div class="member" id="sql-names"><pre class="sig"><code>pub let names : Names</code></pre><p>The names a saver and a store take when nothing else is asked for.</p></div>
+</section>
+<section id="otel-top"><h2><span class="pkg">moonstate/otel</span></h2><p>An executor that reports each superstep and each node inside it as a span.</p>
+<article id="otel-traced"><h3><span class="kind">struct</span> Traced</h3>
+<p>An executor that reports what it runs: one span per superstep, and one child span per node inside that superstep.  A trace follows a thread from superstep to superstep — each superstep span is a child of the previous one — so a run is one trace however many supersteps it takes, and a node&#x27;s span sits under the superstep that ran it. Two threads sharing the executor get two traces, because the chain is kept per thread.</p>
+<pre class="sig"><code>pub struct Traced {
+  inner : &amp;@moonstate.Executor
+  tracer : @trace.Tracer
+  now : () -&gt; Int64
+  last : Map[String, @trace.TraceContext]
+}</code></pre>
+<dl class="fields"><dt><code>last</code></dt><dd><p>The span the next superstep of a thread hangs off. Kept per thread, because the engine runs supersteps one at a time but several threads at once.</p></dd></dl>
+</article>
+<h3 id="otel-functions">Functions</h3>
+<div class="member" id="otel-traced"><pre class="sig"><code>pub fn traced(&amp;@moonstate.Executor, tracer~ : @trace.Tracer, now~ : () -&gt; Int64) -&gt; Traced</code></pre><p>Wrap <code>inner</code> so every task it runs is traced. <code>now</code> supplies the nanosecond timestamps; this library does not read a clock of its own, so a replay can run on a timeline the caller chose.</p></div>
+</section>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <span>moonbitstack/moonstate</span>
+      <a href="https://github.com/moonbitstack/moonstate">the repository</a>
+    </footer>
+  </body>
+</html>
