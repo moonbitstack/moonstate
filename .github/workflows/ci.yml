@@ -113,3 +113,94 @@ jobs:
 
       - name: kill the durable example mid-run and restart it
         run: bash scripts/kill_test.sh
+
+  backends:
+    name: the same checkpoint scenarios on four backends
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: moonstate
+          POSTGRES_DB: moonstate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: moonstate
+          MYSQL_DATABASE: moonstate
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -pmoonstate"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      # SQLite, PostgreSQL and MySQL run the same scenarios as the in-memory
+      # saver, and the transcripts have to match line for line.
+      - name: the four backends answer alike
+        working-directory: integration
+        env:
+          MOONSTATE_LIVE: "1"
+          PGPORT: "5432"
+          PGPASSWORD: moonstate
+          PGDATABASE: moonstate
+          MYSQL_TCP_PORT: "3306"
+          MYSQL_PWD: moonstate
+          MYSQL_DATABASE: moonstate
+        run: |
+          moon run src --target native | tee "$RUNNER_TEMP/backends.txt"
+          grep -q "every backend answers alike" "$RUNNER_TEMP/backends.txt"
+
+  semantic-conventions:
+    name: the spans follow the semantic conventions
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: install weaver
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/weaver.tar.xz" \
+            "https://github.com/open-telemetry/weaver/releases/download/v0.28.0/weaver-x86_64-unknown-linux-gnu.tar.xz"
+          tar -xf "$RUNNER_TEMP/weaver.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/weaver-x86_64-unknown-linux-gnu" >> "$GITHUB_PATH"
+
+      - name: the registry accepts the telemetry
+        run: bash scripts/weaver_live_check.sh
