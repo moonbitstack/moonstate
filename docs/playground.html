@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Playground — moonstate</title>
     <meta name="description" content="The instrument at full size: run three graphs, read the checkpoint records themselves, answer a question, rewrite the tail, and pull the plug to see the run survive a reload.">
-    <meta name="theme-color" content="#f3f0e7">
+    <meta name="theme-color" content="#f2efe6">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/instrument.css">
     <link rel="stylesheet" href="assets/pages.css">
@@ -62,6 +62,22 @@
         </div>
 
         <form class="controls" id="controls" autocomplete="off">
+          <div class="demo">
+            <div class="demo-head">
+              <button type="button" class="act act-play" id="play"><span class="mark-play" aria-hidden="true"></span><span class="demo-label">play the demo</span></button>
+              <span class="demo-note">five stages, about ten seconds, every one of them the engine</span>
+            </div>
+            <ol class="stages" id="stages" aria-label="The stages of the demo">
+              <li><button type="button" data-stage="0" aria-label="stage 1, a line">1</button></li>
+              <li><button type="button" data-stage="1" aria-label="stage 2, a question">2</button></li>
+              <li><button type="button" data-stage="2" aria-label="stage 3, the answer">3</button></li>
+              <li><button type="button" data-stage="3" aria-label="stage 4, a fan-out">4</button></li>
+              <li><button type="button" data-stage="4" aria-label="stage 5, a rewrite">5</button></li>
+            </ol>
+            <p class="stage-note" id="stage-note">press play, or pick a stage: each one runs the engine to that point.</p>
+          </div>
+
+          <div class="manual">
           <div class="chips" role="group" aria-label="The graph">
             <button type="button" class="chip is-on" data-scenario="line">a line</button>
             <button type="button" class="chip" data-scenario="review">a question</button>
@@ -92,6 +108,7 @@
             <button type="button" class="lever" id="pull">Pull the plug</button>
             <span>the tab reloads; the run does not start over.</span>
           </p>
+          </div>
         </form>
       </section>
 

@@ -1,18 +1,20 @@
 /* The site has one palette and two settings of it. Everything is drawn from
    these variables, so the theme toggle is a change of eight values.
 
-   Light: paper and ink, the accent taken from the moon's own colour.
-   Dark: the same drawing at night, the accent given back its light. */
+   The accent is verdigris, the colour a bronze instrument turns: a green-blue
+   that sits beside ink without competing with it, and is not the gold every
+   dial on every landing page is given. Light is bone paper; dark is a night
+   that keeps a little green in it rather than going blue. */
 
 :root {
-  --paper: #f3f0e7;
-  --panel: #fbf9f3;
-  --ink: #16150f;
-  --muted: #6b6759;
-  --rule: #cec7b4;
-  --rule-soft: #e2dccb;
-  --accent: #8a6a12;
-  --accent-soft: #d9c79a;
+  --paper: #f2efe6;
+  --panel: #faf8f1;
+  --ink: #151a17;
+  --muted: #63695f;
+  --rule: #cbc9bd;
+  --rule-soft: #e0ded2;
+  --accent: #2c6659;
+  --accent-soft: #a9c9be;
 
   --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
   --sans: ui-sans-serif, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -26,14 +28,14 @@
 }
 
 :root[data-theme="dark"] {
-  --paper: #0e0e0c;
-  --panel: #151513;
-  --ink: #ece9e1;
-  --muted: #98958c;
-  --rule: #33332c;
-  --rule-soft: #24241f;
-  --accent: #e9c46a;
-  --accent-soft: #4a3f22;
+  --paper: #0c100e;
+  --panel: #131815;
+  --ink: #e9ece7;
+  --muted: #96a099;
+  --rule: #2c3531;
+  --rule-soft: #1f2622;
+  --accent: #79c0ac;
+  --accent-soft: #2f4a41;
 
   color-scheme: dark;
 }
@@ -41,14 +43,14 @@
 /* No script and no stored choice: the system still decides. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --paper: #0e0e0c;
-    --panel: #151513;
-    --ink: #ece9e1;
-    --muted: #98958c;
-    --rule: #33332c;
-    --rule-soft: #24241f;
-    --accent: #e9c46a;
-    --accent-soft: #4a3f22;
+    --paper: #0c100e;
+    --panel: #131815;
+    --ink: #e9ece7;
+    --muted: #96a099;
+    --rule: #2c3531;
+    --rule-soft: #1f2622;
+    --accent: #79c0ac;
+    --accent-soft: #2f4a41;
 
     color-scheme: dark;
   }
@@ -637,59 +639,144 @@ pre code {
   color: var(--ink);
 }
 
-/* the three moves, in the order a first visitor should make them */
-.moves {
-  list-style: none;
-  margin: 2px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px dashed var(--rule);
+/* the demo track: a play button, five stages, one line saying what happens */
+
+.demo {
+  display: grid;
+  gap: 11px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.demo-head {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px 14px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--muted);
 }
 
-.moves li {
+.act-play {
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  border-color: var(--accent);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 9px 14px 8px;
 }
 
-.moves button {
-  border: none;
-  padding: 1px 0 2px;
+.act-play:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.mark-play {
+  width: 0;
+  height: 0;
+  margin-right: 9px;
+  border-left: 7px solid currentColor;
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+}
+
+.act-play.is-playing .mark-play {
+  width: 8px;
+  height: 8px;
+  margin-right: 9px;
+  border: 0;
+  background: currentColor;
+}
+
+.demo-note {
+  font-family: var(--mono);
+  font-size: 10.5px;
   color: var(--muted);
-  border-bottom: 1px solid var(--rule);
+}
+
+.stages {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  margin: 2px 0 0;
+  padding: 0;
+  position: relative;
+}
+
+.stages::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  top: 13px;
+  height: 1px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.stages li {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.stages li:first-child {
+  justify-content: flex-start;
+}
+
+.stages li:last-child {
+  justify-content: flex-end;
+}
+
+.stages button {
+  position: relative;
+  z-index: 1;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.stages button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stages li.is-done button {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stages li.is-next button {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.stages li.is-now button {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+.stage-note {
+  margin: 0;
+  min-height: 2.6em;
+  font-family: var(--mono);
   font-size: 11px;
-}
-
-.moves li.is-next button {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
-.moves li.is-next .n {
-  color: var(--accent);
-}
-
-.moves li.is-next .n::before {
-  content: "›";
-  margin-right: 4px;
-}
-
-.moves li.is-done button {
+  line-height: 1.55;
   color: var(--muted);
-  border-bottom-color: transparent;
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--rule);
+  max-width: 52ch;
 }
 
-.moves .n {
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
+.manual {
+  display: grid;
+  gap: 12px;
 }
 
 /* ---------- the plates ---------- */

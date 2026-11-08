@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>moonstate — durable state graphs for MoonBit</title>
     <meta name="description" content="A run is a sequence of supersteps, and every superstep is a checkpoint. This page runs the library in your browser: run it, stop it at a question, reload the tab, and it carries on.">
-    <meta name="theme-color" content="#f3f0e7">
+    <meta name="theme-color" content="#f2efe6">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/instrument.css">
     <script src="assets/theme.js"></script>
@@ -67,6 +67,22 @@
         </p>
 
         <form class="controls" id="controls" autocomplete="off">
+          <div class="demo">
+            <div class="demo-head">
+              <button type="button" class="act act-play" id="play"><span class="mark-play" aria-hidden="true"></span><span class="demo-label">play the demo</span></button>
+              <span class="demo-note">five stages, about ten seconds, every one of them the engine</span>
+            </div>
+            <ol class="stages" id="stages" aria-label="The stages of the demo">
+              <li><button type="button" data-stage="0" aria-label="stage 1, a line">1</button></li>
+              <li><button type="button" data-stage="1" aria-label="stage 2, a question">2</button></li>
+              <li><button type="button" data-stage="2" aria-label="stage 3, the answer">3</button></li>
+              <li><button type="button" data-stage="3" aria-label="stage 4, a fan-out">4</button></li>
+              <li><button type="button" data-stage="4" aria-label="stage 5, a rewrite">5</button></li>
+            </ol>
+            <p class="stage-note" id="stage-note">press play, or pick a stage: each one runs the engine to that point.</p>
+          </div>
+
+          <div class="manual">
           <div class="chips" role="group" aria-label="The graph">
             <button type="button" class="chip is-on" data-scenario="line">a line</button>
             <button type="button" class="chip" data-scenario="review">a question</button>
@@ -86,21 +102,8 @@
             <input id="answer" name="answer" inputmode="numeric" value="7" size="3">
             <button type="submit" class="act" id="reply">Answer</button>
           </div>
+          </div>
 
-          <ol class="moves" aria-label="Three things to try">
-            <li data-move="run">
-              <span class="n">1</span>
-              <button type="button" data-do="run">run it</button>
-            </li>
-            <li data-move="ask">
-              <span class="n">2</span>
-              <button type="button" data-do="ask">stop it at a question</button>
-            </li>
-            <li data-move="plug">
-              <span class="n">3</span>
-              <button type="button" data-do="plug">pull the plug</button>
-            </li>
-          </ol>
         </form>
       </section>
 
@@ -181,8 +184,9 @@
           <h2>A finished thread can be taken back</h2>
           <p>
             <code>update</code> writes a state as if a node had produced it, then the run
-            continues from what follows that node. The checkpoints of the abandoned attempt stay
-            in the history, so the ring keeps both arcs and the ledger keeps both records.
+            continues from what follows that node — on a new branch, whose supersteps are counted
+            from zero again. The checkpoints of the abandoned attempt stay in the history, so the
+            ring keeps both sets of notches and the ledger keeps both records.
           </p>
           <p>
             On <em>a line</em>, run it to the end and press <em>Rewrite the tail</em>.
@@ -203,7 +207,7 @@
           </ul>
           <p class="colophon">
             Set in the system serif and mono faces, drawn in SVG, run by the library it describes.
-            <br>moonbitstack/moonstate · Apache-2.0 · one accent, taken from the moon.
+            <br>moonbitstack/moonstate · Apache-2.0 · one accent, the colour bronze turns.
           </p>
         </section>
       </div>

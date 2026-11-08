@@ -1,13 +1,53 @@
 // The page's half of the demonstration. Every number it draws came back from
 // `../engine/moonstate.js`, which is this library compiled to JavaScript; nothing
 // here invents a state, a checkpoint or a superstep count.
+//
+// The demo is a script of five stages, and each stage is a few real calls into
+// the engine: a fresh saver, a run, an answer. Jumping to a stage replays the
+// ones before it, so what a visitor sees at stage four is the state a person
+// would have reached by pressing the buttons themselves.
 
 import { reset, run, answer, rewrite, dump, restore } from "../engine/moonstate.js";
 
 const CENTRE = 260;
 const RADIUS = 200;
 const STORE = "moonstate.run.v1";
-const MOVES = "moonstate.moves.v1";
+const SEEN = "moonstate.stages.v1";
+const BEAT = 1700;
+
+const STAGES = [
+  {
+    name: "a line",
+    scenario: "line",
+    actions: ["run"],
+    caption: "a line — seed, double, stamp: three supersteps and four checkpoints.",
+  },
+  {
+    name: "a question",
+    scenario: "review",
+    actions: ["run"],
+    caption: "a question — the second node asks, and the run stops with the question in a checkpoint.",
+  },
+  {
+    name: "the answer",
+    scenario: "review",
+    actions: ["run", "answer:7"],
+    caption: "the answer — 7 goes back into the same thread, and the node that asked reads it.",
+  },
+  {
+    name: "a fan-out",
+    scenario: "fanout",
+    actions: ["run"],
+    caption: "a fan-out — one superstep, three shards, one fold in the order they were queued.",
+  },
+  {
+    name: "a rewrite",
+    scenario: "line",
+    actions: ["run", "rewrite"],
+    caption:
+      "a rewrite — update starts a new branch from double, so the dial counts it from 0; the six checkpoints of both branches stay.",
+  },
+];
 
 const $ = (id) => document.getElementById(id);
 const tickLayer = $("ticks");
@@ -20,7 +60,10 @@ const svgNS = "http://www.w3.org/2000/svg";
 let payload = null;
 let limit = 25;
 let picked = null;
-let done = new Set(loadMoves());
+let seen = new Set(loadSeen());
+let stageNow = null;
+let playing = false;
+let token = 0;
 
 const at = (index) => ((-90 + (index * 360) / limit) * Math.PI) / 180;
 
@@ -31,27 +74,23 @@ const point = (index, radius) => [
 
 const round = (value) => Math.round(value * 10) / 10;
 
-function loadMoves() {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function loadSeen() {
   try {
-    const raw = JSON.parse(sessionStorage.getItem(MOVES) || "[]");
+    const raw = JSON.parse(sessionStorage.getItem(SEEN) || "[]");
     return Array.isArray(raw) ? raw : [];
   } catch {
     return [];
   }
 }
 
-function saveMoves() {
+function saveSeen() {
   try {
-    sessionStorage.setItem(MOVES, JSON.stringify([...done]));
+    sessionStorage.setItem(SEEN, JSON.stringify([...seen]));
   } catch {
-    // A tab that refuses storage simply forgets which moves were made.
+    // A tab that refuses storage forgets which stages were shown; nothing breaks.
   }
-}
-
-function mark(move) {
-  if (done.has(move)) return;
-  done.add(move);
-  saveMoves();
 }
 
 function buildRing() {
@@ -107,19 +146,20 @@ function drawRing() {
 
   // Where the run stopped because it ran out of graph, rather than because it ran
   // out of something to say: a short radial mark outside the rim.
-  if (!capLayer) return;
-  capLayer.replaceChildren();
-  if (payload && payload.outcome === "done" && phase > 0) {
-    const [x1, y1] = point(phase, RADIUS + 13);
-    const [x2, y2] = point(phase, RADIUS + 21);
-    const mark = document.createElementNS(svgNS, "line");
-    mark.setAttribute("x1", round(x1));
-    mark.setAttribute("y1", round(y1));
-    mark.setAttribute("x2", round(x2));
-    mark.setAttribute("y2", round(y2));
-    mark.setAttribute("class", "cap");
-    mark.setAttribute("stroke-linecap", "round");
-    capLayer.append(mark);
+  if (capLayer) {
+    capLayer.replaceChildren();
+    if (payload && payload.outcome === "done" && phase > 0) {
+      const [x1, y1] = point(phase, RADIUS + 13);
+      const [x2, y2] = point(phase, RADIUS + 21);
+      const mark = document.createElementNS(svgNS, "line");
+      mark.setAttribute("x1", round(x1));
+      mark.setAttribute("y1", round(y1));
+      mark.setAttribute("x2", round(x2));
+      mark.setAttribute("y2", round(y2));
+      mark.setAttribute("class", "cap");
+      mark.setAttribute("stroke-linecap", "round");
+      capLayer.append(mark);
+    }
   }
 
   notchLayer.replaceChildren();
@@ -203,16 +243,74 @@ function hintText() {
   return set.idle;
 }
 
-function renderMoves() {
-  if (document.querySelectorAll(".moves li").length === 0) return;
-  const order = ["run", "ask", "plug"];
-  const next = order.find((move) => !done.has(move)) || null;
-  for (const item of document.querySelectorAll(".moves li")) {
-    const move = item.dataset.move;
-    item.classList.toggle("is-done", done.has(move));
-    item.classList.toggle("is-next", move === next);
+/* ---------- the demo track ---------- */
+
+function renderStages() {
+  const track = $("stages");
+  if (!track) return;
+  const next = STAGES.findIndex((_, index) => !seen.has(index));
+
+  for (const item of track.querySelectorAll("li")) {
+    const index = Number(item.querySelector("button").dataset.stage);
+    item.classList.toggle("is-now", stageNow === index);
+    item.classList.toggle("is-done", seen.has(index) && stageNow !== index);
+    item.classList.toggle("is-next", next === index && stageNow !== index);
+  }
+
+  if ($("stage-note")) {
+    $("stage-note").textContent = stageNow !== null
+      ? `${stageNow + 1} · ${STAGES[stageNow].caption}`
+      : "press play, or pick a stage: each one runs the engine to that point.";
+  }
+
+  if ($("play")) {
+    $("play").classList.toggle("is-playing", playing);
+    const label = $("play").querySelector(".demo-label");
+    if (label) label.textContent = playing ? "stop the demo" : "play the demo";
+    $("play").setAttribute("aria-pressed", playing ? "true" : "false");
   }
 }
+
+async function gotoStage(index) {
+  const wanted = Math.max(0, Math.min(STAGES.length - 1, index));
+  for (let i = 0; i <= wanted; i += 1) {
+    const stage = STAGES[i];
+    await apply(reset(stage.scenario), true);
+    for (const action of stage.actions) {
+      if (action === "run") await apply(run(), true);
+      else if (action === "rewrite") await apply(rewrite("double"), true);
+      else if (action.startsWith("answer:")) {
+        await apply(answer(action.slice("answer:".length)), true);
+      }
+    }
+  }
+  stageNow = wanted;
+  seen.add(wanted);
+  saveSeen();
+  await persist();
+  render();
+}
+
+async function playDemo() {
+  if (playing) {
+    playing = false;
+    token += 1;
+    renderStages();
+    return;
+  }
+  playing = true;
+  const mine = ++token;
+  renderStages();
+  for (let i = 0; i < STAGES.length; i += 1) {
+    if (!playing || mine !== token) return;
+    await gotoStage(i);
+    if (i < STAGES.length - 1) await sleep(BEAT);
+  }
+  playing = false;
+  renderStages();
+}
+
+/* ---------- rendering ---------- */
 
 function render() {
   if (!payload) return;
@@ -237,39 +335,43 @@ function render() {
     ? `recorded ${record.id}`
     : payload.checkpoint || "no checkpoint";
 
-  ledger.replaceChildren();
-  payload.checkpoints.forEach((checkpoint, index) => {
-    const row = document.createElement("li");
-    row.tabIndex = 0;
-    row.dataset.index = String(index);
-    if (picked === index) row.classList.add("is-picked");
-    row.innerHTML =
-      `<span class="id">${checkpoint.id}</span>` +
-      `<span class="what">${summary(checkpoint.state)} · ${
-        checkpoint.next.length ? checkpoint.next.join(", ") : "end"
-      }</span>` +
-      `<span class="when">step ${checkpoint.step}${
-        checkpoint.interrupted ? " · asks" : ""
-      }</span>`;
-    row.addEventListener("click", () => pick(index));
-    row.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        pick(index);
-      }
+  if (ledger) {
+    ledger.replaceChildren();
+    payload.checkpoints.forEach((checkpoint, index) => {
+      const row = document.createElement("li");
+      row.tabIndex = 0;
+      row.dataset.index = String(index);
+      if (picked === index) row.classList.add("is-picked");
+      row.innerHTML =
+        `<span class="id">${checkpoint.id}</span>` +
+        `<span class="what">${summary(checkpoint.state)} · ${
+          checkpoint.next.length ? checkpoint.next.join(", ") : "end"
+        }</span>` +
+        `<span class="when">step ${checkpoint.step}${
+          checkpoint.interrupted ? " · asks" : ""
+        }</span>`;
+      row.addEventListener("click", () => pick(index));
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          pick(index);
+        }
+      });
+      ledger.append(row);
     });
-    ledger.append(row);
-  });
+  }
 
   const asking = payload.outcome === "asking";
-  $("answer-row").hidden = !asking;
-  $("run").disabled = asking;
-  $("rewrite").hidden = !(payload.outcome === "done" && payload.scenario === "line");
+  if ($("answer-row")) $("answer-row").hidden = !asking;
+  if ($("run")) $("run").disabled = asking;
+  if ($("rewrite")) {
+    $("rewrite").hidden = !(payload.outcome === "done" && payload.scenario === "line");
+  }
   for (const chip of document.querySelectorAll(".chip")) {
     chip.classList.toggle("is-on", chip.dataset.scenario === payload.scenario);
   }
 
-  renderMoves();
+  renderStages();
   drawRing();
   showRecord(record || payload.checkpoints[payload.checkpoints.length - 1] || null);
 }
@@ -281,7 +383,8 @@ function showRecord(record) {
   panel.innerHTML = record ? highlight(JSON.stringify(record, null, 2)) : "{ }";
 }
 
-const TOKEN = /("(?:\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?/g;
+const TOKEN =
+  /("(?:\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?/g;
 
 function highlight(text) {
   const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -313,15 +416,15 @@ async function persist(pending = false) {
   }
 }
 
-async function apply(call) {
+async function apply(call, quiet = false) {
   const text = await call;
   payload = JSON.parse(text);
   if (payload.status === "failed" && !payload.outcome) payload.outcome = "failed";
-  if (payload.outcome === "done" || payload.outcome === "asking") mark("run");
-  if (payload.outcome === "asking") mark("ask");
   picked = null;
-  await persist();
-  render();
+  if (!quiet) {
+    await persist();
+    render();
+  }
 }
 
 async function boot() {
@@ -329,12 +432,11 @@ async function boot() {
   try {
     const saved = localStorage.getItem(STORE);
     if (saved) {
-      const { scenario, records, plug } = JSON.parse(saved);
+      const { scenario, records } = JSON.parse(saved);
       const list = JSON.parse(records);
       if (Array.isArray(list) && list.length > 0) {
         await apply(restore(scenario, records));
-        if (plug) mark("plug");
-        renderMoves();
+        renderStages();
         return;
       }
     }
@@ -345,17 +447,25 @@ async function boot() {
   await apply(run());
 }
 
-$("run").addEventListener("click", () => apply(run()));
+$("run").addEventListener("click", () => {
+  stageNow = null;
+  renderStages();
+  apply(run());
+});
 
 $("reset").addEventListener("click", () => {
   const scenario = payload ? payload.scenario : "line";
   localStorage.removeItem(STORE);
+  stageNow = null;
+  renderStages();
   apply(reset(scenario));
 });
 
 for (const chip of document.querySelectorAll(".chip")) {
   chip.addEventListener("click", () => {
     localStorage.removeItem(STORE);
+    stageNow = null;
+    renderStages();
     apply(reset(chip.dataset.scenario));
   });
 }
@@ -363,33 +473,33 @@ for (const chip of document.querySelectorAll(".chip")) {
 $("controls").addEventListener("submit", (event) => {
   event.preventDefault();
   const value = $("answer").value.trim() || "7";
+  stageNow = null;
+  renderStages();
   apply(answer(value));
 });
 
-$("rewrite").addEventListener("click", () => apply(rewrite("double")));
+$("rewrite").addEventListener("click", () => {
+  stageNow = null;
+  renderStages();
+  apply(rewrite("double"));
+});
 
-async function switchTo(scenario) {
-  localStorage.removeItem(STORE);
-  await apply(reset(scenario));
-  await apply(run());
+if ($("pull")) {
+  $("pull").addEventListener("click", async () => {
+    await persist(true);
+    location.reload();
+  });
 }
 
-for (const button of document.querySelectorAll("[data-do]")) {
-  button.addEventListener("click", async () => {
-    switch (button.dataset.do) {
-      case "run":
-        await switchTo("line");
-        break;
-      case "ask":
-        await switchTo("review");
-        break;
-      case "plug":
-        await persist(true);
-        location.reload();
-        break;
-      default:
-        break;
-    }
+if ($("play")) {
+  $("play").addEventListener("click", () => playDemo());
+}
+
+for (const button of document.querySelectorAll("[data-stage]")) {
+  button.addEventListener("click", () => {
+    token += 1;
+    playing = false;
+    gotoStage(Number(button.dataset.stage));
   });
 }
 
