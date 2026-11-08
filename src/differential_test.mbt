@@ -470,6 +470,8 @@ async fn check_vector(vector : Json) -> Unit raise Failure {
         actual.push({
           "values": @json.to_json(snapshot.state),
           "next": Json::array(snapshot.next.map(node => Json(node))),
+          "step": Json(snapshot.step),
+          "interrupted": Json(snapshot.interrupt is Some(_)),
         })
       }
       expect_same(name + " snapshots", Json::array(actual), expected)

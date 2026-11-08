@@ -35,18 +35,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "a"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "b"
         ],
+        "step": 1,
         "values": {
           "log": [
             "a"
@@ -55,9 +59,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "c"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -67,7 +73,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -159,26 +167,32 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "start"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "left",
           "right"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "left",
@@ -278,27 +292,33 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "start"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "a",
           "b",
           "c"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -415,28 +435,34 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "start"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "a",
           "b"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "join"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -446,7 +472,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -567,29 +595,35 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "start"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "a",
           "b",
           "c"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "gathered"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -600,7 +634,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -735,18 +771,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "loop"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "loop"
         ],
+        "step": 1,
         "values": {
           "log": [
             "tick"
@@ -755,9 +795,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "loop"
         ],
+        "step": 2,
         "values": {
           "log": [
             "tick",
@@ -767,9 +809,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "exit"
         ],
+        "step": 3,
         "values": {
           "log": [
             "tick",
@@ -780,7 +824,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 4,
         "values": {
           "log": [
             "tick",
@@ -879,18 +925,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "a"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "b"
         ],
+        "step": 1,
         "values": {
           "log": [
             "a"
@@ -899,9 +949,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "exit"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -911,7 +963,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -1007,25 +1061,31 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "router"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [
           "small"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "small"
@@ -1116,25 +1176,31 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "router"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [
           "low"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "low"
@@ -1258,27 +1324,33 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "fan"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "worker",
           "worker",
           "worker"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "w0",
@@ -1354,28 +1426,34 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "fan"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "worker",
           "worker"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "collect"
         ],
+        "step": 2,
         "values": {
           "log": [
             "w",
@@ -1385,7 +1463,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "w",
@@ -1460,25 +1540,31 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "a"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "c"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "c"
@@ -1558,18 +1644,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "a"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "c"
         ],
+        "step": 1,
         "values": {
           "log": [
             "jump"
@@ -1578,7 +1668,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "jump",
@@ -1663,18 +1755,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "flaky"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 4
         }
       },
       {
+        "interrupted": false,
         "next": [
           "out"
         ],
+        "step": 1,
         "values": {
           "log": [
             "flaky"
@@ -1683,7 +1779,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "flaky",
@@ -1783,18 +1881,22 @@
     },
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "before"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": true,
         "next": [
           "gate"
         ],
+        "step": 1,
         "values": {
           "log": [
             "before"
@@ -1803,9 +1905,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "after"
         ],
+        "step": 2,
         "values": {
           "log": [
             "before",
@@ -1815,7 +1919,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "before",
@@ -1936,18 +2042,22 @@
     },
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "a"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": true,
         "next": [
           "gate"
         ],
+        "step": 1,
         "values": {
           "log": [
             "a"
@@ -1956,9 +2066,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "b"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -1968,9 +2080,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "c"
         ],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -1981,7 +2095,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 4,
         "values": {
           "log": [
             "a",
@@ -2087,27 +2203,33 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "start"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [
           "sub"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [
           "done"
         ],
+        "step": 2,
         "values": {
           "log": [
             "sub"
@@ -2116,7 +2238,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "sub",
@@ -2229,18 +2353,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "loop"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "sub"
         ],
+        "step": 1,
         "values": {
           "log": [
             "tick"
@@ -2249,9 +2377,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "loop"
         ],
+        "step": 2,
         "values": {
           "log": [
             "tick",
@@ -2261,9 +2391,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "sub"
         ],
+        "step": 3,
         "values": {
           "log": [
             "tick",
@@ -2274,9 +2406,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "exit"
         ],
+        "step": 4,
         "values": {
           "log": [
             "tick",
@@ -2288,7 +2422,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 5,
         "values": {
           "log": [
             "tick",
@@ -2422,18 +2558,22 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "a"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "b"
         ],
+        "step": 1,
         "values": {
           "log": [
             "a"
@@ -2442,9 +2582,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "c"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -2454,9 +2596,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "d"
         ],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -2467,9 +2611,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "e"
         ],
+        "step": 4,
         "values": {
           "log": [
             "a",
@@ -2481,9 +2627,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "f"
         ],
+        "step": 5,
         "values": {
           "log": [
             "a",
@@ -2496,7 +2644,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 6,
         "values": {
           "log": [
             "a",
@@ -2881,28 +3031,34 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "start"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "a",
           "b"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "mid"
         ],
+        "step": 2,
         "values": {
           "log": [
             "a",
@@ -2912,10 +3068,12 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "c",
           "d"
         ],
+        "step": 3,
         "values": {
           "log": [
             "a",
@@ -2926,9 +3084,11 @@
         }
       },
       {
+        "interrupted": false,
         "next": [
           "last"
         ],
+        "step": 4,
         "values": {
           "log": [
             "a",
@@ -2941,7 +3101,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 5,
         "values": {
           "log": [
             "a",
@@ -3094,28 +3256,34 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "fan"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "worker",
           "worker"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 0
         }
       },
       {
+        "interrupted": false,
         "next": [
           "finish"
         ],
+        "step": 2,
         "values": {
           "log": [
             "w0",
@@ -3125,7 +3293,9 @@
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 3,
         "values": {
           "log": [
             "w0",
@@ -3208,26 +3378,32 @@
     "resumed": null,
     "snapshots": [
       {
+        "interrupted": false,
         "next": [
           "router"
         ],
+        "step": 0,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [
           "x",
           "y"
         ],
+        "step": 1,
         "values": {
           "log": [],
           "n": 1
         }
       },
       {
+        "interrupted": false,
         "next": [],
+        "step": 2,
         "values": {
           "log": [
             "x",

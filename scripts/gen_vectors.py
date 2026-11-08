@@ -191,14 +191,26 @@ def drain(stream: Any) -> list[dict[str, Any]]:
 
 
 def snapshots_of(compiled: Any, config: Any) -> list[dict[str, Any]]:
-    """One entry per superstep, oldest first: the state it started from and the
-    nodes it was about to run. The raw-input checkpoint LangGraph writes before
-    `__start__` has no counterpart here, so it is dropped."""
+    """One entry per checkpoint, oldest first: the state it holds, the tasks it
+    says run next, which superstep it is, and whether it is waiting on an answer.
+
+    The raw-input checkpoint LangGraph writes before `__start__` has no
+    counterpart here, so it is dropped."""
     steps = []
     for snapshot in reversed(list(compiled.get_state_history(config))):
         if snapshot.next and list(snapshot.next) == ["__start__"]:
             continue
-        steps.append({"values": snapshot.values, "next": list(snapshot.next)})
+        interrupted = any(
+            task.interrupts for task in (snapshot.tasks or ())
+        )
+        steps.append(
+            {
+                "values": snapshot.values,
+                "next": list(snapshot.next),
+                "step": snapshot.metadata.get("step"),
+                "interrupted": interrupted,
+            }
+        )
     return steps
 
 
