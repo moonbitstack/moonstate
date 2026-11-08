@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Playground — moonstate</title>
     <meta name="description" content="The instrument at full size: run three graphs, read the checkpoint records themselves, answer a question, rewrite the tail, and pull the plug to see the run survive a reload.">
+    <link rel="canonical" href="https://moonbitstack.github.io/moonstate/playground.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="moonstate">
+    <meta property="og:title" content="Playground — moonstate">
+    <meta property="og:description" content="The instrument at full size: run three graphs, read the checkpoint records themselves, answer a question, rewrite the tail, and pull the plug to see the run survive a reload.">
+    <meta property="og:url" content="https://moonbitstack.github.io/moonstate/playground.html">
+    <meta property="og:image" content="https://moonbitstack.github.io/moonstate/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#f1f0e7">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="modulepreload" href="engine/moonstate.js">
     <link rel="stylesheet" href="assets/instrument.css">
     <link rel="stylesheet" href="assets/pages.css">
     <script src="assets/theme.js"></script>
@@ -61,6 +72,13 @@
             <p class="budget">limit <span id="limit">25</span></p>
           </div>
         </div>
+
+        <p class="legend" aria-hidden="true">
+          <span><i></i> a superstep that ran</span>
+          <span><i class="k-notch"></i> a checkpoint</span>
+          <span><i class="k-now"></i> the phase it is on</span>
+          <span><i class="k-tick"></i> a phase left</span>
+        </p>
 
         <form class="controls" id="controls" autocomplete="off">
           <div class="demo">
