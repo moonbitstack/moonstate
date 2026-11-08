@@ -419,10 +419,10 @@ pre code {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 4px 16px;
+  gap: 4px 13px;
   margin: -14px 0 6px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.02em;
   color: var(--muted);
 }
@@ -430,12 +430,12 @@ pre code {
 .legend span {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .legend i {
   display: inline-block;
-  width: 16px;
+  width: 13px;
   height: 2px;
   background: var(--accent);
 }
