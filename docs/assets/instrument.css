@@ -419,6 +419,7 @@ pre code {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: none;
   gap: 4px 13px;
   margin: -14px 0 6px;
   font-family: var(--mono);

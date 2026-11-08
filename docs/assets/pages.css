@@ -467,10 +467,6 @@
   margin: 4px 0 10px;
 }
 
-.pg p {
-  max-width: 60ch;
-}
-
 .pg .side {
   display: grid;
   gap: 22px;
@@ -501,6 +497,7 @@
 }
 
 .pg .plate p {
+  max-width: 60ch;
   font-size: 15px;
   line-height: 1.6;
   margin: 0 0 12px;
