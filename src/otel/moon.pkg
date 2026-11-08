@@ -1,0 +1,17 @@
+// Traces for a run.
+//
+// One span per superstep and one per node inside it, named with the GenAI
+// semantic conventions
+// (https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/) so that a
+// graph shows up in a trace viewer next to the model calls it makes.
+
+import {
+  "moonbitstack/moonstate",
+  "moonbitstack/moontel/semconv",
+  "moonbitstack/moontel/trace",
+}
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+} for "wbtest"

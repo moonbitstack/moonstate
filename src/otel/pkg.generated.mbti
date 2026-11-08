@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonstate/otel"
+
+import {
+  "moonbitstack/moonstate",
+  "moonbitstack/moontel/trace",
+}
+
+// Values
+pub fn traced(&@moonstate.Executor, tracer~ : @trace.Tracer, now~ : () -> Int64) -> Traced
+
+// Errors
+
+// Types and methods
+pub struct Traced {
+  inner : &@moonstate.Executor
+  tracer : @trace.Tracer
+  now : () -> Int64
+  last : Map[String, @trace.TraceContext]
+}
+pub async fn Traced::each(Self, Array[@moonstate.Work]) -> Array[@moonstate.Done]
+pub impl @moonstate.Executor for Traced
+
+// Type aliases
+
+// Traits

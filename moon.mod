@@ -41,6 +41,11 @@ keywords = [
   "mariadb",
   "database",
   "durable-workflow",
+  "opentelemetry",
+  "otel",
+  "otel-tracing",
+  "tracing",
+  "observability",
   "moonbit",
 ]
 
