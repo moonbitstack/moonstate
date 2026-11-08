@@ -201,10 +201,20 @@ jobs:
           moon version --all
           moon update
 
+      # The release CDN answers 504 often enough that a single curl is a coin
+      # toss; the API path is a second route to the same file.
       - name: install weaver
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          curl -fsSL -o "$RUNNER_TEMP/weaver.tar.xz" \
-            "https://github.com/open-telemetry/weaver/releases/download/v0.28.0/weaver-x86_64-unknown-linux-gnu.tar.xz"
+          asset="weaver-x86_64-unknown-linux-gnu.tar.xz"
+          url="https://github.com/open-telemetry/weaver/releases/download/v0.28.0/$asset"
+          if ! curl -fsSL --retry 5 --retry-all-errors --retry-delay 3 \
+              -o "$RUNNER_TEMP/weaver.tar.xz" "$url"; then
+            gh release download v0.28.0 -R open-telemetry/weaver -p "$asset" \
+              -D "$RUNNER_TEMP" --clobber
+            mv "$RUNNER_TEMP/$asset" "$RUNNER_TEMP/weaver.tar.xz"
+          fi
           tar -xf "$RUNNER_TEMP/weaver.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/weaver-x86_64-unknown-linux-gnu" >> "$GITHUB_PATH"
 
