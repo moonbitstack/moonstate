@@ -1,0 +1,84 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonstate/sql"
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+  "moonbitstack/moondb",
+  "moonbitstack/moonstate",
+}
+
+// Values
+pub fn[T] blocking(T) -> Blocking[T]
+
+pub let names : Names
+
+pub fn[T : @moondb.AsyncDriver] saver(T, names? : Names, dialect? : @moondb.Dialect) -> SqlSaver[T]
+
+pub fn[T : @moondb.AsyncDriver] store(T, names? : Names, dialect? : @moondb.Dialect) -> SqlStore[T]
+
+// Errors
+pub(all) suberror Failed {
+  Unreadable(column~ : String, reason~ : String)
+}
+pub fn Failed::report(Self) -> String
+
+// Types and methods
+pub struct Blocking[T] {
+  driver : T
+}
+pub async fn[T : @moondb.Driver] Blocking::begin(Self[T]) -> Unit raise @moondb.DbError
+pub fn[T : @moondb.Driver] Blocking::capabilities(Self[T]) -> @moondb.Capabilities
+pub async fn[T : @moondb.Driver] Blocking::close(Self[T]) -> Unit
+pub async fn[T : @moondb.Driver] Blocking::commit(Self[T]) -> Unit raise @moondb.DbError
+pub fn[T : @moondb.Driver] Blocking::dialect(Self[T]) -> @moondb.Dialect
+pub async fn[T : @moondb.Driver] Blocking::execute(Self[T], String, Array[@moondb.Value]) -> @moondb.ExecResult raise @moondb.DbError
+pub async fn[T : @moondb.Driver] Blocking::ping(Self[T]) -> Bool
+pub async fn[T : @moondb.Driver] Blocking::prepare(Self[T], String) -> &@moondb.AsyncStmt raise @moondb.DbError
+pub async fn[T : @moondb.Driver] Blocking::query(Self[T], String, Array[@moondb.Value]) -> Array[@moondb.Row] raise @moondb.DbError
+pub async fn[T : @moondb.Driver] Blocking::query_stream(Self[T], String, Array[@moondb.Value]) -> &@moondb.AsyncCursor raise @moondb.DbError
+pub async fn[T : @moondb.Driver] Blocking::rollback(Self[T]) -> Unit raise @moondb.DbError
+pub impl[T : @moondb.Driver] @moondb.AsyncDriver for Blocking[T]
+
+pub(all) struct Names {
+  checkpoint : String
+  write : String
+  item : String
+}
+
+pub struct SqlSaver[T] {
+  driver : T
+  names : Names
+  statements : Statements
+  lock : @async.Mutex
+  dialect : @moondb.Dialect
+}
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::delete(Self[T], String) -> Unit
+pub fn[T] SqlSaver::dialect(Self[T]) -> @moondb.Dialect
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::forget(Self[T], String) -> Unit
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::get(Self[T], String, id? : String) -> @moonstate.Checkpoint?
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::list(Self[T], String, limit? : Int32, before? : String) -> Array[@moonstate.Checkpoint]
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::put(Self[T], @moonstate.Checkpoint) -> Unit
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::put_writes(Self[T], String, String, String, Array[@json.Json]) -> Unit
+pub async fn[T : @moondb.AsyncDriver] SqlSaver::setup(Self[T]) -> Unit
+pub impl[T : @moondb.AsyncDriver] @moonstate.Saver for SqlSaver[T]
+
+pub struct SqlStore[T] {
+  driver : T
+  names : Names
+  statements : Statements
+  lock : @async.Mutex
+  dialect : @moondb.Dialect
+}
+pub async fn[T : @moondb.AsyncDriver] SqlStore::delete(Self[T], Array[String], String) -> Unit
+pub async fn[T : @moondb.AsyncDriver] SqlStore::get(Self[T], Array[String], String) -> @moonstate.Item?
+pub async fn[T : @moondb.AsyncDriver] SqlStore::put(Self[T], Array[String], String, @json.Json) -> Unit
+pub async fn[T : @moondb.AsyncDriver] SqlStore::search(Self[T], Array[String], query? : String, filter? : Map[String, @json.Json], limit? : Int32) -> Array[@moonstate.Item]
+pub async fn[T : @moondb.AsyncDriver] SqlStore::setup(Self[T]) -> Unit
+pub impl[T : @moondb.AsyncDriver] @moonstate.Store for SqlStore[T]
+
+type Statements
+
+// Type aliases
+
+// Traits

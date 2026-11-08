@@ -32,6 +32,15 @@ keywords = [
   "agent",
   "orchestration",
   "json",
+  "sql-checkpoint",
+  "checkpoint-saver",
+  "sqlite",
+  "postgres",
+  "postgresql",
+  "mysql",
+  "mariadb",
+  "database",
+  "durable-workflow",
   "moonbit",
 ]
 
@@ -41,4 +50,6 @@ source = "src"
 
 import {
   "moonbitlang/async@0.22.5",
+  "moonbitstack/moondb@0.2.7",
+  "moonbitstack/moontel@0.1.1",
 }
