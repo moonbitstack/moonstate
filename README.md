@@ -437,7 +437,10 @@ page of history, a rewrite, a deleted thread, and long-term memory — run again
 in-memory saver, SQLite, PostgreSQL and MySQL in `integration/`, and the transcripts have to
 match line for line. The spans of a run are checked against the OpenTelemetry semantic
 conventions registry by `weaver registry live-check` in CI: the names on them are the
-conventions' names, and a name this library invented would fail the job.
+conventions' names, and a name this library invented would fail the job. Against the GenAI
+registry the eight spans of the example raise 28 advisories and no violation; every one of
+the 28 says an attribute is at `development` stability, which is the state of that family of
+conventions rather than anything about the name.
 
 Two behaviours are deliberately different, and are not in the vectors:
 
