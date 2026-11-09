@@ -1,6 +1,6 @@
 name = "moonbitstack/moonstate"
 
-version = "0.1.0"
+version = "0.1.1"
 
 readme = "README.md"
 
@@ -55,6 +55,6 @@ source = "src"
 
 import {
   "moonbitlang/async@0.22.5",
-  "moonbitstack/moondb@0.2.7",
+  "moonbitstack/moondb@0.2.8",
   "moonbitstack/moontel@0.1.2",
 }
