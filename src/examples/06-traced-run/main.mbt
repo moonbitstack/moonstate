@@ -131,7 +131,7 @@ async fn main {
       transport~,
       endpoint="http://" + host + ":" + port.to_string() + "/v1/traces",
       resource=@otlp.Resource::new(attributes=[]),
-      format=@otlp.BodyFormat::Protobuf,
+      encoding=@binary.protobuf,
       now=nanos,
       rand=bytes,
     )
