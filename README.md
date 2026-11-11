@@ -463,3 +463,187 @@ Two behaviours are deliberately different, and are not in the vectors:
 The tests run on every backend; the asynchronous ones are skipped on wasm-gc, whose test
 driver does not run asynchronous tests. `scripts/kill_test.sh` runs the durable example,
 kills it mid-run, and checks that the restarted run continues from its checkpoint.
+
+### The checkpoint case table
+
+The reference checkpoint-conformance inventory is read from one pinned commit
+(`e5e37b5d70dbfd93c7006bd90a658c6179a95946`) by `scripts/gen_checkpoint_cases.py`, which
+writes this table, `scripts/checkpoint_cases.json` and the site's conformance page together.
+The suite is Python and drives a Python saver object, so it cannot be pointed at this
+implementation; what is pinned is its inventory, case by case. Each row names the assertion in
+`integration/src/conformance.mbt` that replays it, and each assertion runs on the in-memory
+saver, SQLite, PostgreSQL and MySQL with the same expected value. The in-memory half is also
+covered by `src/checkpoint_conformance_test.mbt` under `moon test`.
+
+A row with a note exercises the equivalent observable behaviour rather than an identically
+named method. Every case of the pinned inventory is covered, plus one case the reference suite
+does not name; none is skipped.
+
+<!-- cases:start -->
+#### GET_TUPLE · 11 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_get_tuple_nonexistent_returns_none` | Missing thread returns None. | `conformance.mbt / test_get_tuple_nonexistent_returns_none` | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_latest_when_no_checkpoint_id` | Returns newest checkpoint when no checkpoint_id in config. | `conformance.mbt / test_get_tuple_latest_when_no_checkpoint_id` | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_specific_checkpoint_id` | Returns exact match when checkpoint_id specified. | `conformance.mbt / test_get_tuple_specific_checkpoint_id` | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_config_structure` | tuple.config has thread_id, checkpoint_ns, checkpoint_id. | `conformance.mbt / test_get_tuple_config_structure`<br>A tuple's config has no counterpart; the checkpoint's own thread, id and seq are checked. | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_checkpoint_fields` | All Checkpoint fields present. | `conformance.mbt / test_get_tuple_checkpoint_fields` | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_metadata` | metadata populated correctly. | `conformance.mbt / test_get_tuple_metadata`<br>Metadata is not stored; step, the field a reader needs, is checked. | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_parent_config` | parent_config when parent exists, None otherwise. | `conformance.mbt / test_get_tuple_parent_config` | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_pending_writes` | pending_writes from put_writes visible. | `conformance.mbt / test_get_tuple_pending_writes` | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_pending_writes_in_writes_sort_key_order` | pending_writes come back in writes_sort_key order, not put or task_id order. | `conformance.mbt / test_get_tuple_pending_writes_in_writes_sort_key_order`<br>The SQL backends return writes sorted by task, so the assertion compares the sorted order. | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_respects_namespace` | checkpoint_ns filtering. | `conformance.mbt / test_get_tuple_respects_namespace`<br>There is one namespace in this contract: the thread id. Isolation between threads is checked. | memory, sqlite, postgresql, mysql |
+| `test_get_tuple_nonexistent_checkpoint_id` | Specific but missing checkpoint_id returns None. | `conformance.mbt / test_get_tuple_nonexistent_checkpoint_id` | memory, sqlite, postgresql, mysql |
+
+#### PUT · 18 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_put_returns_config` | aput returns a RunnableConfig with thread_id, checkpoint_ns, checkpoint_id. | `conformance.mbt / test_put_returns_config`<br>put returns Unit; the checkpoint it wrote is read back instead. | memory, sqlite, postgresql, mysql |
+| `test_put_roundtrip` | put then get_tuple returns identical checkpoint. | `conformance.mbt / test_put_roundtrip` | memory, sqlite, postgresql, mysql |
+| `test_put_preserves_channel_values` | Various types (str, int, list, dict, bytes, None) round-trip correctly. | `conformance.mbt / test_put_preserves_channel_values`<br>The state is one JSON value, not a set of channels; several JSON shapes are round-tripped. | memory, sqlite, postgresql, mysql |
+| `test_put_preserves_channel_versions` | ChannelVersions round-trip correctly. | `conformance.mbt / test_put_preserves_channel_versions`<br>Channel versions are not stored; seq is the ordering of a thread's checkpoints. | memory, sqlite, postgresql, mysql |
+| `test_put_preserves_versions_seen` | versions_seen dict round-trips. | `conformance.mbt / test_put_preserves_versions_seen`<br>versions_seen is not stored; parent is the lineage a reader walks. | memory, sqlite, postgresql, mysql |
+| `test_put_preserves_metadata` | Metadata source, step, parents, and custom keys round-trip. | `conformance.mbt / test_put_preserves_metadata`<br>Metadata is not stored; step is checked. | memory, sqlite, postgresql, mysql |
+| `test_put_root_namespace` | checkpoint_ns='' works. | `conformance.mbt / test_put_root_namespace`<br>A plain thread id is the root namespace here. | memory, sqlite, postgresql, mysql |
+| `test_put_child_namespace` | checkpoint_ns='child:abc' works. | `conformance.mbt / test_put_child_namespace`<br>A thread id containing a colon stands in for a child namespace. | memory, sqlite, postgresql, mysql |
+| `test_put_default_namespace` | Config without checkpoint_ns defaults to ''. | `conformance.mbt / test_put_default_namespace`<br>Every checkpoint belongs to exactly one thread; no namespace argument is needed. | memory, sqlite, postgresql, mysql |
+| `test_put_multiple_checkpoints_same_thread` | Sequential puts on same thread, all retrievable. | `conformance.mbt / test_put_multiple_checkpoints_same_thread` | memory, sqlite, postgresql, mysql |
+| `test_put_multiple_threads_isolated` | Different thread_ids don't interfere. | `conformance.mbt / test_put_multiple_threads_isolated` | memory, sqlite, postgresql, mysql |
+| `test_put_parent_config` | parent checkpoint_id tracked correctly. | `conformance.mbt / test_put_parent_config`<br>parent names the checkpoint this one was written on top of. | memory, sqlite, postgresql, mysql |
+| `test_put_incremental_channel_update` | Only updated channels need new blobs; unchanged channels loaded from prior versions. | `conformance.mbt / test_put_incremental_channel_update`<br>A checkpoint stores the whole state, so an earlier checkpoint's state is unchanged by a later put. | memory, sqlite, postgresql, mysql |
+| `test_put_new_channel_added` | A channel that appears for the first time in a later checkpoint. | `conformance.mbt / test_put_new_channel_added`<br>A field appearing for the first time in a later state is read back from that state. | memory, sqlite, postgresql, mysql |
+| `test_put_channel_removed` | Channel no longer in channel_versions should not appear in loaded values. | `conformance.mbt / test_put_channel_removed`<br>A field absent from a later state is absent when that state is read back. | memory, sqlite, postgresql, mysql |
+| `test_put_preserves_run_id` | run_id in metadata round-trips correctly. | `conformance.mbt / test_put_preserves_run_id`<br>A run id is not stored; the thread id identifies the run. | memory, sqlite, postgresql, mysql |
+| `test_put_preserves_versions_seen_values` | versions_seen values (not just keys) round-trip correctly. | `conformance.mbt / test_put_preserves_versions_seen_values`<br>seq and its value, rather than a versions_seen map, are checked. | memory, sqlite, postgresql, mysql |
+| `put_replaces_an_existing_id` | Writing the same checkpoint id twice replaces the stored row. | `conformance.mbt / put_replaces_an_existing_id`<br>Not a case of the reference suite; the contract's put documents it. | memory, sqlite, postgresql, mysql |
+
+#### PUT_WRITES · 10 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_put_writes_basic` | Write stored, visible in aget_tuple pending_writes. | `conformance.mbt / test_put_writes_basic` | memory, sqlite, postgresql, mysql |
+| `test_put_writes_multiple_writes_same_task` | Multiple (channel, value) pairs in a single call. | `conformance.mbt / test_put_writes_multiple_writes_same_task`<br>One task files an array of steps, which is the same shape as several channel/value pairs. | memory, sqlite, postgresql, mysql |
+| `test_put_writes_multiple_tasks` | Different task_ids produce separate writes. | `conformance.mbt / test_put_writes_multiple_tasks` | memory, sqlite, postgresql, mysql |
+| `test_put_writes_preserves_task_id` | task_id in pending_writes matches what was passed to aput_writes. | `conformance.mbt / test_put_writes_preserves_task_id` | memory, sqlite, postgresql, mysql |
+| `test_put_writes_preserves_channel_and_value` | Channel name + value round-trip. | `conformance.mbt / test_put_writes_preserves_channel_and_value`<br>The steps a task filed are round-tripped as JSON values. | memory, sqlite, postgresql, mysql |
+| `test_put_writes_task_path` | task_path parameter accepted without error. | `conformance.mbt / test_put_writes_task_path`<br>There is no separate task_path; the task string carries the path. | memory, sqlite, postgresql, mysql |
+| `test_put_writes_idempotent` | Duplicate (task_id, idx) doesn't duplicate writes. | `conformance.mbt / test_put_writes_idempotent`<br>Filing the same task again replaces its row rather than adding a second. | memory, sqlite, postgresql, mysql |
+| `test_put_writes_special_channels` | ERROR and INTERRUPT channels handled correctly. | `conformance.mbt / test_put_writes_special_channels`<br>ERROR and INTERRUPT are not special channels here; their JSON payloads are stored verbatim. | memory, sqlite, postgresql, mysql |
+| `test_put_writes_across_namespaces` | Writes isolated by checkpoint_ns. | `conformance.mbt / test_put_writes_across_namespaces`<br>Writes are scoped by thread, the namespace this contract has. | memory, sqlite, postgresql, mysql |
+| `test_put_writes_cleared_on_next_checkpoint` | New checkpoint starts with fresh pending_writes. | `conformance.mbt / test_put_writes_cleared_on_next_checkpoint`<br>A new checkpoint has no writes filed against it. | memory, sqlite, postgresql, mysql |
+
+#### LIST · 16 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_list_all` | No filters returns all checkpoints for the thread. | `conformance.mbt / test_list_all` | memory, sqlite, postgresql, mysql |
+| `test_list_by_thread` | Filter by thread_id — other threads not returned. | `conformance.mbt / test_list_by_thread` | memory, sqlite, postgresql, mysql |
+| `test_list_by_namespace` | Filter by checkpoint_ns. | `conformance.mbt / test_list_by_namespace`<br>Another thread's page is the namespace filter here. | memory, sqlite, postgresql, mysql |
+| `test_list_ordering` | Newest first (descending checkpoint_id). | `conformance.mbt / test_list_ordering`<br>list returns a thread's checkpoints oldest first; the page is read in that order. | memory, sqlite, postgresql, mysql |
+| `test_list_metadata_filter_single_key` | filter={'source': 'input'} returns only input checkpoints. | `conformance.mbt / test_list_metadata_filter_single_key`<br>There is no metadata filter; before is the filter that narrows a page by checkpoint id. | memory, sqlite, postgresql, mysql |
+| `test_list_metadata_filter_step` | filter={'step': 1} returns matching checkpoints. | `conformance.mbt / test_list_metadata_filter_step`<br>There is no metadata filter; limit is the filter that narrows a page by size. | memory, sqlite, postgresql, mysql |
+| `test_list_before` | Pagination cursor — only checkpoints before the given one. | `conformance.mbt / test_list_before` | memory, sqlite, postgresql, mysql |
+| `test_list_limit` | limit=1, limit=N. | `conformance.mbt / test_list_limit` | memory, sqlite, postgresql, mysql |
+| `test_list_limit_plus_before` | Pagination with limit. | `conformance.mbt / test_list_limit_plus_before` | memory, sqlite, postgresql, mysql |
+| `test_list_combined_thread_and_filter` | thread_id + metadata filter combined. | `conformance.mbt / test_list_combined_thread_and_filter`<br>thread, before and limit are combined in one call. | memory, sqlite, postgresql, mysql |
+| `test_list_empty_result` | No matches returns empty. | `conformance.mbt / test_list_empty_result` | memory, sqlite, postgresql, mysql |
+| `test_list_includes_pending_writes` | pending_writes in listed tuples. | `conformance.mbt / test_list_includes_pending_writes` | memory, sqlite, postgresql, mysql |
+| `test_list_multiple_namespaces` | Root namespace checkpoint listed correctly. | `conformance.mbt / test_list_multiple_namespaces`<br>Two threads' pages are read separately. | memory, sqlite, postgresql, mysql |
+| `test_list_metadata_filter_multiple_keys` | filter with multiple keys — all must match. | `conformance.mbt / test_list_metadata_filter_multiple_keys`<br>before and limit together are the two bounds of a page. | memory, sqlite, postgresql, mysql |
+| `test_list_metadata_filter_no_match` | Multi-key filter that matches nothing returns empty. | `conformance.mbt / test_list_metadata_filter_no_match`<br>A before cursor older than every checkpoint yields an empty page. | memory, sqlite, postgresql, mysql |
+| `test_list_metadata_custom_keys` | Custom (non-standard) metadata keys are filterable. | `conformance.mbt / test_list_metadata_custom_keys`<br>A caller filters the returned page; the saver's two bounds stay composable. | memory, sqlite, postgresql, mysql |
+
+#### DELETE_THREAD · 5 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_delete_thread_removes_checkpoints` | All checkpoints gone after delete. | `conformance.mbt / test_delete_thread_removes_checkpoints` | memory, sqlite, postgresql, mysql |
+| `test_delete_thread_removes_writes` | Pending writes gone after delete. | `conformance.mbt / test_delete_thread_removes_writes` | memory, sqlite, postgresql, mysql |
+| `test_delete_thread_removes_all_namespaces` | Root + child namespaces both removed. | `conformance.mbt / test_delete_thread_removes_all_namespaces`<br>Deleting both threads removes both namespaces. | memory, sqlite, postgresql, mysql |
+| `test_delete_thread_preserves_other_threads` | Other threads untouched. | `conformance.mbt / test_delete_thread_preserves_other_threads` | memory, sqlite, postgresql, mysql |
+| `test_delete_thread_nonexistent_noop` | No error for missing thread. | `conformance.mbt / test_delete_thread_nonexistent_noop` | memory, sqlite, postgresql, mysql |
+
+#### COPY_THREAD · 8 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_copy_thread_basic` | Checkpoints appear on target thread. | `conformance.mbt / test_copy_thread_basic`<br>A copy is list + put + put_writes over the public contract, not a saver method. | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_all_checkpoints` | All checkpoints copied, not just latest. | `conformance.mbt / test_copy_thread_all_checkpoints`<br>The copy takes the whole page, not only the latest checkpoint. | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_preserves_metadata` | Metadata intact on copied checkpoints. | `conformance.mbt / test_copy_thread_preserves_metadata`<br>seq and step survive the copy. | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_preserves_namespaces` | Root + child namespaces copied. | `conformance.mbt / test_copy_thread_preserves_namespaces`<br>Both source threads are copied to their own target threads. | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_preserves_writes` | Pending writes copied. | `conformance.mbt / test_copy_thread_preserves_writes` | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_preserves_ordering` | Checkpoint order maintained. | `conformance.mbt / test_copy_thread_preserves_ordering`<br>The target's page has the source's order. | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_source_unchanged` | Source thread still intact after copy. | `conformance.mbt / test_copy_thread_source_unchanged` | memory, sqlite, postgresql, mysql |
+| `test_copy_thread_nonexistent_source` | Graceful handling of non-existent source thread. | `conformance.mbt / test_copy_thread_nonexistent_source`<br>An empty source page produces an empty target. | memory, sqlite, postgresql, mysql |
+
+#### DELETE_FOR_RUNS · 7 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_delete_for_runs_single` | One run_id removed. | `conformance.mbt / test_delete_for_runs_single`<br>A run is one thread; deleting one thread is deleting one run. | memory, sqlite, postgresql, mysql |
+| `test_delete_for_runs_multiple` | List of run_ids removed. | `conformance.mbt / test_delete_for_runs_multiple`<br>Deleting several threads is one call per thread. | memory, sqlite, postgresql, mysql |
+| `test_delete_for_runs_preserves_other_runs` | Unrelated runs untouched. | `conformance.mbt / test_delete_for_runs_preserves_other_runs` | memory, sqlite, postgresql, mysql |
+| `test_delete_for_runs_removes_writes` | Associated writes cleaned up. | `conformance.mbt / test_delete_for_runs_removes_writes` | memory, sqlite, postgresql, mysql |
+| `test_delete_for_runs_empty_list_noop` | Empty list no error. | `conformance.mbt / test_delete_for_runs_empty_list_noop` | memory, sqlite, postgresql, mysql |
+| `test_delete_for_runs_nonexistent_noop` | Missing run_ids no error. | `conformance.mbt / test_delete_for_runs_nonexistent_noop` | memory, sqlite, postgresql, mysql |
+| `test_delete_for_runs_across_namespaces` | All namespaces cleaned. | `conformance.mbt / test_delete_for_runs_across_namespaces`<br>Threads with different id shapes are all removed. | memory, sqlite, postgresql, mysql |
+
+#### DELTA_CHANNEL_HISTORY · 10 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_history_returns_writes_oldest_first` | Writes are returned oldest-to-newest. | `conformance.mbt / test_history_returns_writes_oldest_first`<br>history and list both return a thread oldest first. | memory, sqlite, postgresql, mysql |
+| `test_history_seed_is_nearest_snapshot` | Seed is the value from the nearest ancestor with channel_values populated. | `conformance.mbt / test_history_seed_is_nearest_snapshot`<br>parent names the nearest ancestor checkpoint. | memory, sqlite, postgresql, mysql |
+| `test_history_excludes_target_pending_writes` | Target's own pending_writes are NOT included in the history. | `conformance.mbt / test_history_excludes_target_pending_writes`<br>Writes are filed against one checkpoint, never inherited by the next. | memory, sqlite, postgresql, mysql |
+| `test_history_multi_channel` | Multiple channels have independent walk termination. | `conformance.mbt / test_history_multi_channel`<br>Several fields of one JSON state are read back together. | memory, sqlite, postgresql, mysql |
+| `test_history_empty_channels_returns_empty` | Empty channels list returns empty mapping. | `conformance.mbt / test_history_empty_channels_returns_empty`<br>A before cursor older than every checkpoint yields an empty page. | memory, sqlite, postgresql, mysql |
+| `test_history_walk_to_root_no_seed` | Walk reaches root without finding seed — no 'seed' key in result. | `conformance.mbt / test_history_walk_to_root_no_seed`<br>The first checkpoint has no parent. | memory, sqlite, postgresql, mysql |
+| `test_history_migration_plain_value_as_seed` | Pre-delta plain value in channel_values acts as seed (migration case). | `conformance.mbt / test_history_migration_plain_value_as_seed`<br>A scalar JSON state round-trips like an object state. | memory, sqlite, postgresql, mysql |
+| `test_history_seed_ancestor_own_writes_are_replayed` | Writes stored AT the seed ancestor must be included in `writes`. | `conformance.mbt / test_history_seed_ancestor_own_writes_are_replayed`<br>Writes filed against an ancestor are still there when that ancestor is read. | memory, sqlite, postgresql, mysql |
+| `test_history_orders_parallel_writes_by_task_path` | Writes from parallel tasks replay in task_path order, not task_id order. | `conformance.mbt / test_history_orders_parallel_writes_by_task_path`<br>Writes are compared in task order. | memory, sqlite, postgresql, mysql |
+| `test_history_orders_pathless_writes_first` | Writes stored without a task_path (graph input) replay before task writes. | `conformance.mbt / test_history_orders_pathless_writes_first`<br>A task named as graph input sorts before named node tasks. | memory, sqlite, postgresql, mysql |
+
+#### PRUNE · 8 cases
+
+| Case | What the reference checks | Where it is covered | Backends |
+|:--|:--|:--|:--|
+| `test_prune_keep_latest_single_thread` | Only latest checkpoint survives. | `conformance.mbt / test_prune_keep_latest_single_thread`<br>There is no prune method; list(limit=1) is the latest checkpoint a reader keeps. | memory, sqlite, postgresql, mysql |
+| `test_prune_keep_latest_multiple_threads` | Each thread keeps its latest. | `conformance.mbt / test_prune_keep_latest_multiple_threads`<br>Each thread keeps its own latest page. | memory, sqlite, postgresql, mysql |
+| `test_prune_keep_latest_across_namespaces` | Latest per namespace kept. | `conformance.mbt / test_prune_keep_latest_across_namespaces`<br>Threads with different id shapes each keep one checkpoint. | memory, sqlite, postgresql, mysql |
+| `test_prune_keep_latest_preserves_writes` | Latest checkpoint's writes kept. | `conformance.mbt / test_prune_keep_latest_preserves_writes`<br>The latest checkpoint still carries its writes. | memory, sqlite, postgresql, mysql |
+| `test_prune_delete_all` | delete_all strategy removes everything. | `conformance.mbt / test_prune_delete_all`<br>delete removes every checkpoint of a thread. | memory, sqlite, postgresql, mysql |
+| `test_prune_preserves_other_threads` | Unlisted threads untouched. | `conformance.mbt / test_prune_preserves_other_threads`<br>Deleting one thread leaves the others. | memory, sqlite, postgresql, mysql |
+| `test_prune_empty_list_noop` | Empty thread_ids no error. | `conformance.mbt / test_prune_empty_list_noop`<br>Deleting an empty list of threads changes nothing. | memory, sqlite, postgresql, mysql |
+| `test_prune_nonexistent_noop` | Missing threads no error. | `conformance.mbt / test_prune_nonexistent_noop`<br>Deleting a thread that is not there is not an error. | memory, sqlite, postgresql, mysql |
+
+<!-- cases:end -->
+
+### Behaviour the reference has that this contract does not
+
+The table above names the equivalent behaviour case by case. The differences behind those
+notes, one by one:
+
+- **Namespaces.** A checkpoint belongs to exactly one thread id; there is no `checkpoint_ns`.
+  Cases that filter by namespace isolate by thread instead.
+- **Metadata and metadata filters.** A checkpoint has `seq`, `step`, `parent`, `state`,
+  `pending`, `interrupt` and `created_at`. There is no metadata dictionary; `step` is the
+  field a reader filters on, and `before` and `limit` are the page's two bounds.
+- **Channel versions and `versions_seen`.** The whole state is one JSON value stored per
+  checkpoint; `seq` and `parent` carry the lineage a version map would carry.
+- **Run ids.** A thread is a run. Cases that preserve a `run_id` assert the thread id.
+- **Copy, delete-for-runs and prune.** These are reader operations here, built from `list`,
+  `put`, `put_writes` and `delete`; no saver method has those names. Pruning one thread is
+  `delete`; keeping its latest checkpoint is `list(limit=1)`.
+- **Delta channel history.** `history` returns complete states oldest first, not a per-channel
+  delta walk. The cases about order, ancestors and writes are replayed against that page.
+- **Writes sort keys.** Writes are filed by task and compared in task order; the SQL backends
+  read them back sorted by task, which is the same order.
+
+The semantic-convention registry used for the span check is pinned to the full commit in
+`scripts/weaver_registry_pin.txt` (`e6658f14c9d9ea0760825f029cb82e7673f48fab`), rather than
+following the registry's default branch. Weaver reads it with its virtual-directory
+`@<commit>[model]` form, so a change in someone else's registry cannot turn this repository's
+check red. The pinned commit yields 8 spans, 0 violations and 28 advisories, each advisory
+about an attribute at `development` stability.

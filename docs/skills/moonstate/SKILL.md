@@ -108,6 +108,36 @@ SQLite, PostgreSQL or MySQL: `@sql.saver(connection)` and `@sql.store(connection
 `setup()` to create the tables. One connection carries one saver and one store; a blocking
 driver goes in through `@sql.blocking(connection)`.
 
+## The saver contract
+
+A `Saver` is five methods over JSON records, so the in-memory saver and the three SQL
+backends answer the same calls. `get` reads the latest checkpoint or one by id, `put` stores
+one (writing the same id again replaces it), `put_writes` files what one task produced,
+`list` pages a thread with `before` and `limit`, and `delete` drops the thread and its
+writes. Implement the trait to put checkpoints in a backend of your own.
+
+```moonbit
+async test "the five methods of a saver" {
+  let saver = @moonstate.MemorySaver::new()
+  saver.put(@moonstate.Checkpoint::{
+    thread: "job", id: "cp-000000", parent: None, seq: 0, step: 0,
+    state: Json::object({ "n": Json(0) }), pending: [], interrupt: None,
+    created_at: 0L, writes: None,
+  })
+  saver.put_writes("job", "cp-000000", "node-a", [Json(1)])
+  assert_eq(saver.get("job").unwrap().id, "cp-000000")
+  assert_eq(saver.get("job", id="cp-000000").unwrap().writes.unwrap().length(), 1)
+  assert_eq(saver.list("job", limit=1).length(), 1)
+  assert_eq(saver.list("job", before="cp-000000").length(), 0)
+  saver.delete("job")
+  assert_eq(saver.get("job") is None, true)
+}
+```
+
+`list` returns oldest first; `before` keeps checkpoints whose id sorts before the cursor and
+`limit` then keeps the newest of those. Give ids a fixed width so the cursor means the same
+thing on every backend.
+
 ## Interrupts
 
 The node that asks returns `Interrupt`; the run raises `GraphError::Interrupted`; the answer

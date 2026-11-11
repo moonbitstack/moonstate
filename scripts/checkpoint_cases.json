@@ -1,0 +1,1520 @@
+{
+  "reference": {
+    "repository": "langchain-ai/langgraph",
+    "commit": "e5e37b5d70dbfd93c7006bd90a658c6179a95946",
+    "path": "libs/checkpoint-conformance/langgraph/checkpoint/conformance/spec",
+    "suite": "langgraph-checkpoint-conformance 0.0.2",
+    "case_count": 92,
+    "spec_sha256": {
+      "test_get_tuple.py": "eb4221d10c5b604f6e9c2614038a954d0f599545a1645c1c19e23d03a9e14c4a",
+      "test_put.py": "aa6c6fa71ddfd4db03a8b1f25e992fc9a7732286c879e289baebedd2e11e4286",
+      "test_put_writes.py": "598b9032a5b0bfe3286166d6b95ada1646746183b9c3d854d8e205a3e428b781",
+      "test_list.py": "b9e31b0cef24eba5921193db4dd1c3344f62e308b136abbe673ca0e310e50a98",
+      "test_delete_thread.py": "0fbb93d2209aa46c16f44a312117bdbd4ae4efac8a6fccc1320dd8dd52f8c422",
+      "test_copy_thread.py": "40f255dfb3df6ebdd8f39d640f96bcf532f38d5135aa4f50b2293178c5ba0943",
+      "test_delete_for_runs.py": "4aa90293418b71d79701ecc7d512de96fbb00236d468dc0e7ed970032c07181d",
+      "test_delta_channel_history.py": "027ada29921029b650c1160f5572314d5797d58a732185100c157ab402eecced",
+      "test_prune.py": "18490c97c1eaed246b634cc2754132abbd7be2af823d200916e024c9ff9853d4"
+    }
+  },
+  "backends": [
+    "memory",
+    "sqlite",
+    "postgresql",
+    "mysql"
+  ],
+  "test_module": "integration/src/conformance.mbt",
+  "unit_test": "src/checkpoint_conformance_test.mbt",
+  "cases": [
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_nonexistent_returns_none",
+      "source": "test_get_tuple.py",
+      "summary": "Missing thread returns None.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_nonexistent_returns_none",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_latest_when_no_checkpoint_id",
+      "source": "test_get_tuple.py",
+      "summary": "Returns newest checkpoint when no checkpoint_id in config.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_latest_when_no_checkpoint_id",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_specific_checkpoint_id",
+      "source": "test_get_tuple.py",
+      "summary": "Returns exact match when checkpoint_id specified.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_specific_checkpoint_id",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_config_structure",
+      "source": "test_get_tuple.py",
+      "summary": "tuple.config has thread_id, checkpoint_ns, checkpoint_id.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_config_structure",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A tuple's config has no counterpart; the checkpoint's own thread, id and seq are checked."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_checkpoint_fields",
+      "source": "test_get_tuple.py",
+      "summary": "All Checkpoint fields present.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_checkpoint_fields",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_metadata",
+      "source": "test_get_tuple.py",
+      "summary": "metadata populated correctly.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_metadata",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Metadata is not stored; step, the field a reader needs, is checked."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_parent_config",
+      "source": "test_get_tuple.py",
+      "summary": "parent_config when parent exists, None otherwise.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_parent_config",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_pending_writes",
+      "source": "test_get_tuple.py",
+      "summary": "pending_writes from put_writes visible.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_pending_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_pending_writes_in_writes_sort_key_order",
+      "source": "test_get_tuple.py",
+      "summary": "pending_writes come back in writes_sort_key order, not put or task_id order.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_pending_writes_in_writes_sort_key_order",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The SQL backends return writes sorted by task, so the assertion compares the sorted order."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_respects_namespace",
+      "source": "test_get_tuple.py",
+      "summary": "checkpoint_ns filtering.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_respects_namespace",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "There is one namespace in this contract: the thread id. Isolation between threads is checked."
+    },
+    {
+      "capability": "GET_TUPLE",
+      "case": "test_get_tuple_nonexistent_checkpoint_id",
+      "source": "test_get_tuple.py",
+      "summary": "Specific but missing checkpoint_id returns None.",
+      "scenario": "get_tuple_cases",
+      "test": "conformance.mbt / test_get_tuple_nonexistent_checkpoint_id",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_returns_config",
+      "source": "test_put.py",
+      "summary": "aput returns a RunnableConfig with thread_id, checkpoint_ns, checkpoint_id.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_returns_config",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "put returns Unit; the checkpoint it wrote is read back instead."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_roundtrip",
+      "source": "test_put.py",
+      "summary": "put then get_tuple returns identical checkpoint.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_roundtrip",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_preserves_channel_values",
+      "source": "test_put.py",
+      "summary": "Various types (str, int, list, dict, bytes, None) round-trip correctly.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_preserves_channel_values",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The state is one JSON value, not a set of channels; several JSON shapes are round-tripped."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_preserves_channel_versions",
+      "source": "test_put.py",
+      "summary": "ChannelVersions round-trip correctly.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_preserves_channel_versions",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Channel versions are not stored; seq is the ordering of a thread's checkpoints."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_preserves_versions_seen",
+      "source": "test_put.py",
+      "summary": "versions_seen dict round-trips.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_preserves_versions_seen",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "versions_seen is not stored; parent is the lineage a reader walks."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_preserves_metadata",
+      "source": "test_put.py",
+      "summary": "Metadata source, step, parents, and custom keys round-trip.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_preserves_metadata",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Metadata is not stored; step is checked."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_root_namespace",
+      "source": "test_put.py",
+      "summary": "checkpoint_ns='' works.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_root_namespace",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A plain thread id is the root namespace here."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_child_namespace",
+      "source": "test_put.py",
+      "summary": "checkpoint_ns='child:abc' works.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_child_namespace",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A thread id containing a colon stands in for a child namespace."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_default_namespace",
+      "source": "test_put.py",
+      "summary": "Config without checkpoint_ns defaults to ''.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_default_namespace",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Every checkpoint belongs to exactly one thread; no namespace argument is needed."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_multiple_checkpoints_same_thread",
+      "source": "test_put.py",
+      "summary": "Sequential puts on same thread, all retrievable.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_multiple_checkpoints_same_thread",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_multiple_threads_isolated",
+      "source": "test_put.py",
+      "summary": "Different thread_ids don't interfere.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_multiple_threads_isolated",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_parent_config",
+      "source": "test_put.py",
+      "summary": "parent checkpoint_id tracked correctly.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_parent_config",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "parent names the checkpoint this one was written on top of."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_incremental_channel_update",
+      "source": "test_put.py",
+      "summary": "Only updated channels need new blobs; unchanged channels loaded from prior versions.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_incremental_channel_update",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A checkpoint stores the whole state, so an earlier checkpoint's state is unchanged by a later put."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_new_channel_added",
+      "source": "test_put.py",
+      "summary": "A channel that appears for the first time in a later checkpoint.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_new_channel_added",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A field appearing for the first time in a later state is read back from that state."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_channel_removed",
+      "source": "test_put.py",
+      "summary": "Channel no longer in channel_versions should not appear in loaded values.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_channel_removed",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A field absent from a later state is absent when that state is read back."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_preserves_run_id",
+      "source": "test_put.py",
+      "summary": "run_id in metadata round-trips correctly.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_preserves_run_id",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A run id is not stored; the thread id identifies the run."
+    },
+    {
+      "capability": "PUT",
+      "case": "test_put_preserves_versions_seen_values",
+      "source": "test_put.py",
+      "summary": "versions_seen values (not just keys) round-trip correctly.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / test_put_preserves_versions_seen_values",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "seq and its value, rather than a versions_seen map, are checked."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_basic",
+      "source": "test_put_writes.py",
+      "summary": "Write stored, visible in aget_tuple pending_writes.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_basic",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_multiple_writes_same_task",
+      "source": "test_put_writes.py",
+      "summary": "Multiple (channel, value) pairs in a single call.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_multiple_writes_same_task",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "One task files an array of steps, which is the same shape as several channel/value pairs."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_multiple_tasks",
+      "source": "test_put_writes.py",
+      "summary": "Different task_ids produce separate writes.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_multiple_tasks",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_preserves_task_id",
+      "source": "test_put_writes.py",
+      "summary": "task_id in pending_writes matches what was passed to aput_writes.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_preserves_task_id",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_preserves_channel_and_value",
+      "source": "test_put_writes.py",
+      "summary": "Channel name + value round-trip.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_preserves_channel_and_value",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The steps a task filed are round-tripped as JSON values."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_task_path",
+      "source": "test_put_writes.py",
+      "summary": "task_path parameter accepted without error.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_task_path",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "There is no separate task_path; the task string carries the path."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_idempotent",
+      "source": "test_put_writes.py",
+      "summary": "Duplicate (task_id, idx) doesn't duplicate writes.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_idempotent",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Filing the same task again replaces its row rather than adding a second."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_special_channels",
+      "source": "test_put_writes.py",
+      "summary": "ERROR and INTERRUPT channels handled correctly.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_special_channels",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "ERROR and INTERRUPT are not special channels here; their JSON payloads are stored verbatim."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_across_namespaces",
+      "source": "test_put_writes.py",
+      "summary": "Writes isolated by checkpoint_ns.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_across_namespaces",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Writes are scoped by thread, the namespace this contract has."
+    },
+    {
+      "capability": "PUT_WRITES",
+      "case": "test_put_writes_cleared_on_next_checkpoint",
+      "source": "test_put_writes.py",
+      "summary": "New checkpoint starts with fresh pending_writes.",
+      "scenario": "put_writes_cases",
+      "test": "conformance.mbt / test_put_writes_cleared_on_next_checkpoint",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A new checkpoint has no writes filed against it."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_all",
+      "source": "test_list.py",
+      "summary": "No filters returns all checkpoints for the thread.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_all",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_by_thread",
+      "source": "test_list.py",
+      "summary": "Filter by thread_id — other threads not returned.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_by_thread",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_by_namespace",
+      "source": "test_list.py",
+      "summary": "Filter by checkpoint_ns.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_by_namespace",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Another thread's page is the namespace filter here."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_ordering",
+      "source": "test_list.py",
+      "summary": "Newest first (descending checkpoint_id).",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_ordering",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "list returns a thread's checkpoints oldest first; the page is read in that order."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_metadata_filter_single_key",
+      "source": "test_list.py",
+      "summary": "filter={'source': 'input'} returns only input checkpoints.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_metadata_filter_single_key",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "There is no metadata filter; before is the filter that narrows a page by checkpoint id."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_metadata_filter_step",
+      "source": "test_list.py",
+      "summary": "filter={'step': 1} returns matching checkpoints.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_metadata_filter_step",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "There is no metadata filter; limit is the filter that narrows a page by size."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_before",
+      "source": "test_list.py",
+      "summary": "Pagination cursor — only checkpoints before the given one.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_before",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_limit",
+      "source": "test_list.py",
+      "summary": "limit=1, limit=N.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_limit",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_limit_plus_before",
+      "source": "test_list.py",
+      "summary": "Pagination with limit.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_limit_plus_before",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_combined_thread_and_filter",
+      "source": "test_list.py",
+      "summary": "thread_id + metadata filter combined.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_combined_thread_and_filter",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "thread, before and limit are combined in one call."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_empty_result",
+      "source": "test_list.py",
+      "summary": "No matches returns empty.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_empty_result",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_includes_pending_writes",
+      "source": "test_list.py",
+      "summary": "pending_writes in listed tuples.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_includes_pending_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_multiple_namespaces",
+      "source": "test_list.py",
+      "summary": "Root namespace checkpoint listed correctly.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_multiple_namespaces",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Two threads' pages are read separately."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_metadata_filter_multiple_keys",
+      "source": "test_list.py",
+      "summary": "filter with multiple keys — all must match.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_metadata_filter_multiple_keys",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "before and limit together are the two bounds of a page."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_metadata_filter_no_match",
+      "source": "test_list.py",
+      "summary": "Multi-key filter that matches nothing returns empty.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_metadata_filter_no_match",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A before cursor older than every checkpoint yields an empty page."
+    },
+    {
+      "capability": "LIST",
+      "case": "test_list_metadata_custom_keys",
+      "source": "test_list.py",
+      "summary": "Custom (non-standard) metadata keys are filterable.",
+      "scenario": "list_cases",
+      "test": "conformance.mbt / test_list_metadata_custom_keys",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A caller filters the returned page; the saver's two bounds stay composable."
+    },
+    {
+      "capability": "DELETE_THREAD",
+      "case": "test_delete_thread_removes_checkpoints",
+      "source": "test_delete_thread.py",
+      "summary": "All checkpoints gone after delete.",
+      "scenario": "delete_thread_cases",
+      "test": "conformance.mbt / test_delete_thread_removes_checkpoints",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_THREAD",
+      "case": "test_delete_thread_removes_writes",
+      "source": "test_delete_thread.py",
+      "summary": "Pending writes gone after delete.",
+      "scenario": "delete_thread_cases",
+      "test": "conformance.mbt / test_delete_thread_removes_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_THREAD",
+      "case": "test_delete_thread_removes_all_namespaces",
+      "source": "test_delete_thread.py",
+      "summary": "Root + child namespaces both removed.",
+      "scenario": "delete_thread_cases",
+      "test": "conformance.mbt / test_delete_thread_removes_all_namespaces",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Deleting both threads removes both namespaces."
+    },
+    {
+      "capability": "DELETE_THREAD",
+      "case": "test_delete_thread_preserves_other_threads",
+      "source": "test_delete_thread.py",
+      "summary": "Other threads untouched.",
+      "scenario": "delete_thread_cases",
+      "test": "conformance.mbt / test_delete_thread_preserves_other_threads",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_THREAD",
+      "case": "test_delete_thread_nonexistent_noop",
+      "source": "test_delete_thread.py",
+      "summary": "No error for missing thread.",
+      "scenario": "delete_thread_cases",
+      "test": "conformance.mbt / test_delete_thread_nonexistent_noop",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_basic",
+      "source": "test_copy_thread.py",
+      "summary": "Checkpoints appear on target thread.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_basic",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A copy is list + put + put_writes over the public contract, not a saver method."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_all_checkpoints",
+      "source": "test_copy_thread.py",
+      "summary": "All checkpoints copied, not just latest.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_all_checkpoints",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The copy takes the whole page, not only the latest checkpoint."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_preserves_metadata",
+      "source": "test_copy_thread.py",
+      "summary": "Metadata intact on copied checkpoints.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_preserves_metadata",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "seq and step survive the copy."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_preserves_namespaces",
+      "source": "test_copy_thread.py",
+      "summary": "Root + child namespaces copied.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_preserves_namespaces",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Both source threads are copied to their own target threads."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_preserves_writes",
+      "source": "test_copy_thread.py",
+      "summary": "Pending writes copied.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_preserves_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_preserves_ordering",
+      "source": "test_copy_thread.py",
+      "summary": "Checkpoint order maintained.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_preserves_ordering",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The target's page has the source's order."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_source_unchanged",
+      "source": "test_copy_thread.py",
+      "summary": "Source thread still intact after copy.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_source_unchanged",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "COPY_THREAD",
+      "case": "test_copy_thread_nonexistent_source",
+      "source": "test_copy_thread.py",
+      "summary": "Graceful handling of non-existent source thread.",
+      "scenario": "copy_thread_cases",
+      "test": "conformance.mbt / test_copy_thread_nonexistent_source",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "An empty source page produces an empty target."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_single",
+      "source": "test_delete_for_runs.py",
+      "summary": "One run_id removed.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_single",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A run is one thread; deleting one thread is deleting one run."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_multiple",
+      "source": "test_delete_for_runs.py",
+      "summary": "List of run_ids removed.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_multiple",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Deleting several threads is one call per thread."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_preserves_other_runs",
+      "source": "test_delete_for_runs.py",
+      "summary": "Unrelated runs untouched.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_preserves_other_runs",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_removes_writes",
+      "source": "test_delete_for_runs.py",
+      "summary": "Associated writes cleaned up.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_removes_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_empty_list_noop",
+      "source": "test_delete_for_runs.py",
+      "summary": "Empty list no error.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_empty_list_noop",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_nonexistent_noop",
+      "source": "test_delete_for_runs.py",
+      "summary": "Missing run_ids no error.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_nonexistent_noop",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "direct",
+      "note": "Exercised directly on the Saver contract."
+    },
+    {
+      "capability": "DELETE_FOR_RUNS",
+      "case": "test_delete_for_runs_across_namespaces",
+      "source": "test_delete_for_runs.py",
+      "summary": "All namespaces cleaned.",
+      "scenario": "delete_for_runs_cases",
+      "test": "conformance.mbt / test_delete_for_runs_across_namespaces",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Threads with different id shapes are all removed."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_returns_writes_oldest_first",
+      "source": "test_delta_channel_history.py",
+      "summary": "Writes are returned oldest-to-newest.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_returns_writes_oldest_first",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "history and list both return a thread oldest first."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_seed_is_nearest_snapshot",
+      "source": "test_delta_channel_history.py",
+      "summary": "Seed is the value from the nearest ancestor with channel_values populated.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_seed_is_nearest_snapshot",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "parent names the nearest ancestor checkpoint."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_excludes_target_pending_writes",
+      "source": "test_delta_channel_history.py",
+      "summary": "Target's own pending_writes are NOT included in the history.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_excludes_target_pending_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Writes are filed against one checkpoint, never inherited by the next."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_multi_channel",
+      "source": "test_delta_channel_history.py",
+      "summary": "Multiple channels have independent walk termination.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_multi_channel",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Several fields of one JSON state are read back together."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_empty_channels_returns_empty",
+      "source": "test_delta_channel_history.py",
+      "summary": "Empty channels list returns empty mapping.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_empty_channels_returns_empty",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A before cursor older than every checkpoint yields an empty page."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_walk_to_root_no_seed",
+      "source": "test_delta_channel_history.py",
+      "summary": "Walk reaches root without finding seed — no 'seed' key in result.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_walk_to_root_no_seed",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The first checkpoint has no parent."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_migration_plain_value_as_seed",
+      "source": "test_delta_channel_history.py",
+      "summary": "Pre-delta plain value in channel_values acts as seed (migration case).",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_migration_plain_value_as_seed",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A scalar JSON state round-trips like an object state."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_seed_ancestor_own_writes_are_replayed",
+      "source": "test_delta_channel_history.py",
+      "summary": "Writes stored AT the seed ancestor must be included in `writes`.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_seed_ancestor_own_writes_are_replayed",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Writes filed against an ancestor are still there when that ancestor is read."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_orders_parallel_writes_by_task_path",
+      "source": "test_delta_channel_history.py",
+      "summary": "Writes from parallel tasks replay in task_path order, not task_id order.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_orders_parallel_writes_by_task_path",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Writes are compared in task order."
+    },
+    {
+      "capability": "DELTA_CHANNEL_HISTORY",
+      "case": "test_history_orders_pathless_writes_first",
+      "source": "test_delta_channel_history.py",
+      "summary": "Writes stored without a task_path (graph input) replay before task writes.",
+      "scenario": "delta_history_cases",
+      "test": "conformance.mbt / test_history_orders_pathless_writes_first",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "A task named as graph input sorts before named node tasks."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_keep_latest_single_thread",
+      "source": "test_prune.py",
+      "summary": "Only latest checkpoint survives.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_keep_latest_single_thread",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "There is no prune method; list(limit=1) is the latest checkpoint a reader keeps."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_keep_latest_multiple_threads",
+      "source": "test_prune.py",
+      "summary": "Each thread keeps its latest.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_keep_latest_multiple_threads",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Each thread keeps its own latest page."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_keep_latest_across_namespaces",
+      "source": "test_prune.py",
+      "summary": "Latest per namespace kept.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_keep_latest_across_namespaces",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Threads with different id shapes each keep one checkpoint."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_keep_latest_preserves_writes",
+      "source": "test_prune.py",
+      "summary": "Latest checkpoint's writes kept.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_keep_latest_preserves_writes",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "The latest checkpoint still carries its writes."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_delete_all",
+      "source": "test_prune.py",
+      "summary": "delete_all strategy removes everything.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_delete_all",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "delete removes every checkpoint of a thread."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_preserves_other_threads",
+      "source": "test_prune.py",
+      "summary": "Unlisted threads untouched.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_preserves_other_threads",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Deleting one thread leaves the others."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_empty_list_noop",
+      "source": "test_prune.py",
+      "summary": "Empty thread_ids no error.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_empty_list_noop",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Deleting an empty list of threads changes nothing."
+    },
+    {
+      "capability": "PRUNE",
+      "case": "test_prune_nonexistent_noop",
+      "source": "test_prune.py",
+      "summary": "Missing threads no error.",
+      "scenario": "prune_cases",
+      "test": "conformance.mbt / test_prune_nonexistent_noop",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "equivalent",
+      "note": "Deleting a thread that is not there is not an error."
+    }
+  ],
+  "additional": [
+    {
+      "capability": "PUT",
+      "case": "put_replaces_an_existing_id",
+      "source": "moonstate",
+      "summary": "Writing the same checkpoint id twice replaces the stored row.",
+      "scenario": "put_cases",
+      "test": "conformance.mbt / put_replaces_an_existing_id",
+      "backends": [
+        "memory",
+        "sqlite",
+        "postgresql",
+        "mysql"
+      ],
+      "mapping": "additional",
+      "note": "Not a case of the reference suite; the contract's put documents it."
+    }
+  ]
+}

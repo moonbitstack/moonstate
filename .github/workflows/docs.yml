@@ -49,6 +49,7 @@ jobs:
           python3 scripts/gen_api.py --check
           python3 scripts/gen_guide.py --check
           python3 scripts/gen_numbers.py --check
+          python3 scripts/gen_checkpoint_cases.py --check --offline
 
       - name: the code on the pages compiles
         run: python3 scripts/check_snippets.py docs/guide.html

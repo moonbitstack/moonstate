@@ -83,6 +83,7 @@ jobs:
           python3 scripts/gen_api.py --check
           python3 scripts/gen_guide.py --check
           python3 scripts/gen_numbers.py --check
+          python3 scripts/gen_checkpoint_cases.py --check --offline
 
   vectors:
     name: differential vectors match the reference
@@ -103,6 +104,39 @@ jobs:
 
       - name: regenerate and compare
         run: python scripts/gen_vectors.py --check
+
+  checkpoint-conformance:
+    name: the checkpoint cases match the pinned reference
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The reference suite at the same commit the inventory names, read as
+      # source rather than through a package index.
+      - name: read the reference spec at the pinned commit
+        uses: actions/checkout@v7
+        with:
+          repository: langchain-ai/langgraph
+          ref: e5e37b5d70dbfd93c7006bd90a658c6179a95946
+          path: ${{ runner.temp }}/langgraph
+          persist-credentials: false
+          sparse-checkout: |
+            libs/checkpoint-conformance/langgraph/checkpoint/conformance/spec
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # Re-reading the spec fails the job if a case appears upstream without a
+      # row and an assertion of its own here.
+      - name: check every row against the pinned spec
+        run: |
+          python3 scripts/gen_checkpoint_cases.py --check \
+            --spec-dir "${{ runner.temp }}/langgraph/libs/checkpoint-conformance/langgraph/checkpoint/conformance/spec"
 
   crash:
     name: a killed run continues from its checkpoint
@@ -186,6 +220,10 @@ jobs:
           MYSQL_DATABASE: moonstate
         run: |
           moon run src --target native | tee "$RUNNER_TEMP/backends.txt"
+          if grep -q '^FAIL ' "$RUNNER_TEMP/backends.txt"; then
+            echo "a checkpoint case did not meet its expected value"
+            exit 1
+          fi
           grep -q "every backend answers alike" "$RUNNER_TEMP/backends.txt"
 
   semantic-conventions:
@@ -224,6 +262,14 @@ jobs:
           fi
           tar -xf "$RUNNER_TEMP/weaver.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/weaver-x86_64-unknown-linux-gnu" >> "$GITHUB_PATH"
+
+      # A pin is only a pin if it is a full object id: a branch or tag here
+      # would put the moving default branch back by another name.
+      - name: the registry pin is a full commit
+        run: |
+          pin="$(tr -d '[:space:]' < scripts/weaver_registry_pin.txt)"
+          test "${#pin}" -eq 40
+          echo "the semantic-convention registry is pinned at $pin"
 
       - name: the registry accepts the telemetry
         run: bash scripts/weaver_live_check.sh

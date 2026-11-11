@@ -7,12 +7,20 @@
 # made up rather than one the convention defines.
 #
 # The registry is the GenAI one, because the names on these spans are the GenAI
-# ones. Weaver clones it on first use.
+# ones. The commit it is read from is checked in rather than followed: the
+# registry's default branch moves, and a red job on a morning we changed nothing
+# would be someone else's commit. Weaver's virtual-directory syntax takes a full
+# 40-character SHA after `@` and a repository sub-folder in brackets.
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 weaver="${WEAVER:-weaver}"
-registry="${REGISTRY:-https://github.com/open-telemetry/semantic-conventions-genai.git[model]}"
+pin="$(tr -d '[:space:]' < "$root/scripts/weaver_registry_pin.txt")"
+if ! [[ "$pin" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "the registry pin is not a full commit SHA: $pin" >&2
+  exit 1
+fi
+registry="${REGISTRY:-https://github.com/open-telemetry/semantic-conventions-genai.git@$pin[model]}"
 report="${RUNNER_TEMP:-/tmp}/moonstate-live-check"
 
 rm -rf "$report"

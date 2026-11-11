@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkpoint conformance — moonstate</title>
+    <meta name="description" content="Every case of the pinned reference checkpoint-conformance inventory, the MoonBit test that covers it, and the four backends that test runs on.">
+    <link rel="canonical" href="https://moonbitstack.github.io/moonstate/conformance.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="moonstate">
+    <meta property="og:title" content="Checkpoint conformance — moonstate">
+    <meta property="og:description" content="Every case of the pinned reference checkpoint-conformance inventory, the MoonBit test that covers it, and the four backends that test runs on.">
+    <meta property="og:url" content="https://moonbitstack.github.io/moonstate/conformance.html">
+    <meta property="og:image" content="https://moonbitstack.github.io/moonstate/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#f1f0e7">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/instrument.css">
+    <link rel="stylesheet" href="assets/pages.css">
+    <script src="assets/theme.js"></script>
+    <script src="assets/chrome.js" defer></script>
+    <script type="module" src="assets/pages.js"></script>
+  </head>
+  <body class="doc">
+    <a class="skip" href="#cases">Skip to the tables</a>
+    <header class="top">
+      <a class="mark" href="index.html">moonstate</a>
+      <nav class="nav" aria-label="The library">
+        <a href="index.html">instrument</a>
+        <a href="guide.html">guide</a>
+        <a href="api.html">api</a>
+        <a href="playground.html">playground</a>
+        <a href="conformance.html" aria-current="page">conformance</a>
+        <a href="https://github.com/moonbitstack/moonstate">github</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg data-icon="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3Z"></path>
+          </svg>
+          <svg data-icon="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>
+          </svg>
+          <span>theme</span>
+        </button>
+      </nav>
+    </header>
+
+    <main class="reference" id="cases">
+      <aside class="rail" aria-label="The capabilities">
+        <div class="group"><b>the inventory</b></div>
+        <a href="#case-get-tuple">01 get tuple</a>
+        <a href="#case-put">02 put</a>
+        <a href="#case-put-writes">03 put writes</a>
+        <a href="#case-list">04 list</a>
+        <a href="#case-delete-thread">05 delete thread</a>
+        <a href="#case-copy-thread">06 copy thread</a>
+        <a href="#case-delete-for-runs">07 delete for runs</a>
+        <a href="#case-delta-channel-history">08 delta history</a>
+        <a href="#case-prune">09 prune</a>
+      </aside>
+
+      <article class="prose cases">
+        <h1>One row, one case, four backends</h1>
+        <p class="lede">
+          The saver contract has five methods. Each row below is one case of the reference
+          checkpoint-conformance inventory, read from one pinned commit
+          (<code>e5e37b5d70db</code>) rather than from a moving branch. Each names the
+          assertion in <code>integration/src/conformance.mbt</code> that exercises it, and each of
+          those assertions runs on memory, sqlite, postgresql, mysql with the same expected value.
+        </p>
+        <p>
+          92 reference cases, plus one the suite does not name, make
+          93 rows in total. A row whose note says a concept is absent
+          names the equivalent observable behaviour: this contract has no channel versions,
+          metadata filters, namespaces beyond the thread id, or prune strategies. It stores whole
+          states, filters pages by <code>before</code> and <code>limit</code>, and deletes a thread
+          as one unit. Those differences are listed in the Conformance section of the README.
+        </p>
+
+<section class="case-group" id="case-get-tuple">
+  <h3>GET_TUPLE <span>11 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_get_tuple_nonexistent_returns_none</code></td><td>Missing thread returns None.</td><td><code>conformance.mbt / test_get_tuple_nonexistent_returns_none</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_latest_when_no_checkpoint_id</code></td><td>Returns newest checkpoint when no checkpoint_id in config.</td><td><code>conformance.mbt / test_get_tuple_latest_when_no_checkpoint_id</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_specific_checkpoint_id</code></td><td>Returns exact match when checkpoint_id specified.</td><td><code>conformance.mbt / test_get_tuple_specific_checkpoint_id</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_config_structure</code><span class="case-note">A tuple&#x27;s config has no counterpart; the checkpoint&#x27;s own thread, id and seq are checked.</span></td><td>tuple.config has thread_id, checkpoint_ns, checkpoint_id.</td><td><code>conformance.mbt / test_get_tuple_config_structure</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_checkpoint_fields</code></td><td>All Checkpoint fields present.</td><td><code>conformance.mbt / test_get_tuple_checkpoint_fields</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_metadata</code><span class="case-note">Metadata is not stored; step, the field a reader needs, is checked.</span></td><td>metadata populated correctly.</td><td><code>conformance.mbt / test_get_tuple_metadata</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_parent_config</code></td><td>parent_config when parent exists, None otherwise.</td><td><code>conformance.mbt / test_get_tuple_parent_config</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_pending_writes</code></td><td>pending_writes from put_writes visible.</td><td><code>conformance.mbt / test_get_tuple_pending_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_pending_writes_in_writes_sort_key_order</code><span class="case-note">The SQL backends return writes sorted by task, so the assertion compares the sorted order.</span></td><td>pending_writes come back in writes_sort_key order, not put or task_id order.</td><td><code>conformance.mbt / test_get_tuple_pending_writes_in_writes_sort_key_order</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_respects_namespace</code><span class="case-note">There is one namespace in this contract: the thread id. Isolation between threads is checked.</span></td><td>checkpoint_ns filtering.</td><td><code>conformance.mbt / test_get_tuple_respects_namespace</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_get_tuple_nonexistent_checkpoint_id</code></td><td>Specific but missing checkpoint_id returns None.</td><td><code>conformance.mbt / test_get_tuple_nonexistent_checkpoint_id</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-put">
+  <h3>PUT <span>18 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_put_returns_config</code><span class="case-note">put returns Unit; the checkpoint it wrote is read back instead.</span></td><td>aput returns a RunnableConfig with thread_id, checkpoint_ns, checkpoint_id.</td><td><code>conformance.mbt / test_put_returns_config</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_roundtrip</code></td><td>put then get_tuple returns identical checkpoint.</td><td><code>conformance.mbt / test_put_roundtrip</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_preserves_channel_values</code><span class="case-note">The state is one JSON value, not a set of channels; several JSON shapes are round-tripped.</span></td><td>Various types (str, int, list, dict, bytes, None) round-trip correctly.</td><td><code>conformance.mbt / test_put_preserves_channel_values</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_preserves_channel_versions</code><span class="case-note">Channel versions are not stored; seq is the ordering of a thread&#x27;s checkpoints.</span></td><td>ChannelVersions round-trip correctly.</td><td><code>conformance.mbt / test_put_preserves_channel_versions</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_preserves_versions_seen</code><span class="case-note">versions_seen is not stored; parent is the lineage a reader walks.</span></td><td>versions_seen dict round-trips.</td><td><code>conformance.mbt / test_put_preserves_versions_seen</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_preserves_metadata</code><span class="case-note">Metadata is not stored; step is checked.</span></td><td>Metadata source, step, parents, and custom keys round-trip.</td><td><code>conformance.mbt / test_put_preserves_metadata</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_root_namespace</code><span class="case-note">A plain thread id is the root namespace here.</span></td><td>checkpoint_ns=&#x27;&#x27; works.</td><td><code>conformance.mbt / test_put_root_namespace</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_child_namespace</code><span class="case-note">A thread id containing a colon stands in for a child namespace.</span></td><td>checkpoint_ns=&#x27;child:abc&#x27; works.</td><td><code>conformance.mbt / test_put_child_namespace</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_default_namespace</code><span class="case-note">Every checkpoint belongs to exactly one thread; no namespace argument is needed.</span></td><td>Config without checkpoint_ns defaults to &#x27;&#x27;.</td><td><code>conformance.mbt / test_put_default_namespace</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_multiple_checkpoints_same_thread</code></td><td>Sequential puts on same thread, all retrievable.</td><td><code>conformance.mbt / test_put_multiple_checkpoints_same_thread</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_multiple_threads_isolated</code></td><td>Different thread_ids don&#x27;t interfere.</td><td><code>conformance.mbt / test_put_multiple_threads_isolated</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_parent_config</code><span class="case-note">parent names the checkpoint this one was written on top of.</span></td><td>parent checkpoint_id tracked correctly.</td><td><code>conformance.mbt / test_put_parent_config</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_incremental_channel_update</code><span class="case-note">A checkpoint stores the whole state, so an earlier checkpoint&#x27;s state is unchanged by a later put.</span></td><td>Only updated channels need new blobs; unchanged channels loaded from prior versions.</td><td><code>conformance.mbt / test_put_incremental_channel_update</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_new_channel_added</code><span class="case-note">A field appearing for the first time in a later state is read back from that state.</span></td><td>A channel that appears for the first time in a later checkpoint.</td><td><code>conformance.mbt / test_put_new_channel_added</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_channel_removed</code><span class="case-note">A field absent from a later state is absent when that state is read back.</span></td><td>Channel no longer in channel_versions should not appear in loaded values.</td><td><code>conformance.mbt / test_put_channel_removed</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_preserves_run_id</code><span class="case-note">A run id is not stored; the thread id identifies the run.</span></td><td>run_id in metadata round-trips correctly.</td><td><code>conformance.mbt / test_put_preserves_run_id</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_preserves_versions_seen_values</code><span class="case-note">seq and its value, rather than a versions_seen map, are checked.</span></td><td>versions_seen values (not just keys) round-trip correctly.</td><td><code>conformance.mbt / test_put_preserves_versions_seen_values</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>put_replaces_an_existing_id</code><span class="case-note">Not a case of the reference suite; the contract&#x27;s put documents it.</span></td><td>Writing the same checkpoint id twice replaces the stored row.</td><td><code>conformance.mbt / put_replaces_an_existing_id</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-put-writes">
+  <h3>PUT_WRITES <span>10 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_put_writes_basic</code></td><td>Write stored, visible in aget_tuple pending_writes.</td><td><code>conformance.mbt / test_put_writes_basic</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_multiple_writes_same_task</code><span class="case-note">One task files an array of steps, which is the same shape as several channel/value pairs.</span></td><td>Multiple (channel, value) pairs in a single call.</td><td><code>conformance.mbt / test_put_writes_multiple_writes_same_task</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_multiple_tasks</code></td><td>Different task_ids produce separate writes.</td><td><code>conformance.mbt / test_put_writes_multiple_tasks</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_preserves_task_id</code></td><td>task_id in pending_writes matches what was passed to aput_writes.</td><td><code>conformance.mbt / test_put_writes_preserves_task_id</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_preserves_channel_and_value</code><span class="case-note">The steps a task filed are round-tripped as JSON values.</span></td><td>Channel name + value round-trip.</td><td><code>conformance.mbt / test_put_writes_preserves_channel_and_value</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_task_path</code><span class="case-note">There is no separate task_path; the task string carries the path.</span></td><td>task_path parameter accepted without error.</td><td><code>conformance.mbt / test_put_writes_task_path</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_idempotent</code><span class="case-note">Filing the same task again replaces its row rather than adding a second.</span></td><td>Duplicate (task_id, idx) doesn&#x27;t duplicate writes.</td><td><code>conformance.mbt / test_put_writes_idempotent</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_special_channels</code><span class="case-note">ERROR and INTERRUPT are not special channels here; their JSON payloads are stored verbatim.</span></td><td>ERROR and INTERRUPT channels handled correctly.</td><td><code>conformance.mbt / test_put_writes_special_channels</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_across_namespaces</code><span class="case-note">Writes are scoped by thread, the namespace this contract has.</span></td><td>Writes isolated by checkpoint_ns.</td><td><code>conformance.mbt / test_put_writes_across_namespaces</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_put_writes_cleared_on_next_checkpoint</code><span class="case-note">A new checkpoint has no writes filed against it.</span></td><td>New checkpoint starts with fresh pending_writes.</td><td><code>conformance.mbt / test_put_writes_cleared_on_next_checkpoint</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-list">
+  <h3>LIST <span>16 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_list_all</code></td><td>No filters returns all checkpoints for the thread.</td><td><code>conformance.mbt / test_list_all</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_by_thread</code></td><td>Filter by thread_id — other threads not returned.</td><td><code>conformance.mbt / test_list_by_thread</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_by_namespace</code><span class="case-note">Another thread&#x27;s page is the namespace filter here.</span></td><td>Filter by checkpoint_ns.</td><td><code>conformance.mbt / test_list_by_namespace</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_ordering</code><span class="case-note">list returns a thread&#x27;s checkpoints oldest first; the page is read in that order.</span></td><td>Newest first (descending checkpoint_id).</td><td><code>conformance.mbt / test_list_ordering</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_metadata_filter_single_key</code><span class="case-note">There is no metadata filter; before is the filter that narrows a page by checkpoint id.</span></td><td>filter={&#x27;source&#x27;: &#x27;input&#x27;} returns only input checkpoints.</td><td><code>conformance.mbt / test_list_metadata_filter_single_key</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_metadata_filter_step</code><span class="case-note">There is no metadata filter; limit is the filter that narrows a page by size.</span></td><td>filter={&#x27;step&#x27;: 1} returns matching checkpoints.</td><td><code>conformance.mbt / test_list_metadata_filter_step</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_before</code></td><td>Pagination cursor — only checkpoints before the given one.</td><td><code>conformance.mbt / test_list_before</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_limit</code></td><td>limit=1, limit=N.</td><td><code>conformance.mbt / test_list_limit</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_limit_plus_before</code></td><td>Pagination with limit.</td><td><code>conformance.mbt / test_list_limit_plus_before</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_combined_thread_and_filter</code><span class="case-note">thread, before and limit are combined in one call.</span></td><td>thread_id + metadata filter combined.</td><td><code>conformance.mbt / test_list_combined_thread_and_filter</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_empty_result</code></td><td>No matches returns empty.</td><td><code>conformance.mbt / test_list_empty_result</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_includes_pending_writes</code></td><td>pending_writes in listed tuples.</td><td><code>conformance.mbt / test_list_includes_pending_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_multiple_namespaces</code><span class="case-note">Two threads&#x27; pages are read separately.</span></td><td>Root namespace checkpoint listed correctly.</td><td><code>conformance.mbt / test_list_multiple_namespaces</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_metadata_filter_multiple_keys</code><span class="case-note">before and limit together are the two bounds of a page.</span></td><td>filter with multiple keys — all must match.</td><td><code>conformance.mbt / test_list_metadata_filter_multiple_keys</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_metadata_filter_no_match</code><span class="case-note">A before cursor older than every checkpoint yields an empty page.</span></td><td>Multi-key filter that matches nothing returns empty.</td><td><code>conformance.mbt / test_list_metadata_filter_no_match</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_list_metadata_custom_keys</code><span class="case-note">A caller filters the returned page; the saver&#x27;s two bounds stay composable.</span></td><td>Custom (non-standard) metadata keys are filterable.</td><td><code>conformance.mbt / test_list_metadata_custom_keys</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-delete-thread">
+  <h3>DELETE_THREAD <span>5 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_delete_thread_removes_checkpoints</code></td><td>All checkpoints gone after delete.</td><td><code>conformance.mbt / test_delete_thread_removes_checkpoints</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_thread_removes_writes</code></td><td>Pending writes gone after delete.</td><td><code>conformance.mbt / test_delete_thread_removes_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_thread_removes_all_namespaces</code><span class="case-note">Deleting both threads removes both namespaces.</span></td><td>Root + child namespaces both removed.</td><td><code>conformance.mbt / test_delete_thread_removes_all_namespaces</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_thread_preserves_other_threads</code></td><td>Other threads untouched.</td><td><code>conformance.mbt / test_delete_thread_preserves_other_threads</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_thread_nonexistent_noop</code></td><td>No error for missing thread.</td><td><code>conformance.mbt / test_delete_thread_nonexistent_noop</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-copy-thread">
+  <h3>COPY_THREAD <span>8 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_copy_thread_basic</code><span class="case-note">A copy is list + put + put_writes over the public contract, not a saver method.</span></td><td>Checkpoints appear on target thread.</td><td><code>conformance.mbt / test_copy_thread_basic</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_all_checkpoints</code><span class="case-note">The copy takes the whole page, not only the latest checkpoint.</span></td><td>All checkpoints copied, not just latest.</td><td><code>conformance.mbt / test_copy_thread_all_checkpoints</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_preserves_metadata</code><span class="case-note">seq and step survive the copy.</span></td><td>Metadata intact on copied checkpoints.</td><td><code>conformance.mbt / test_copy_thread_preserves_metadata</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_preserves_namespaces</code><span class="case-note">Both source threads are copied to their own target threads.</span></td><td>Root + child namespaces copied.</td><td><code>conformance.mbt / test_copy_thread_preserves_namespaces</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_preserves_writes</code></td><td>Pending writes copied.</td><td><code>conformance.mbt / test_copy_thread_preserves_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_preserves_ordering</code><span class="case-note">The target&#x27;s page has the source&#x27;s order.</span></td><td>Checkpoint order maintained.</td><td><code>conformance.mbt / test_copy_thread_preserves_ordering</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_source_unchanged</code></td><td>Source thread still intact after copy.</td><td><code>conformance.mbt / test_copy_thread_source_unchanged</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_copy_thread_nonexistent_source</code><span class="case-note">An empty source page produces an empty target.</span></td><td>Graceful handling of non-existent source thread.</td><td><code>conformance.mbt / test_copy_thread_nonexistent_source</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-delete-for-runs">
+  <h3>DELETE_FOR_RUNS <span>7 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_delete_for_runs_single</code><span class="case-note">A run is one thread; deleting one thread is deleting one run.</span></td><td>One run_id removed.</td><td><code>conformance.mbt / test_delete_for_runs_single</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_for_runs_multiple</code><span class="case-note">Deleting several threads is one call per thread.</span></td><td>List of run_ids removed.</td><td><code>conformance.mbt / test_delete_for_runs_multiple</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_for_runs_preserves_other_runs</code></td><td>Unrelated runs untouched.</td><td><code>conformance.mbt / test_delete_for_runs_preserves_other_runs</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_for_runs_removes_writes</code></td><td>Associated writes cleaned up.</td><td><code>conformance.mbt / test_delete_for_runs_removes_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_for_runs_empty_list_noop</code></td><td>Empty list no error.</td><td><code>conformance.mbt / test_delete_for_runs_empty_list_noop</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_for_runs_nonexistent_noop</code></td><td>Missing run_ids no error.</td><td><code>conformance.mbt / test_delete_for_runs_nonexistent_noop</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_delete_for_runs_across_namespaces</code><span class="case-note">Threads with different id shapes are all removed.</span></td><td>All namespaces cleaned.</td><td><code>conformance.mbt / test_delete_for_runs_across_namespaces</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-delta-channel-history">
+  <h3>DELTA_CHANNEL_HISTORY <span>10 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_history_returns_writes_oldest_first</code><span class="case-note">history and list both return a thread oldest first.</span></td><td>Writes are returned oldest-to-newest.</td><td><code>conformance.mbt / test_history_returns_writes_oldest_first</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_seed_is_nearest_snapshot</code><span class="case-note">parent names the nearest ancestor checkpoint.</span></td><td>Seed is the value from the nearest ancestor with channel_values populated.</td><td><code>conformance.mbt / test_history_seed_is_nearest_snapshot</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_excludes_target_pending_writes</code><span class="case-note">Writes are filed against one checkpoint, never inherited by the next.</span></td><td>Target&#x27;s own pending_writes are NOT included in the history.</td><td><code>conformance.mbt / test_history_excludes_target_pending_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_multi_channel</code><span class="case-note">Several fields of one JSON state are read back together.</span></td><td>Multiple channels have independent walk termination.</td><td><code>conformance.mbt / test_history_multi_channel</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_empty_channels_returns_empty</code><span class="case-note">A before cursor older than every checkpoint yields an empty page.</span></td><td>Empty channels list returns empty mapping.</td><td><code>conformance.mbt / test_history_empty_channels_returns_empty</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_walk_to_root_no_seed</code><span class="case-note">The first checkpoint has no parent.</span></td><td>Walk reaches root without finding seed — no &#x27;seed&#x27; key in result.</td><td><code>conformance.mbt / test_history_walk_to_root_no_seed</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_migration_plain_value_as_seed</code><span class="case-note">A scalar JSON state round-trips like an object state.</span></td><td>Pre-delta plain value in channel_values acts as seed (migration case).</td><td><code>conformance.mbt / test_history_migration_plain_value_as_seed</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_seed_ancestor_own_writes_are_replayed</code><span class="case-note">Writes filed against an ancestor are still there when that ancestor is read.</span></td><td>Writes stored AT the seed ancestor must be included in `writes`.</td><td><code>conformance.mbt / test_history_seed_ancestor_own_writes_are_replayed</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_orders_parallel_writes_by_task_path</code><span class="case-note">Writes are compared in task order.</span></td><td>Writes from parallel tasks replay in task_path order, not task_id order.</td><td><code>conformance.mbt / test_history_orders_parallel_writes_by_task_path</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_history_orders_pathless_writes_first</code><span class="case-note">A task named as graph input sorts before named node tasks.</span></td><td>Writes stored without a task_path (graph input) replay before task writes.</td><td><code>conformance.mbt / test_history_orders_pathless_writes_first</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="case-group" id="case-prune">
+  <h3>PRUNE <span>8 cases</span></h3>
+  <div class="case-scroll">
+    <table class="case-table">
+      <thead><tr><th>Case</th><th>What it checks</th><th>Covered by</th><th>Backends</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_prune_keep_latest_single_thread</code><span class="case-note">There is no prune method; list(limit=1) is the latest checkpoint a reader keeps.</span></td><td>Only latest checkpoint survives.</td><td><code>conformance.mbt / test_prune_keep_latest_single_thread</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_keep_latest_multiple_threads</code><span class="case-note">Each thread keeps its own latest page.</span></td><td>Each thread keeps its latest.</td><td><code>conformance.mbt / test_prune_keep_latest_multiple_threads</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_keep_latest_across_namespaces</code><span class="case-note">Threads with different id shapes each keep one checkpoint.</span></td><td>Latest per namespace kept.</td><td><code>conformance.mbt / test_prune_keep_latest_across_namespaces</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_keep_latest_preserves_writes</code><span class="case-note">The latest checkpoint still carries its writes.</span></td><td>Latest checkpoint&#x27;s writes kept.</td><td><code>conformance.mbt / test_prune_keep_latest_preserves_writes</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_delete_all</code><span class="case-note">delete removes every checkpoint of a thread.</span></td><td>delete_all strategy removes everything.</td><td><code>conformance.mbt / test_prune_delete_all</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_preserves_other_threads</code><span class="case-note">Deleting one thread leaves the others.</span></td><td>Unlisted threads untouched.</td><td><code>conformance.mbt / test_prune_preserves_other_threads</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_empty_list_noop</code><span class="case-note">Deleting an empty list of threads changes nothing.</span></td><td>Empty thread_ids no error.</td><td><code>conformance.mbt / test_prune_empty_list_noop</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+        <tr><td><code>test_prune_nonexistent_noop</code><span class="case-note">Deleting a thread that is not there is not an error.</span></td><td>Missing threads no error.</td><td><code>conformance.mbt / test_prune_nonexistent_noop</code></td><td class="backends">memory, sqlite, postgresql, mysql</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+        <h2>The registry is pinned too</h2>
+        <p>
+          Span names are checked against a semantic-convention registry at one pinned commit,
+          <code>e6658f14c9d9ea0760825f029cb82e7673f48fab</code>, recorded in
+          <code>scripts/weaver_registry_pin.txt</code>. A check that follows a default branch can
+          turn red on a change nobody in this repository made.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>

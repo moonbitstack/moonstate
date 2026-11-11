@@ -76,6 +76,20 @@ fn compare(
 }
 
 ///|
+/// Every line of the conformance transcript carries an expected value, so a
+/// backend that agrees with another while both are wrong still fails here.
+fn failed_cases(backend : String, lines : Array[String]) -> Int32 {
+  let mut count = 0
+  for line in lines {
+    if line.has_prefix("FAIL ") {
+      println(backend + ": " + line)
+      count = count + 1
+    }
+  }
+  count
+}
+
+///|
 async fn main {
   let mut failures = 0
   println("start")
@@ -85,6 +99,9 @@ async fn main {
   )
   println("memory")
   println(transcript_of(reference))
+  let reference_cases = conformance_suite(@moonstate.MemorySaver::new())
+  println(transcript_of(reference_cases))
+  failures = failures + failed_cases("memory cases", reference_cases)
   let stamp = @env.now().to_string()
   let directory = match @env.get_env_var("TMPDIR") {
     Some(path) => path
@@ -104,6 +121,12 @@ async fn main {
     if !compare("sqlite", reference, sqlite) {
       failures = failures + 1
     }
+    let sqlite_cases = conformance_suite(saver)
+    println(transcript_of(sqlite_cases))
+    if !compare("sqlite cases", reference_cases, sqlite_cases) {
+      failures = failures + 1
+    }
+    failures = failures + failed_cases("sqlite cases", sqlite_cases)
     connection.close()
   }
   let live = @env.get_env_var("MOONSTATE_LIVE") is Some(_)
@@ -135,6 +158,12 @@ async fn main {
     if !compare("postgres", reference, postgres) {
       failures = failures + 1
     }
+    let postgres_cases = conformance_suite(saver)
+    println(transcript_of(postgres_cases))
+    if !compare("postgres cases", reference_cases, postgres_cases) {
+      failures = failures + 1
+    }
+    failures = failures + failed_cases("postgres cases", postgres_cases)
     saver_connection.close()
     store_connection.close()
     let mysql_host = env_or("MYSQL_HOST", "127.0.0.1")
@@ -158,6 +187,12 @@ async fn main {
     if !compare("mysql", reference, mysql) {
       failures = failures + 1
     }
+    let mysql_cases = conformance_suite(saver)
+    println(transcript_of(mysql_cases))
+    if !compare("mysql cases", reference_cases, mysql_cases) {
+      failures = failures + 1
+    }
+    failures = failures + failed_cases("mysql cases", mysql_cases)
     mysql_saver.close()
     mysql_store.close()
   } else {

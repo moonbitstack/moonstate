@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkpoint conformance — moonstate</title>
+    <meta name="description" content="Every case of the pinned reference checkpoint-conformance inventory, the MoonBit test that covers it, and the four backends that test runs on.">
+    <link rel="canonical" href="https://moonbitstack.github.io/moonstate/conformance.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="moonstate">
+    <meta property="og:title" content="Checkpoint conformance — moonstate">
+    <meta property="og:description" content="Every case of the pinned reference checkpoint-conformance inventory, the MoonBit test that covers it, and the four backends that test runs on.">
+    <meta property="og:url" content="https://moonbitstack.github.io/moonstate/conformance.html">
+    <meta property="og:image" content="https://moonbitstack.github.io/moonstate/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#f1f0e7">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/instrument.css">
+    <link rel="stylesheet" href="assets/pages.css">
+    <script src="assets/theme.js"></script>
+    <script src="assets/chrome.js" defer></script>
+    <script type="module" src="assets/pages.js"></script>
+  </head>
+  <body class="doc">
+    <a class="skip" href="#cases">Skip to the tables</a>
+    <header class="top">
+      <a class="mark" href="index.html">moonstate</a>
+      <nav class="nav" aria-label="The library">
+        <a href="index.html">instrument</a>
+        <a href="guide.html">guide</a>
+        <a href="api.html">api</a>
+        <a href="playground.html">playground</a>
+        <a href="conformance.html" aria-current="page">conformance</a>
+        <a href="https://github.com/moonbitstack/moonstate">github</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg data-icon="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3Z"></path>
+          </svg>
+          <svg data-icon="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>
+          </svg>
+          <span>theme</span>
+        </button>
+      </nav>
+    </header>
+
+    <main class="reference" id="cases">
+      <aside class="rail" aria-label="The capabilities">
+        <div class="group"><b>the inventory</b></div>
+        <a href="#case-get-tuple">01 get tuple</a>
+        <a href="#case-put">02 put</a>
+        <a href="#case-put-writes">03 put writes</a>
+        <a href="#case-list">04 list</a>
+        <a href="#case-delete-thread">05 delete thread</a>
+        <a href="#case-copy-thread">06 copy thread</a>
+        <a href="#case-delete-for-runs">07 delete for runs</a>
+        <a href="#case-delta-channel-history">08 delta history</a>
+        <a href="#case-prune">09 prune</a>
+      </aside>
+
+      <article class="prose cases">
+        <h1>One row, one case, four backends</h1>
+        <p class="lede">
+          The saver contract has five methods. Each row below is one case of the reference
+          checkpoint-conformance inventory, read from one pinned commit
+          (<code><!-- cases:commit --></code>) rather than from a moving branch. Each names the
+          assertion in <code>integration/src/conformance.mbt</code> that exercises it, and each of
+          those assertions runs on <!-- cases:backends --> with the same expected value.
+        </p>
+        <p>
+          <!-- cases:count --> reference cases, plus one the suite does not name, make
+          <!-- cases:total --> rows in total. A row whose note says a concept is absent
+          names the equivalent observable behaviour: this contract has no channel versions,
+          metadata filters, namespaces beyond the thread id, or prune strategies. It stores whole
+          states, filters pages by <code>before</code> and <code>limit</code>, and deletes a thread
+          as one unit. Those differences are listed in the Conformance section of the README.
+        </p>
+
+<!-- cases:block -->
+
+        <h2>The registry is pinned too</h2>
+        <p>
+          Span names are checked against a semantic-convention registry at one pinned commit,
+          <code><!-- registry:pin --></code>, recorded in
+          <code>scripts/weaver_registry_pin.txt</code>. A check that follows a default branch can
+          turn red on a change nobody in this repository made.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>

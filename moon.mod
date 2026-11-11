@@ -18,6 +18,8 @@ keywords = [
   "superstep",
   "checkpoint",
   "checkpointing",
+  "checkpoint-conformance",
+  "conformance",
   "durable-execution",
   "resume",
   "interrupt",
