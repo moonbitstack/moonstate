@@ -116,13 +116,14 @@ jobs:
           persist-credentials: false
 
       # The reference suite at the same commit the inventory names, read as
-      # source rather than through a package index.
+      # source rather than through a package index. It lives inside the
+      # workspace: actions/checkout refuses a path outside it.
       - name: read the reference spec at the pinned commit
         uses: actions/checkout@v7
         with:
           repository: langchain-ai/langgraph
           ref: e5e37b5d70dbfd93c7006bd90a658c6179a95946
-          path: ${{ runner.temp }}/langgraph
+          path: reference-spec
           persist-credentials: false
           sparse-checkout: |
             libs/checkpoint-conformance/langgraph/checkpoint/conformance/spec
@@ -136,7 +137,7 @@ jobs:
       - name: check every row against the pinned spec
         run: |
           python3 scripts/gen_checkpoint_cases.py --check \
-            --spec-dir "${{ runner.temp }}/langgraph/libs/checkpoint-conformance/langgraph/checkpoint/conformance/spec"
+            --spec-dir reference-spec/libs/checkpoint-conformance/langgraph/checkpoint/conformance/spec
 
   crash:
     name: a killed run continues from its checkpoint
