@@ -106,7 +106,7 @@ The same handles also cover the rest of a durable workflow:
 `MemorySaver` keeps checkpoints in the process. `moonbitstack/moonstate/sql` puts them in
 SQLite, PostgreSQL or MySQL: `@sql.saver(connection)` and `@sql.store(connection)`, with
 `setup()` to create the tables. One connection carries one saver and one store; a blocking
-driver goes in through `@sql.blocking(connection)`.
+driver goes in through `@blocking.Blocking::new(connection)`.
 
 ## The saver contract
 

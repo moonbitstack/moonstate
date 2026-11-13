@@ -110,8 +110,8 @@ async fn main {
   let path = directory + "/moonstate-" + stamp + ".db"
   {
     let connection = @moonsqlite.SqliteDriver::open(path)
-    let saver = @sql.saver(@sql.blocking(connection))
-    let store = @sql.store(@sql.blocking(connection))
+    let saver = @sql.saver(@blocking.Blocking::new(connection))
+    let store = @sql.store(@blocking.Blocking::new(connection))
     // SQLite's driver does not number its parameters, so nothing needs saying.
     saver.setup()
     store.setup()

@@ -346,8 +346,9 @@ async test "an executor of one's own" {
           <p class="note">
             One connection carries one saver and one store: a driver's connection carries one
             exchange at a time. A blocking driver — SQLite's calls into C — goes in through
-            <code>@sql.blocking</code>. A driver that does not report its dialect is told which one
-            to use: <code>@sql.saver(connection, dialect=@moondb.Dialect::Postgres)</code>.
+            <code>@blocking.Blocking::new(connection)</code>. A driver that does not report its
+            dialect is told which one to use:
+            <code>@sql.saver(connection, dialect=@moondb.Dialect::Postgres)</code>.
           </p>
         </section>
 

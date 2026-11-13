@@ -9,8 +9,6 @@ import {
 }
 
 // Values
-pub fn[T] blocking(T) -> Blocking[T]
-
 pub let names : Names
 
 pub fn[T : @moondb.AsyncDriver] saver(T, names? : Names, dialect? : @moondb.Dialect) -> SqlSaver[T]
@@ -24,22 +22,6 @@ pub(all) suberror Failed {
 pub fn Failed::report(Self) -> String
 
 // Types and methods
-pub struct Blocking[T] {
-  driver : T
-}
-pub async fn[T : @moondb.Driver] Blocking::begin(Self[T]) -> Unit raise @moondb.DbError
-pub fn[T : @moondb.Driver] Blocking::capabilities(Self[T]) -> @moondb.Capabilities
-pub async fn[T : @moondb.Driver] Blocking::close(Self[T]) -> Unit
-pub async fn[T : @moondb.Driver] Blocking::commit(Self[T]) -> Unit raise @moondb.DbError
-pub fn[T : @moondb.Driver] Blocking::dialect(Self[T]) -> @moondb.Dialect
-pub async fn[T : @moondb.Driver] Blocking::execute(Self[T], String, Array[@moondb.Value]) -> @moondb.ExecResult raise @moondb.DbError
-pub async fn[T : @moondb.Driver] Blocking::ping(Self[T]) -> Bool
-pub async fn[T : @moondb.Driver] Blocking::prepare(Self[T], String) -> &@moondb.AsyncStmt raise @moondb.DbError
-pub async fn[T : @moondb.Driver] Blocking::query(Self[T], String, Array[@moondb.Value]) -> Array[@moondb.Row] raise @moondb.DbError
-pub async fn[T : @moondb.Driver] Blocking::query_stream(Self[T], String, Array[@moondb.Value]) -> &@moondb.AsyncCursor raise @moondb.DbError
-pub async fn[T : @moondb.Driver] Blocking::rollback(Self[T]) -> Unit raise @moondb.DbError
-pub impl[T : @moondb.Driver] @moondb.AsyncDriver for Blocking[T]
-
 pub(all) struct Names {
   checkpoint : String
   write : String

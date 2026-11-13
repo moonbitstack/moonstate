@@ -220,7 +220,8 @@ Two things are worth knowing before pointing it at a server:
   SQLite's `?` and is refused by the server at the first statement; pass
   `dialect=@moondb.Dialect::Postgres` to `@sql.saver` in that case.
 - **A driver that blocks.** SQLite's driver calls into C and implements the synchronous
-  `Driver`; `@sql.blocking(connection)` is the bridge, and it is a bridge for any blocking
+  `Driver`; `moonbitstack/moondb/blocking` presents it as the asynchronous one the saver
+  awaits — `@blocking.Blocking::new(connection)` — and it is a bridge for any blocking
   driver, not a special case for SQLite.
 
 ## Interrupts
@@ -428,7 +429,7 @@ system until the reader chooses one.
 | `task` / `entrypoint` / `Task` / `Context` | The functional form. |
 | `@sql.saver(driver, names?, dialect?)` | Checkpoints in SQLite, PostgreSQL or MySQL. |
 | `@sql.store(driver, names?, dialect?)` | Long-term memory on the same tables. |
-| `@sql.blocking(driver)` | A blocking driver, as one the saver can await. |
+| `@blocking.Blocking::new(driver)` | A blocking driver, as one the saver can await (`moonbitstack/moondb/blocking`). |
 | `@otel.traced(executor, tracer~, now~)` | An executor that reports spans. |
 
 ## Conformance

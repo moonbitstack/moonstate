@@ -82,7 +82,6 @@
 </div>
 <div class="group"><b>moonstate/sql</b>
 <a href="#sql-failed">Failed</a>
-<a href="#sql-blocking">Blocking</a>
 <a href="#sql-names">Names</a>
 <a href="#sql-sqlsaver">SqlSaver</a>
 <a href="#sql-sqlstore">SqlStore</a>
@@ -399,14 +398,6 @@
 }</code></pre>
 <div class="member" id="sql-failed-report"><pre class="sig"><code>pub fn Failed::report(Self) -&gt; String</code></pre><p>The text an error carries, for the <code>Backend</code> a caller ends up matching on.</p></div>
 </article>
-<article id="sql-blocking"><h3><span class="kind">struct</span> Blocking</h3>
-<p>A blocking driver seen as an asynchronous one.  The seam this package writes against is <code>AsyncDriver</code>, because a checkpointer awaits its database and a wire backend can only be awaited. A driver whose work happens in a C call — SQLite is the one that ships — implements the synchronous <code>Driver</code> instead, and reaches this package through here: the call blocks the task it is made in, which is what a synchronous driver does anyway.</p>
-<pre class="sig"><code>pub struct Blocking[T] {
-  driver : T
-}</code></pre>
-<div class="member" id="sql-blocking-capabilities"><pre class="sig"><code>pub fn[T : @moondb.Driver] Blocking::capabilities(Self[T]) -&gt; @moondb.Capabilities</code></pre></div>
-<div class="member" id="sql-blocking-dialect"><pre class="sig"><code>pub fn[T : @moondb.Driver] Blocking::dialect(Self[T]) -&gt; @moondb.Dialect</code></pre></div>
-</article>
 <article id="sql-names"><h3><span class="kind">struct</span> Names</h3>
 <p>The three tables this package keeps, so that two savers can share one database without sharing one set of names.</p>
 <pre class="sig"><code>pub(all) struct Names {
@@ -438,7 +429,6 @@
 }</code></pre>
 </article>
 <h3 id="sql-functions">Functions</h3>
-<div class="member" id="sql-blocking"><pre class="sig"><code>pub fn[T] blocking(T) -&gt; Blocking[T]</code></pre><p>Wrap <code>driver</code> so it can be handed to <code>saver</code> or <code>store</code>.  ``<code>moonbit nocheck let connection = @moonsqlite.SqliteDriver::open(&quot;state.db&quot;)  let saver = @sql.saver(@sql.blocking(connection)) </code>``</p></div>
 <div class="member" id="sql-saver"><pre class="sig"><code>pub fn[T : @moondb.AsyncDriver] saver(T, names? : Names, dialect? : @moondb.Dialect) -&gt; SqlSaver[T]</code></pre><p>A saver over <code>driver</code>, using the tables in <code>names</code>. Nothing is written until <code>setup</code> has run: a saver does not create tables behind the caller&#x27;s back, because a service account is often not allowed to.  ``<code>moonbit nocheck let saver = @sql.saver(connection) saver.setup() let graph = builder.compile(&quot;job&quot;, saver=saver) </code>`<code>  </code>dialect` overrides what the driver reports. A driver that numbers its parameters has to report its own dialect for this to be unnecessary; until it does, naming it here is the difference between one statement working and the first one being rejected by the server.</p></div>
 <div class="member" id="sql-store"><pre class="sig"><code>pub fn[T : @moondb.AsyncDriver] store(T, names? : Names, dialect? : @moondb.Dialect) -&gt; SqlStore[T]</code></pre><p>A store over <code>driver</code>, using the tables in <code>names</code>. <code>setup</code> on a saver of the same tables creates what this needs.  <code>dialect</code> overrides what the driver reports, the way <code>saver</code>&#x27;s does.</p></div>
 <h3 id="sql-values">Values</h3>
