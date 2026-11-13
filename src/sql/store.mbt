@@ -82,7 +82,7 @@ pub impl[T : @moondb.AsyncDriver] @moonstate.Store for SqlStore[T] with fn put(
   let _ = self.driver.execute(self.statements.item_put, [
     @moondb.Text(space_text(space)),
     @moondb.Text(key),
-    @moondb.Text(value.stringify()),
+    @moondb.Text(@moonjson.dumps(value)),
     @moondb.Int64(@env.now().reinterpret_as_int64()),
   ])
 }

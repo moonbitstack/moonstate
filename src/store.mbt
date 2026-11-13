@@ -108,7 +108,7 @@ pub impl Store for MemoryStore with fn search(
       continue
     }
     match query {
-      Some(text) => if !item.value.stringify().contains(text) { continue }
+      Some(text) => if !@moonjson.dumps(item.value).contains(text) { continue }
       None => ()
     }
     match filter {

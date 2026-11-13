@@ -141,7 +141,10 @@ def main():
                 continue
             code, spans = program(items)
             used = set(re.findall(r"@([a-z_][a-z0-9_]*)\.", code))
-            imports = sorted({aliases[a] for a in used if a in aliases} | {f"moonbitlang/core/{a}" for a in used if a not in aliases and a in CORE} | {f"moonbitlang/core/{NESTED[a]}" for a in used if a not in aliases and a in NESTED})
+            # A core package name always means core: a dependency that ships a
+            # subpackage with the same last segment (moonjson's `json`, say) must
+            # not shadow the `@json` the pages already mean.
+            imports = sorted({f"moonbitlang/core/{a}" for a in used if a in CORE} | {f"moonbitlang/core/{NESTED[a]}" for a in used if a in NESTED} | {aliases[a] for a in used if a in aliases and a not in CORE and a not in NESTED})
             if ("async test" in code or "async fn main" in code) and "moonbitlang/async" not in imports:
                 imports.append("moonbitlang/async")
             pkg = src / "snippet_check"

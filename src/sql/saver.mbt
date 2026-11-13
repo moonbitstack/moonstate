@@ -109,8 +109,9 @@ fn optional_text(
 ///|
 fn json_of(row : @moondb.Row, column : Int32, name : String) -> Json raise {
   let text = text_of(row, column, name)
-  @json.parse(text) catch {
-    error => raise Failed::Unreadable(column=name, reason="\{error}")
+  @moonjson.loads(text, @moonjson.strict) catch {
+    error =>
+      raise Failed::Unreadable(column=name, reason=Error::to_string(error))
   }
 }
 
@@ -124,9 +125,12 @@ fn decode_checkpoint(row : @moondb.Row) -> @moonstate.Checkpoint raise {
   let interrupt = match optional_text(row, 7, "interrupt") {
     Some(text) =>
       Some(
-        @json.parse(text) catch {
+        @moonjson.loads(text, @moonjson.strict) catch {
           error =>
-            raise Failed::Unreadable(column="interrupt", reason="\{error}")
+            raise Failed::Unreadable(
+              column="interrupt",
+              reason=Error::to_string(error),
+            )
         },
       )
     None => None
@@ -187,12 +191,14 @@ pub impl[T : @moondb.AsyncDriver] @moonstate.Saver for SqlSaver[T] with fn put(
     },
     @moondb.Int64(checkpoint.seq.to_int64()),
     @moondb.Int64(checkpoint.step.to_int64()),
-    @moondb.Text(checkpoint.state.stringify()),
+    @moondb.Text(@moonjson.dumps(checkpoint.state)),
     @moondb.Text(
-      Json::array(checkpoint.pending.map(pending => pending.to_json())).stringify(),
+      @moonjson.dumps(
+        Json::array(checkpoint.pending.map(pending => pending.to_json())),
+      ),
     ),
     match checkpoint.interrupt {
-      Some(value) => @moondb.Text(value.stringify())
+      Some(value) => @moondb.Text(@moonjson.dumps(value))
       None => @moondb.Null
     },
     @moondb.Int64(checkpoint.created_at),
@@ -213,7 +219,7 @@ pub impl[T : @moondb.AsyncDriver] @moonstate.Saver for SqlSaver[T] with fn put_w
     @moondb.Text(thread),
     @moondb.Text(id),
     @moondb.Text(task),
-    @moondb.Text(Json::array(values).stringify()),
+    @moondb.Text(@moonjson.dumps(Json::array(values))),
   ])
 }
 

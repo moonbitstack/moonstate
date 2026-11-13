@@ -66,7 +66,7 @@ fn error_text(error : Error) -> String {
     GraphError::NodeFailed(node~, message~) =>
       "node '" + node + "' failed: " + message
     GraphError::Interrupted(thread~, value~) =>
-      "thread '" + thread + "' waits for an answer: " + value.stringify()
+      "thread '" + thread + "' waits for an answer: " + @moonjson.dumps(value)
     GraphError::NotInterrupted(thread~) =>
       "thread '" + thread + "' has nothing to continue"
     GraphError::MissingThread(thread~) => "no thread named '" + thread + "'"

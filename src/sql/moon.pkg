@@ -10,7 +10,12 @@
 import {
   "moonbitstack/moondb",
   "moonbitstack/moonstate",
+  "moonbitstack/moonjson",
   "moonbitlang/async",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
+
+import {
+  "moonbitstack/moondb/blocking",
+} for "wbtest"
