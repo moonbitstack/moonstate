@@ -1,0 +1,15 @@
+// The generator behind `#state.patch`: a state record's patch type and the merge a graph folds
+// each write with. moonx runs it as a dev_build rule; see the README.
+supported_targets = "+native+wasm"
+
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
+  "moonbitstack/moonast/cli",
+  "moonbitlang/parser/attribute",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+}

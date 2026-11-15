@@ -78,6 +78,51 @@ A node writes only the fields it touched. `Patch` above does that with `Option`:
 leaves the field alone, which is what makes two nodes writing in one superstep mergeable
 without knowing about each other.
 
+### Written by an annotation
+
+The update and the merge above follow from the state and from how each field takes a write, so
+`#state.patch` writes them. Each field becomes an `Option` in `<Name>Patch`, and
+`merge_<name>` folds a patch in: a field is replaced unless it says otherwise.
+
+<!-- nocheck -->
+```moonbit
+#state.patch
+#derive(@json.ToJson, @json.FromJson)
+struct Counter {
+  #state.add
+  n : Int32
+  #state.append
+  log : Array[String]
+  #state.with(longest)
+  best : String
+  label : String
+}
+```
+
+| On a field | A write `v` makes the field |
+|:--|:--|
+| nothing | `v` |
+| `#state.append` | the old array followed by `v` |
+| `#state.add` | the old value plus `v` |
+| `#state.with(f)` | `f(old, v)` |
+
+The patch type and the merge share the record's visibility. Wire the generator into the build
+once. In `moon.mod`:
+
+```
+rule(name: "state", command: "moonx moonbitstack/moonstate/cmd/state@0.2.0 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+```
+
+and in the `moon.pkg` of the package holding the record:
+
+```
+dev_build(rule: "state", input: "state.mbt", output: "state.g.mbt")
+formatter(ignore: [ "state.g.mbt" ])
+```
+
+`src/examples/07-annotated-state` is the first graph again, with the patch and the merge written
+this way.
+
 ## Supersteps
 
 A superstep runs the nodes that are queued, merges what they wrote, and then decides what to

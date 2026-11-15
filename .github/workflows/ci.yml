@@ -45,6 +45,11 @@ jobs:
       - name: moon test (all backends)
         run: moon test --target all
 
+      - name: generated state is fresh
+        if: runner.os == 'Linux'
+        run: |
+          moon run src/cmd/state --target native -- -C . src/examples/07-annotated-state/state.mbt -o src/examples/07-annotated-state/state.g.mbt --check
+
       - name: examples run
         if: runner.os == 'Linux'
         run: |

@@ -270,3 +270,11 @@ async test "a traced run has a span per node" {
   branch that leaves it.
 - `run` on a finished thread starts a new turn rather than returning the old result: the
   checkpoints of the earlier turn stay in the thread's history.
+
+## Let `#state.patch` write the update
+
+Instead of a hand-written patch type and merge, annotate the state record: every field becomes an
+`Option` in `<Name>Patch`, and `merge_<name>` replaces a field unless it is marked `#state.append`
+(arrays concatenate), `#state.add` (numbers add) or `#state.with(f)` (`f(old, new)`). The generator
+is `moonbitstack/moonstate/cmd/state`, wired as a `dev_build` rule; `src/examples/07-annotated-state`
+shows the result.

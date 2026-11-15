@@ -1,0 +1,15 @@
+// The state of the first example, with its patch and merge written by `#state.patch` rather
+// than by hand. `state.g.mbt` comes from `cmd/state`; a project wires it as a dev_build rule.
+import {
+  "moonbitstack/moonstate",
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+formatter(ignore: [ "state.g.mbt" ])
+
+options(
+  supported_targets: "native",
+)
