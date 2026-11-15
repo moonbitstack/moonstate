@@ -100,6 +100,13 @@
             declared with <code>routed</code>. Those arrive as <code>Refused</code>, not as a
             failure halfway through a run.
           </p>
+          <p>
+            The update type and the merge follow from the state and from how each field takes a
+            write, so <code>#state.patch</code> can write them: every field becomes an
+            <code>Option</code> in the patch, and a field is replaced unless it says
+            <code>#state.append</code>, <code>#state.add</code> or <code>#state.with(f)</code>.
+          </p>
+          <!-- code:2 -->
         </section>
 
         <section id="checkpoints">
@@ -109,7 +116,7 @@
             The next run on the same thread opens the last checkpoint instead of starting over,
             which is what makes a crash survivable and a finished thread restartable.
           </p>
-          <!-- code:3 -->
+          <!-- code:4 -->
           <p class="out"><span>out</span> <code>["2", "6", "cp-000002"]</code> — the value, six checkpoints, the third one by id</p>
           <p>
             <code>put_writes</code> records a task's result the moment it finishes, so a task that
@@ -132,7 +139,7 @@
             <code>GraphError::Interrupted</code>, and the payload is in the checkpoint. The answer
             arrives later, from anywhere, and the node that asked runs again and reads it.
           </p>
-          <!-- code:5 -->
+          <!-- code:6 -->
           <p class="out"><span>stopped with</span> <code>{"ask":"approve?"}</code> <span>then answered</span> <code>n = 7</code></p>
         </section>
 
@@ -143,7 +150,7 @@
             decides what runs next. <code>Send</code> queues one node once per input; a
             <code>join</code> holds a node until every upstream node has run in the same superstep.
           </p>
-          <!-- code:2 -->
+          <!-- code:3 -->
           <p class="out"><span>out</span> <code>total = 30</code>, four shards folded in the order they were queued</p>
           <p>
             The result does not depend on which task finished first: the engine folds the writes in
@@ -160,7 +167,7 @@
             node by name on the far side and returns the steps as JSON. A policy of your own is one
             method.
           </p>
-          <!-- code:6 -->
+          <!-- code:7 -->
           <p class="out"><span>out</span> <code>n = 5</code>, one task at a time</p>
         </section>
 
@@ -172,7 +179,7 @@
             the upsert spelling and the indexes are written once against the dialect the driver
             reports.
           </p>
-          <!-- code:4 -->
+          <!-- code:5 -->
           <pre class="cmd"><code>// once, at startup
 @sql.saver(connection).setup()
 @sql.store(connection).setup()</code></pre>
@@ -193,7 +200,7 @@
             follows a thread from superstep to superstep, so a run is one trace however long it
             takes, and a node span sits under the superstep that ran it.
           </p>
-          <!-- code:7 -->
+          <!-- code:8 -->
           <p class="out"><span>span names</span> <code>["seed", "superstep 0"]</code></p>
           <p class="note">
             <code>now</code> is required, the way moontel's own layer requires it: a library that

@@ -134,6 +134,23 @@ async test "the first graph" {
             declared with <code>routed</code>. Those arrive as <code>Refused</code>, not as a
             failure halfway through a run.
           </p>
+          <p>
+            The update type and the merge follow from the state and from how each field takes a
+            write, so <code>#state.patch</code> can write them: every field becomes an
+            <code>Option</code> in the patch, and a field is replaced unless it says
+            <code>#state.append</code>, <code>#state.add</code> or <code>#state.with(f)</code>.
+          </p>
+          <pre class="sig"><code>#state.patch
+#derive(@json.ToJson, @json.FromJson)
+struct Board {
+  #state.add
+  n : Int32
+  #state.append
+  log : Array[String]
+  #state.with(longest)
+  best : String
+  label : String
+}</code></pre>
         </section>
 
         <section id="checkpoints">

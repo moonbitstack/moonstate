@@ -88,7 +88,7 @@ The update and the merge above follow from the state and from how each field tak
 ```moonbit
 #state.patch
 #derive(@json.ToJson, @json.FromJson)
-struct Counter {
+struct Board {
   #state.add
   n : Int32
   #state.append
