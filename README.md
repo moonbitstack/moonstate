@@ -110,7 +110,7 @@ The patch type and the merge share the record's visibility. Wire the generator i
 once. In `moon.mod`:
 
 ```
-rule(name: "state", command: "moonx moonbitstack/moonstate/cmd/state@0.2.0 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+rule(name: "state", command: "moonx moonbitstack/moonstate/cmd/state@0.2.1 -C \"$mod_dir\" \"$input\" -o \"$output\"")
 ```
 
 and in the `moon.pkg` of the package holding the record:
