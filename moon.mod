@@ -61,5 +61,5 @@ import {
   "moonbitstack/moondb@0.3.0",
   "moonbitstack/moontel@0.2.2",
   "moonbitstack/moonast@0.3.1",
-  "moonbitlang/parser@0.4.8",
+  "moonbitlang/parser@0.4.9",
 }

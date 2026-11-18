@@ -75,7 +75,7 @@ pub(all) struct Checkpoint {
   created_at : Int64
   writes : Array[TaskWrite]?
 }
-pub fn Checkpoint::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Checkpoint::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn Checkpoint::to_json(Self) -> @json.Json
 
 pub struct Context {
@@ -115,7 +115,7 @@ pub(all) struct Frame {
   input : @json.Json
   output : @json.Json?
 }
-pub fn Frame::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Frame::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn Frame::to_json(Self) -> @json.Json
 
 pub struct Graph[S, U] {
@@ -177,7 +177,7 @@ pub(all) struct Pending {
   node : String
   input : @json.Json?
 }
-pub fn Pending::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Pending::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn Pending::to_json(Self) -> @json.Json
 
 pub(all) struct Retry {
@@ -239,7 +239,7 @@ pub(all) struct TaskWrite {
   task : String
   values : Array[@json.Json]
 }
-pub fn TaskWrite::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn TaskWrite::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn TaskWrite::to_json(Self) -> @json.Json
 
 pub(all) struct Work {

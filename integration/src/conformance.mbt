@@ -39,7 +39,11 @@ fn case_checkpoint(
   @moonstate.Checkpoint::{
     thread,
     id: case_id(seq),
-    parent: if seq == 0 { None } else { Some(case_id(seq - 1)) },
+    parent: if seq == 0 {
+      None
+    } else {
+      Some(case_id(seq - 1))
+    },
     seq,
     step: seq,
     state,
@@ -98,17 +102,19 @@ fn case_shape(found : @moonstate.Checkpoint?) -> String {
 fn case_field(found : @moonstate.Checkpoint?, field : String) -> String {
   match found {
     None => "none"
-    Some(checkpoint) => match field {
-      "thread" => checkpoint.thread
-      "id" => checkpoint.id
-      "seq" => checkpoint.seq.to_string()
-      "step" => checkpoint.step.to_string()
-      "parent" => match checkpoint.parent {
-        Some(parent) => parent
-        None => "none"
+    Some(checkpoint) =>
+      match field {
+        "thread" => checkpoint.thread
+        "id" => checkpoint.id
+        "seq" => checkpoint.seq.to_string()
+        "step" => checkpoint.step.to_string()
+        "parent" =>
+          match checkpoint.parent {
+            Some(parent) => parent
+            None => "none"
+          }
+        _ => checkpoint.state.stringify()
       }
-      _ => checkpoint.state.stringify()
-    }
   }
 }
 
@@ -125,13 +131,14 @@ fn case_ids(checkpoints : Array[@moonstate.Checkpoint]) -> String {
 fn case_writes(found : @moonstate.Checkpoint?) -> String {
   match found {
     None => "none"
-    Some(checkpoint) => match checkpoint.writes {
-      None => "none"
-      Some(writes) =>
-        writes.map(write => write.task).join(",") +
-        "|" +
-        writes.length().to_string()
-    }
+    Some(checkpoint) =>
+      match checkpoint.writes {
+        None => "none"
+        Some(writes) =>
+          writes.map(write => write.task).join(",") +
+          "|" +
+          writes.length().to_string()
+      }
   }
 }
 
@@ -139,16 +146,18 @@ fn case_writes(found : @moonstate.Checkpoint?) -> String {
 fn case_write_of(found : @moonstate.Checkpoint?, task : String) -> String {
   match found {
     None => "none"
-    Some(checkpoint) => match checkpoint.writes {
-      None => "none"
-      Some(writes) => match writes.iter().find_first(write => write.task == task) {
+    Some(checkpoint) =>
+      match checkpoint.writes {
         None => "none"
-        Some(write) =>
-          write.values.length().to_string() +
-          "|" +
-          write.values.map(value => value.stringify()).join(",")
+        Some(writes) =>
+          match writes.iter().find_first(write => write.task == task) {
+            None => "none"
+            Some(write) =>
+              write.values.length().to_string() +
+              "|" +
+              write.values.map(value => value.stringify()).join(",")
+          }
       }
-    }
   }
 }
 
@@ -187,10 +196,10 @@ async fn[S : @moonstate.Saver] get_tuple_cases(
   saver : S,
   out : Array[String],
 ) -> Unit {
-  case_line(saver, "get", 3, seq => Json::object({ "n": Json(seq), }))
+  case_line(saver, "get", 3, seq => Json::object({ "n": Json(seq) }))
   saver.put_writes("get", "cp-000001", "a-task", [Json("a")])
   saver.put_writes("get", "cp-000001", "b-task", [Json("b")])
-  case_line(saver, "get-other", 1, seq => Json::object({ "n": Json(seq), }))
+  case_line(saver, "get-other", 1, seq => Json::object({ "n": Json(seq) }))
   case_check(
     out,
     "test_get_tuple_nonexistent_returns_none",
@@ -264,7 +273,7 @@ async fn[S : @moonstate.Saver] put_cases(
   saver : S,
   out : Array[String],
 ) -> Unit {
-  saver.put(case_checkpoint("put", 0, Json::object({ "n": Json(7), })))
+  saver.put(case_checkpoint("put", 0, Json::object({ "n": Json(7) })))
   case_check(
     out,
     "test_put_returns_config",
@@ -280,7 +289,7 @@ async fn[S : @moonstate.Saver] put_cases(
   saver.put(case_checkpoint("put", 1, Json("text")))
   saver.put(case_checkpoint("put", 2, Json(3)))
   saver.put(case_checkpoint("put", 3, Json::array([Json(1), Json::null()])))
-  saver.put(case_checkpoint("put", 4, Json::object({ "flag": Json("yes"), })))
+  saver.put(case_checkpoint("put", 4, Json::object({ "flag": Json("yes") })))
   case_check(
     out,
     "test_put_preserves_channel_values",
@@ -349,7 +358,7 @@ async fn[S : @moonstate.Saver] put_cases(
     case_field(saver.get("put", id="cp-000004"), "parent"),
     "cp-000003",
   )
-  saver.put(case_checkpoint("put", 5, Json::object({ "n": Json(9), })))
+  saver.put(case_checkpoint("put", 5, Json::object({ "n": Json(9) })))
   case_check(
     out,
     "test_put_incremental_channel_update",
@@ -358,14 +367,14 @@ async fn[S : @moonstate.Saver] put_cases(
     case_state(saver.get("put", id="cp-000005")),
     "{\"n\":7}|{\"n\":9}",
   )
-  saver.put(case_checkpoint("put", 6, Json::object({ "extra": Json("added"), })))
+  saver.put(case_checkpoint("put", 6, Json::object({ "extra": Json("added") })))
   case_check(
     out,
     "test_put_new_channel_added",
     case_state(saver.get("put", id="cp-000006")),
     "{\"extra\":\"added\"}",
   )
-  saver.put(case_checkpoint("put", 7, Json::object({ "n": Json(9), })))
+  saver.put(case_checkpoint("put", 7, Json::object({ "n": Json(9) })))
   case_check(
     out,
     "test_put_channel_removed",
@@ -385,7 +394,7 @@ async fn[S : @moonstate.Saver] put_cases(
     "7",
   )
   // Not one of the reference cases: writing an id twice replaces the row.
-  saver.put(case_checkpoint("put", 0, Json::object({ "n": Json(42), })))
+  saver.put(case_checkpoint("put", 0, Json::object({ "n": Json(42) })))
   case_check(
     out,
     "put_replaces_an_existing_id",
@@ -450,8 +459,8 @@ async fn[S : @moonstate.Saver] put_writes_cases(
     "a-task,b-task,c-node|3",
   )
   saver.put_writes("writes", "cp-000000", "d-interrupt", [
-    Json::object({ "ask": Json("why"), }),
-    Json::object({ "error": Json("boom"), }),
+    Json::object({ "ask": Json("why") }),
+    Json::object({ "error": Json("boom") }),
   ])
   case_check(
     out,
@@ -898,9 +907,9 @@ async fn[S : @moonstate.Saver] prune_cases(
 
 ///|
 /// Every case of the pinned reference inventory, once, on one saver.
-pub async fn[S : @moonstate.Saver] conformance_suite(saver : S) -> Array[
-  String,
-] {
+pub async fn[S : @moonstate.Saver] conformance_suite(
+  saver : S,
+) -> Array[String] {
   let out : Array[String] = []
   get_tuple_cases(saver, out)
   put_cases(saver, out)
