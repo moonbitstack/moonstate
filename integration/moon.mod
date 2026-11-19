@@ -24,9 +24,9 @@ source = "src"
 
 import {
   "moonbitlang/async@0.22.5",
-  "moonbitstack/moonstate@0.2.0",
-  "moonbitstack/moondb@0.3.0",
-  "moonbitstack/moonsqlite@0.4.0",
-  "moonbitstack/moonpostgres@0.7.0",
-  "moonbitstack/moonmysql@0.8.0",
+  "moonbitstack/moonstate@0.2.1",
+  "moonbitstack/moondb@0.3.1",
+  "moonbitstack/moonsqlite@0.4.1",
+  "moonbitstack/moonpostgres@0.7.1",
+  "moonbitstack/moonmysql@0.8.1",
 }

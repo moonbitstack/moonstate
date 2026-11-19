@@ -166,7 +166,7 @@
   writes : Array[TaskWrite]?
 }</code></pre>
 <dl class="fields"><dt><code>id</code></dt><dd><p> Unique within the thread, and ordered by the saver.</p></dd><dt><code>parent</code></dt><dd><p> The checkpoint this one was written on top of, or <code>None</code> for the first.</p></dd><dt><code>seq</code></dt><dd><p> How many checkpoints the thread had written before this one. <code>id</code> is derived from it, so an <code>update</code> that forks the thread does not collide with the checkpoints it forked away from.</p></dd><dt><code>step</code></dt><dd><p> The superstep this checkpoint is about to run.</p></dd><dt><code>state</code></dt><dd><p> The whole state, encoded.</p></dd><dt><code>pending</code></dt><dd><p> The tasks of the next superstep, in the order their writes will be merged.</p></dd><dt><code>interrupt</code></dt><dd><p> Set when the superstep was cut short by <code>Step::Interrupt</code>.</p></dd><dt><code>writes</code></dt><dd><p> The writes recorded for this checkpoint&#x27;s tasks. A saver fills this in when it reads the checkpoint back; it is never part of what <code>put</code> stores.</p></dd></dl>
-<div class="member" id="moonstate-checkpoint-from_json"><pre class="sig"><code>pub fn Checkpoint::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-checkpoint-from_json"><pre class="sig"><code>pub fn Checkpoint::from_json(@json.Json, @json.DecodeContext) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
 <div class="member" id="moonstate-checkpoint-to_json"><pre class="sig"><code>pub fn Checkpoint::to_json(Self) -&gt; @json.Json</code></pre></div>
 </article>
 <article id="moonstate-context"><h3><span class="kind">struct</span> Context</h3>
@@ -215,7 +215,7 @@
   input : @json.Json
   output : @json.Json?
 }</code></pre>
-<div class="member" id="moonstate-frame-from_json"><pre class="sig"><code>pub fn Frame::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-frame-from_json"><pre class="sig"><code>pub fn Frame::from_json(@json.Json, @json.DecodeContext) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
 <div class="member" id="moonstate-frame-to_json"><pre class="sig"><code>pub fn Frame::to_json(Self) -&gt; @json.Json</code></pre></div>
 </article>
 <article id="moonstate-graph"><h3><span class="kind">struct</span> Graph</h3>
@@ -266,7 +266,7 @@
   node : String
   input : @json.Json?
 }</code></pre>
-<div class="member" id="moonstate-pending-from_json"><pre class="sig"><code>pub fn Pending::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-pending-from_json"><pre class="sig"><code>pub fn Pending::from_json(@json.Json, @json.DecodeContext) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
 <div class="member" id="moonstate-pending-to_json"><pre class="sig"><code>pub fn Pending::to_json(Self) -&gt; @json.Json</code></pre></div>
 </article>
 <article id="moonstate-retry"><h3><span class="kind">struct</span> Retry</h3>
@@ -340,7 +340,7 @@
   task : String
   values : Array[@json.Json]
 }</code></pre>
-<div class="member" id="moonstate-taskwrite-from_json"><pre class="sig"><code>pub fn TaskWrite::from_json(@json.Json, @json.JsonPath) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
+<div class="member" id="moonstate-taskwrite-from_json"><pre class="sig"><code>pub fn TaskWrite::from_json(@json.Json, @json.DecodeContext) -&gt; Self raise @json.JsonDecodeError</code></pre></div>
 <div class="member" id="moonstate-taskwrite-to_json"><pre class="sig"><code>pub fn TaskWrite::to_json(Self) -&gt; @json.Json</code></pre></div>
 </article>
 <article id="moonstate-work"><h3><span class="kind">struct</span> Work</h3>
